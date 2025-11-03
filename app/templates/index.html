@@ -11,7 +11,14 @@
         .message-error { color: red; font-weight: bold; }
         fieldset { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; background: #f9f9f9; }
         legend { font-size: 1.2em; font-weight: bold; padding: 0 10px; }
-        select, button { padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
+        select, button, input[type="text"] { /* Dodano input */
+            padding: 10px; 
+            margin-top: 5px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
         button { background-color: #4CAF50; color: white; cursor: pointer; }
         button:hover { background-color: #45a049; }
         button:disabled { background-color: #ccc; }
@@ -23,7 +30,6 @@
     <div class="main-column">
         <h1>Game Engine - Dune: Imperium (Round {{ current_round }})</h1>
         <h2>Current Phase: <span style="color: #3f51b5;">{{ current_phase }}</span></h2>
-
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -36,29 +42,28 @@
 
         <form method="POST" action="/play_intrigue" id="intrigueForm">
             <fieldset>
-                <legend>1. Play Intrigue Card (Optional)</legend>
-                <input type="hidden" id="intrigue_player_name" name="player_name" value="{{ current_player }}">
+                <legend>1. Play Intrigue Card (Manual)</legend>
+                <input type="hidden" id="intrigue_player_name" name="player_name" value="">
                 
-                <p><label for="intrigue_id">Select Intrigue Card (Agent Turn only)</label>
-                    <select id="intrigue_id" name="intrigue_id" required>
-                        <option value="">-- Select Intrigue --</option>
-                        </select>
+                <p><label for="intrigue_text">Intrigue Card Name / Effect</label>
+                    <input type="text" id="intrigue_text" name="intrigue_text" 
+                           placeholder="Wpisz nazwę karty i/lub jej efekt..." required>
                 </p>
-                <button type="submit" id="intrigueButton" disabled>Play Selected Intrigue</button>
+                <button type="submit" id="intrigueButton" disabled>Play Manual Intrigue</button>
             </fieldset>
         </form>
-
         <form method="POST" action="/" id="agentForm">
             <fieldset>
                 <legend>2. Agent Movement</legend>
                 
-                <p><label for="player_name">Who is making a move? (Current: **{{ current_player }}**)</label>
+                <p><label for="player_name">Who is making a move? (Controlling Player)</label>
                     <select id="player_name" name="player_name" required>
                         <option value="">-- Select Player --</option>
                         {% for name in player_names %}
                             {% set agent_info = player_agent_map.get(name) %}
                             <option value="{{ name }}" {% if name == current_player %}selected{% endif %}>
                                 {{ name }} (Agents: {{ agent_info.placed }}/{{ agent_info.total }})
+                                {% if agent_info.has_passed %} (PASSED) {% endif %}
                             </option>
                         {% endfor %}
                     </select>
@@ -83,6 +88,18 @@
             </fieldset>
         </form>
         
+        <form method="POST" action="/pass_turn" id="passForm">
+            <input type="hidden" id="pass_player_name" name="player_name" value="">
+            
+            <fieldset style="border-top: 2px dashed #ccc; margin-top: -20px; border-radius: 0 0 5px 5px; background: #fff9f2;">
+                <legend style="font-size: 1em; color: #f57c00;">Or Pass Turn</legend>
+                <p style="font-size: 0.9em; margin-top: 0;">Use this if the selected player has no legal moves.</p>
+                <button type="submit" id="passTurnButton" style="background-color: #f57c00;" disabled>
+                    Pass Turn
+                </button>
+            </fieldset>
+        </form>
+        
         <hr>
         
         <h2>Game Management</h2>
@@ -91,12 +108,13 @@
                 <legend>AI Assistant for **{{ ai_player_name }}**</legend>
                 <p><a href="{{ url_for('ai_prompt') }}" target="_blank"><button style="background-color: #3f51b5;">Generate AI Prompt</button></a></p>
             </fieldset>
-
+            
             <fieldset style="flex: 1;">
                 <legend>End of Round</legend>
+                <p>This button is also on the Reveal page.</p>
                 <p><a href="{{ url_for('reset_board') }}" onclick="return confirm('Are you sure you want to reset the board and start a new round?');"><button style="background-color: #f44336;">Reset Board/New Round</button></a></p>
             </fieldset>
-        </div>
+            </div>
 
     </div>
     
@@ -105,7 +123,11 @@
         {% if round_history %}
             <ul>
                 {% for move in round_history %}
-                    <li>{{ move.summary }}</li>
+                    {% if move.summary %}
+                        <li>{{ move.summary }}</li>
+                    {% else %}
+                        <li>{{ move }}</li> 
+                    {% endif %}
                 {% endfor %}
             </ul>
         {% else %}
@@ -118,8 +140,9 @@
         // --- Bezpieczne wczytanie danych z Flaska ---
         const playerCardMap = {{ player_card_map | tojson }};
         const playerAgentMap = {{ player_agent_map | tojson }};
-        const playerIntrigueMap = {{ player_intrigue_map | tojson }};
+        // USUNIĘTO playerIntrigueMap
         const currentPhase = {{ current_phase | tojson }};
+        // 'currentPlayer' jest używane tylko do domyślnego wybrania z listy
         const currentPlayer = {{ current_player | tojson }};
 
         // --- Elementy DOM ---
@@ -127,11 +150,14 @@
         const cardDropdown = document.getElementById('card_id');
         const agentMoveButton = document.getElementById('agentMoveButton');
         
+        // Nowe elementy Intrygi
         const intriguePlayerInput = document.getElementById('intrigue_player_name');
-        const intrigueDropdown = document.getElementById('intrigue_id');
         const intrigueButton = document.getElementById('intrigueButton');
+        
+        const passTurnButton = document.getElementById('passTurnButton');
+        const passPlayerNameInput = document.getElementById('pass_player_name');
 
-        // --- Funkcja aktualizująca karty Agenta (z ręki) ---
+        // --- Funkcja aktualizująca karty Agenta (bez zmian) ---
         function updateCardOptions() {
             const selectedPlayer = playerDropdown.value;
             const cardsForPlayer = playerCardMap[selectedPlayer] || [];
@@ -157,68 +183,88 @@
             });
         }
         
-        // --- Funkcja aktualizująca karty Intryg (NOWOŚĆ) ---
-        function updateIntrigueOptions() {
-            // Używamy 'currentPlayer', ponieważ tylko aktywny gracz może grać intrygi
-            intriguePlayerInput.value = currentPlayer; 
-            const intriguesForPlayer = playerIntrigueMap[currentPlayer] || [];
-            
-            intrigueDropdown.innerHTML = '';
-            let defaultOption = document.createElement('option');
-            defaultOption.value = "";
+        // --- USUNIĘTO 'updateIntrigueOptions' ---
 
-            if (intriguesForPlayer.length === 0) {
-                defaultOption.textContent = "-- No 'Agent Turn' intrigues --";
-                intrigueButton.disabled = true;
-            } else {
-                defaultOption.textContent = "-- Select Intrigue --";
-                intrigueButton.disabled = false; // Włącz przycisk, jeśli są karty
-            }
-            intrigueDropdown.appendChild(defaultOption);
-
-            intriguesForPlayer.forEach(function(intrigue) {
-                let option = document.createElement('option');
-                option.value = intrigue.id;
-                option.textContent = `${intrigue.name}: ${intrigue.description}`;
-                intrigueDropdown.appendChild(option);
-            });
-        }
-
-        // --- Funkcja sprawdzająca stan gry (NOWOŚĆ) ---
+        // --- GŁÓWNA ZMIANA: Funkcja sprawdzająca stan gry (bez kolejki) ---
         function checkGameState() {
-            const selectedPlayer = playerDropdown.value;
-            const agentInfo = playerAgentMap[selectedPlayer];
+            const selectedPlayer = playerDropdown.value; 
+            const agentInfo = playerAgentMap[selectedPlayer]; 
             
             let canPlayAgent = false;
+            let canPass = false;
+            let canPlayIntrigue = false;
+
+            // Zaktualizuj ukryte pola (dla obu formularzy)
+            passPlayerNameInput.value = selectedPlayer;
+            intriguePlayerInput.value = selectedPlayer; // <-- NOWOŚĆ
+
             if (currentPhase === 'AGENT_TURN' && agentInfo) {
-                if (agentInfo.placed < agentInfo.total) {
+                
+                // Warunki, czy gracz MOŻE wykonać akcję
+                const hasAgentsLeft = agentInfo.placed < agentInfo.total;
+                const hasNotPassed = !agentInfo.has_passed;
+                
+                // 1. Kiedy można zagrać agenta?
+                //    Gdy ma agentów I nie spasował
+                if (hasAgentsLeft && hasNotPassed) {
                     canPlayAgent = true;
                 }
+                
+                // 2. Kiedy można spasować?
+                //    Gdy nie spasował (można pasować nawet z agentami)
+                if (hasNotPassed) {
+                    canPass = true;
+                }
+
+                // 3. Kiedy można zagrać intrygę?
+                //    Zawsze można próbować, jeśli jest tura agentów
+                canPlayIntrigue = true;
+
             }
             
-            // Zablokuj/Odblokuj przycisk ruchu agenta
+            // --- Zastosuj stany do przycisków ---
+            
+            // Przycisk RUCHU AGENTA
             agentMoveButton.disabled = !canPlayAgent;
-            if (!canPlayAgent) {
-                agentMoveButton.textContent = (currentPhase !== 'AGENT_TURN') ? 'Not in Agent Phase' : 'No Agents Left';
-            } else {
-                agentMoveButton.textContent = 'Save Agent Move';
+            agentMoveButton.textContent = `Save Agent Move (for ${selectedPlayer || '...'})`;
+            
+            // Przycisk PASOWANIA
+            passTurnButton.disabled = !canPass;
+            passTurnButton.textContent = `Pass Turn (for ${selectedPlayer || '...'})`;
+
+            // Przycisk INTRYGI
+            intrigueButton.disabled = !canPlayIntrigue;
+            intrigueButton.textContent = `Play Manual Intrigue (for ${selectedPlayer || '...'})`;
+
+            // Ustaw komunikaty błędów, jeśli gracz nie może grać
+            if (agentInfo && !hasAgentsLeft) {
+                agentMoveButton.textContent = 'No Agents Left';
+            } else if (agentInfo && !hasNotPassed) {
+                agentMoveButton.textContent = 'Player Has Passed';
+                passTurnButton.textContent = 'Player Has Passed';
             }
             
-            // Zablokuj/Odblokuj przycisk intrygi
-            intrigueButton.disabled = (currentPhase !== 'AGENT_TURN' || intrigueDropdown.options.length <= 1);
+            if (currentPhase !== 'AGENT_TURN') {
+                agentMoveButton.disabled = true;
+                passTurnButton.disabled = true;
+                intrigueButton.disabled = true;
+                agentMoveButton.textContent = 'Not in Agent Phase';
+                passTurnButton.textContent = 'Not in Agent Phase';
+                intrigueButton.textContent = 'Not in Agent Phase';
+            }
         }
 
         // --- Event Listeners ---
         playerDropdown.addEventListener('change', () => {
-            updateCardOptions();
-            checkGameState();
+            updateCardOptions(); 
+            checkGameState();    
         });
     
         // --- Inicjalizacja strony ---
         function initializePage() {
             updateCardOptions();
-            updateIntrigueOptions(); // Wypełnij listę intryg
-            checkGameState(); // Sprawdź, czy przyciski powinny być aktywne
+            // USUNIĘTO 'updateIntrigueOptions'
+            checkGameState();      
         }
         
         initializePage();

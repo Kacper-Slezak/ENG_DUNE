@@ -3,12 +3,15 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 import json
 import os
 
-# Zaktualizowano importy z game_manager
-from game_manager import load_game_data, save_json_file, is_move_valid, process_move, check_and_advance_phase, process_intrigue
-from build_ai_prompt import generate_ai_prompt, AI_PLAYER_NAME
+from game_manager import (
+    load_game_data, save_json_file, is_move_valid, process_move, 
+    check_and_advance_phase, process_intrigue,
+    calculate_reveal_stats, perform_cleanup_and_new_round, 
+    GAME_STATE_FILE,
+    process_pass_turn 
+)
 
-# Użyjemy stałych z game_manager.py
-from game_manager import GAME_STATE_FILE, INTRIGUES_DB_FILE
+from build_ai_prompt import generate_ai_prompt, AI_PLAYER_NAME
 
 app = Flask(__name__)
 app.secret_key = 'your_super_secret_dune_key' 
@@ -32,29 +35,31 @@ def get_available_locations(locations_db, game_state):
             })
     return available_locations
 
-# --- FUNKCJA draw_cards_for_ai() ZOSTAŁA USUNIĘTA ---
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    # Używamy nowej, zbiorczej funkcji
-    game_state, locations_db, cards_db, intrigues_db = load_game_data()
+    # Intrigues_db już nie jest potrzebne
+    game_state, locations_db, cards_db, _ = load_game_data()
 
-    if game_state is None or locations_db is None or cards_db is None or intrigues_db is None:
+    if game_state is None or locations_db is None or cards_db is None:
         flash("CRITICAL ERROR: Cannot load core game data. Check JSON files.", "error")
         return render_template('error.html'), 500
 
+    current_phase = game_state.get("current_phase", "Unknown Phase") 
+    if current_phase == "REVEAL":
+        return redirect(url_for('reveal_phase'))
+
     if request.method == 'POST':
-        # Walidacja ruchu AGENTA
+        # Logika ruchu agenta
         player_name_input = request.form.get('player_name')
         card_id_input = request.form.get('card_id')
         location_id_input = request.form.get('location_id')
 
+        # --- USUNIĘTO WALIDACJĘ 'currentPlayer' ---
+        
         is_valid, message = is_move_valid(game_state, locations_db, cards_db, player_name_input, card_id_input, location_id_input)
 
         if is_valid:
             new_game_state = process_move(game_state, locations_db, cards_db, player_name_input, card_id_input, location_id_input)
-            
-            # NOWOŚĆ: Po każdym ruchu sprawdź, czy kończy się faza agentów
             final_game_state = check_and_advance_phase(new_game_state)
             
             if save_json_file(GAME_STATE_FILE, final_game_state):
@@ -66,15 +71,13 @@ def index():
         
         return redirect(url_for('index'))
 
-    # --- Logika GET (wyświetlanie strony) ---
+    # --- Logika GET ---
     current_player = game_state.get("currentPlayer", "Unknown Player")
-    current_phase = game_state.get("current_phase", "Unknown Phase") 
     current_round = game_state.get("round", 1) 
     round_history = game_state.get("round_history", [])
     player_names = get_player_names(game_state)
     available_locations = get_available_locations(locations_db, game_state)
     
-    # --- ZMODYFIKOWANA LOGIKA MAPY KART (z 'hand') ---
     player_card_map = {}
     player_states = game_state.get("players", {})
     
@@ -89,59 +92,47 @@ def index():
                 })
         player_card_map[player_name] = sorted(player_card_list, key=lambda x: x['name'])
     
-    # --- NOWA LOGIKA: Przygotowanie danych o intrygach i agentach ---
     player_agent_map = {}
-    player_intrigue_map = {}
+    # --- USUNIĘTO 'player_intrigue_map' ---
     
     for player_name, player_data in player_states.items():
-        # Mapa Agentów
         player_agent_map[player_name] = {
             "placed": player_data.get("agents_placed", 0),
-            "total": player_data.get("agents_total", 2)
+            "total": player_data.get("agents_total", 2),
+            "has_passed": player_data.get("has_passed", False) 
         }
         
-        # Mapa Intryg (lista obiektów)
-        intrigue_ids_list = player_data.get("intrigue_hand", [])
-        player_intrigue_list = []
-        for intrigue_id in intrigue_ids_list:
-            if intrigue_id in intrigues_db:
-                intrigue_data = intrigues_db[intrigue_id]
-                # Pokaż tylko karty, które można zagrać teraz
-                if intrigue_data.get("type") == "agent_turn":
-                    player_intrigue_list.append({
-                        "id": intrigue_id,
-                        "name": intrigue_data.get("name", intrigue_id),
-                        "description": intrigue_data.get("description", "No description.")
-                    })
-        player_intrigue_map[player_name] = player_intrigue_list
-
-
     return render_template('index.html', 
-        current_player=current_player,
+        current_player=current_player, # Zostawiamy dla spójności UI (wybrany gracz)
         current_phase=current_phase, 
         current_round=current_round, 
         round_history=round_history,
         player_names=player_names,
         player_card_map=player_card_map,
-        player_agent_map=player_agent_map, # Nowe
-        player_intrigue_map=player_intrigue_map, # Nowe
+        player_agent_map=player_agent_map, 
+        # Usunięto player_intrigue_map
         locations=available_locations,
         ai_player_name=AI_PLAYER_NAME
     )
 
+# --- CAŁKOWICIE NOWA LOGIKA INTRYG ---
 @app.route('/play_intrigue', methods=['POST'])
 def play_intrigue():
-    """Nowa ścieżka do obsługi zagrywania kart intryg."""
-    game_state, _, _, intrigues_db = load_game_data()
+    """Obsługa ręcznie wpisanej intrygi."""
+    game_state, _, _, _ = load_game_data()
 
     if game_state.get("current_phase") != "AGENT_TURN":
         flash("Cannot play intrigue: Not in AGENT_TURN phase.", "error")
         return redirect(url_for('index'))
 
+    # Pobierz gracza i tekst z formularza
     player_name_input = request.form.get('player_name')
-    intrigue_id_input = request.form.get('intrigue_id')
+    intrigue_text_input = request.form.get('intrigue_text')
     
-    is_valid, message = process_intrigue(game_state, intrigues_db, player_name_input, intrigue_id_input)
+    # --- USUNIĘTO WALIDACJĘ 'currentPlayer' ---
+        
+    # Użyj nowej funkcji z game_manager
+    is_valid, message = process_intrigue(game_state, player_name_input, intrigue_text_input)
     
     if is_valid:
         if save_json_file(GAME_STATE_FILE, game_state):
@@ -154,9 +145,60 @@ def play_intrigue():
     return redirect(url_for('index'))
 
 
+@app.route('/pass_turn', methods=['POST'])
+def pass_turn():
+    """Przetwarza spasowanie tury przez gracza."""
+    game_state, _, _, _ = load_game_data()
+    
+    if game_state.get("current_phase") != "AGENT_TURN":
+        flash("Cannot pass: Not in AGENT_TURN phase.", "error")
+        return redirect(url_for('index'))
+
+    player_name_input = request.form.get('player_name')
+    if not player_name_input:
+         flash("Invalid pass: Player name was missing.", "error")
+         return redirect(url_for('index'))
+         
+    # --- USUNIĘTO WALIDACJĘ 'currentPlayer' ---
+    
+    game_state, is_valid, message = process_pass_turn(game_state, player_name_input)
+    
+    if is_valid:
+        flash(message, "success")
+        final_game_state = check_and_advance_phase(game_state)
+        save_json_file(GAME_STATE_FILE, final_game_state)
+    else:
+        flash(f"Invalid pass: {message}", "error")
+
+    return redirect(url_for('index'))
+
+
+@app.route('/reveal')
+def reveal_phase():
+    """Wyświetla stronę Fazy Odkrycia (Reveal Phase)."""
+    game_state, _, cards_db, _ = load_game_data()
+    
+    current_phase = game_state.get("current_phase", "Unknown Phase")
+    if current_phase != "REVEAL":
+        return redirect(url_for('index'))
+        
+    all_player_stats = []
+    player_states = game_state.get("players", {})
+    
+    for player_name, player_data in player_states.items():
+        stats = calculate_reveal_stats(player_data, cards_db)
+        stats["name"] = player_name
+        all_player_stats.append(stats)
+
+    return render_template('reveal.html',
+        current_round=game_state.get("round", 1),
+        all_player_stats=all_player_stats
+    )
+
+
 @app.route('/ai_prompt')
 def ai_prompt():
-    game_state, _, _, _ = load_game_data() # Używamy nowej funkcji
+    game_state, _, _, _ = load_game_data()
     
     if game_state is None:
         flash("CRITICAL ERROR: Cannot load game data.", "error")
@@ -171,38 +213,13 @@ def ai_prompt():
     
 @app.route('/reset_board')
 def reset_board():
-    """
-    Resetuje planszę na kolejną rundę.
-    TERAZ musi też resetować agentów i dobierać karty.
-    """
+    """Resetuje planszę na kolejną rundę."""
     game_state, _, _, _ = load_game_data()
     if game_state:
-        # 1. Reset lokacji
-        if "locations_state" in game_state:
-            for loc_id in game_state["locations_state"]:
-                game_state["locations_state"][loc_id]["occupied_by"] = None
-        
-        # 2. Reset fazy i historii
-        game_state["round_history"] = []
-        game_state["current_phase"] = "AGENT_TURN" 
-        game_state["round"] = game_state.get("round", 0) + 1
+        new_game_state = perform_cleanup_and_new_round(game_state)
 
-        # 3. Reset agentów i dobieranie kart dla wszystkich graczy (NOWA LOGIKA)
-        for player_name, player_data in game_state.get("players", {}).items():
-            # Reset agentów (zachowaj 3, jeśli zdobył)
-            player_data["agents_placed"] = 0
-            # Bazowa liczba to 2, chyba że już mają 3
-            if player_data.get("agents_total", 2) != 3:
-                player_data["agents_total"] = 2 
-            
-            # TODO: Dodać pełną logikę tasowania i dobierania 5 kart
-            # Na razie: przenieś wszystko z discard_pile do hand
-            player_data["hand"] = player_data.get("hand", []) + player_data.get("discard_pile", [])
-            player_data["discard_pile"] = []
-
-
-        if save_json_file(GAME_STATE_FILE, game_state):
-            flash("Board has been reset, new round started! (Cards shuffled - simplified)", "success")
+        if save_json_file(GAME_STATE_FILE, new_game_state):
+            flash("Board has been reset, new round started! Cards shuffled and drawn.", "success")
         else:
             flash("ERROR: Failed to save game state changes.", "error")
     

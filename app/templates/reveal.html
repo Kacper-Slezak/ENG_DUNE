@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dune: Imperium - Reveal Phase</title>
+    <style>
+        body { font-family: sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; }
+        h1, h2 { text-align: center; color: #3f51b5; }
+        .player-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .player-card { border: 1px solid #ccc; padding: 15px; background: #f9f9f9; border-radius: 8px; }
+        .player-card h3 { margin-top: 0; border-bottom: 2px solid #ccc; padding-bottom: 5px; }
+        ul { list-style: none; padding-left: 10px; }
+        li { margin-bottom: 5px; }
+        .stats { font-size: 1.2em; font-weight: bold; margin-top: 10px; }
+        .persuasion { color: #00897b; }
+        .swords { color: #d81b60; }
+        .management { text-align: center; margin-top: 30px; }
+        button { background-color: #f44336; color: white; cursor: pointer; padding: 15px 30px; font-size: 1.1em; border: none; border-radius: 5px; }
+        button:hover { background-color: #d32f2f; }
+    </style>
+</head>
+<body>
+    <h1>Reveal Phase (Round {{ current_round }})</h1>
+    <h2>All agents have been placed. Revealing cards...</h2>
+
+    <div class="player-grid">
+        {% for player_stats in all_player_stats %}
+        <div class="player-card">
+            <h3>{{ player_stats.name }}</h3>
+            
+            <h4>Cards Played (Agent Cards):</h4>
+            <ul>
+                {% for card in player_stats.cards_played %}
+                    <li>{{ card.name }} ({{ card.persuasion }} Perswazji, {{ card.swords }} Siły)</li>
+                {% else %}
+                    <li>(No cards played)</li>
+                {% endfor %}
+            </ul>
+            
+            <h4>Cards in Hand (Reveal Only):</h4>
+            <ul>
+                {% for card in player_stats.cards_in_hand %}
+                    <li>{{ card.name }} ({{ card.persuasion }} Perswazji, {{ card.swords }} Siły)</li>
+                {% else %}
+                    <li>(No cards in hand)</li>
+                {% endfor %}
+            </ul>
+            
+            <hr>
+            <div class="stats">
+                <span class="persuasion">Total Persuasion: {{ player_stats.total_persuasion }}</span><br>
+                <span class="swords">Total Swords: {{ player_stats.total_swords }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="management">
+        <fieldset>
+            <legend>End of Round</legend>
+            <p>TODO: Implement Combat and Card Buying (using Persuasion).</p>
+            <p>After resolving combat and buying, reset the board for the next round.</p>
+            <p>
+                <a href="{{ url_for('reset_board') }}" onclick="return confirm('Are you sure you want to reset the board and start a new round?');">
+                    <button>Start New Round (Cleanup)</button>
+                </a>
+            </p>
+        </fieldset>
+    </div>
+
+</body>
+</html>
