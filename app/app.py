@@ -8,7 +8,10 @@ from game_manager import (
     check_and_advance_phase, process_intrigue,
     calculate_reveal_stats, perform_cleanup_and_new_round, 
     GAME_STATE_FILE,
-    process_pass_turn 
+    process_pass_turn,
+    process_buy_card,
+    get_card_persuasion_cost,
+    add_card_to_market # <--- NOWY IMPORT
 )
 
 from build_ai_prompt import generate_ai_prompt, AI_PLAYER_NAME
@@ -37,7 +40,6 @@ def get_available_locations(locations_db, game_state):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    # Intrigues_db już nie jest potrzebne
     game_state, locations_db, cards_db, _ = load_game_data()
 
     if game_state is None or locations_db is None or cards_db is None:
@@ -49,18 +51,15 @@ def index():
         return redirect(url_for('reveal_phase'))
 
     if request.method == 'POST':
-        # Logika ruchu agenta
         player_name_input = request.form.get('player_name')
         card_id_input = request.form.get('card_id')
         location_id_input = request.form.get('location_id')
-
-        # --- USUNIĘTO WALIDACJĘ 'currentPlayer' ---
         
         is_valid, message = is_move_valid(game_state, locations_db, cards_db, player_name_input, card_id_input, location_id_input)
 
         if is_valid:
             new_game_state = process_move(game_state, locations_db, cards_db, player_name_input, card_id_input, location_id_input)
-            final_game_state = check_and_advance_phase(new_game_state)
+            final_game_state = check_and_advance_phase(new_game_state, cards_db)
             
             if save_json_file(GAME_STATE_FILE, final_game_state):
                  flash(f"Success! Player {player_name_input}'s move has been played.", "success")
@@ -93,7 +92,6 @@ def index():
         player_card_map[player_name] = sorted(player_card_list, key=lambda x: x['name'])
     
     player_agent_map = {}
-    # --- USUNIĘTO 'player_intrigue_map' ---
     
     for player_name, player_data in player_states.items():
         player_agent_map[player_name] = {
@@ -103,35 +101,28 @@ def index():
         }
         
     return render_template('index.html', 
-        current_player=current_player, # Zostawiamy dla spójności UI (wybrany gracz)
+        current_player=current_player, 
         current_phase=current_phase, 
         current_round=current_round, 
         round_history=round_history,
         player_names=player_names,
         player_card_map=player_card_map,
         player_agent_map=player_agent_map, 
-        # Usunięto player_intrigue_map
         locations=available_locations,
         ai_player_name=AI_PLAYER_NAME
     )
 
-# --- CAŁKOWICIE NOWA LOGIKA INTRYG ---
 @app.route('/play_intrigue', methods=['POST'])
 def play_intrigue():
-    """Obsługa ręcznie wpisanej intrygi."""
     game_state, _, _, _ = load_game_data()
 
     if game_state.get("current_phase") != "AGENT_TURN":
         flash("Cannot play intrigue: Not in AGENT_TURN phase.", "error")
         return redirect(url_for('index'))
 
-    # Pobierz gracza i tekst z formularza
     player_name_input = request.form.get('player_name')
     intrigue_text_input = request.form.get('intrigue_text')
     
-    # --- USUNIĘTO WALIDACJĘ 'currentPlayer' ---
-        
-    # Użyj nowej funkcji z game_manager
     is_valid, message = process_intrigue(game_state, player_name_input, intrigue_text_input)
     
     if is_valid:
@@ -147,8 +138,7 @@ def play_intrigue():
 
 @app.route('/pass_turn', methods=['POST'])
 def pass_turn():
-    """Przetwarza spasowanie tury przez gracza."""
-    game_state, _, _, _ = load_game_data()
+    game_state, _, cards_db, _ = load_game_data()
     
     if game_state.get("current_phase") != "AGENT_TURN":
         flash("Cannot pass: Not in AGENT_TURN phase.", "error")
@@ -159,13 +149,11 @@ def pass_turn():
          flash("Invalid pass: Player name was missing.", "error")
          return redirect(url_for('index'))
          
-    # --- USUNIĘTO WALIDACJĘ 'currentPlayer' ---
-    
     game_state, is_valid, message = process_pass_turn(game_state, player_name_input)
     
     if is_valid:
         flash(message, "success")
-        final_game_state = check_and_advance_phase(game_state)
+        final_game_state = check_and_advance_phase(game_state, cards_db)
         save_json_file(GAME_STATE_FILE, final_game_state)
     else:
         flash(f"Invalid pass: {message}", "error")
@@ -186,25 +174,123 @@ def reveal_phase():
     player_states = game_state.get("players", {})
     
     for player_name, player_data in player_states.items():
-        stats = calculate_reveal_stats(player_data, cards_db)
+        stats = player_data.get("reveal_stats", {}) 
         stats["name"] = player_name
+        stats["influence"] = player_data.get("influence", {}) # <--- DODANO WPŁYWY
         all_player_stats.append(stats)
+
+    market_cards_details = []
+    market_ids = game_state.get("imperium_row", [])
+    for card_id in market_ids:
+        card_data = cards_db.get(card_id, {})
+        card_cost = get_card_persuasion_cost(card_data)
+        cost_display = str(card_cost) if card_cost != 999 else "N/A"
+        
+        market_cards_details.append({
+            "id": card_id, 
+            "name": card_data.get("name", card_id), 
+            "cost": cost_display
+        })
+        
+    # ZMIANA: Przygotuj listę wszystkich kart do wyszukiwarki
+    all_buyable_cards = []
+    for card_id, card_data in cards_db.items():
+        if get_card_persuasion_cost(card_data) != 999:
+            all_buyable_cards.append({
+                "id": card_id,
+                "name": card_data.get("name", card_id)
+            })
 
     return render_template('reveal.html',
         current_round=game_state.get("round", 1),
-        all_player_stats=all_player_stats
+        all_player_stats=all_player_stats,
+        market_cards=market_cards_details,
+        player_names=get_player_names(game_state),
+        ai_player_name=AI_PLAYER_NAME,
+        round_history=game_state.get("round_history", []),
+        all_buyable_cards=all_buyable_cards # <--- Przekaż do szablonu
     )
+
+@app.route('/buy_card', methods=['POST'])
+def buy_card():
+    game_state, _, cards_db, _ = load_game_data()
+
+    if game_state.get("current_phase") != "REVEAL":
+        flash("Cannot buy cards: Not in REVEAL phase.", "error")
+        return redirect(url_for('reveal_phase'))
+        
+    player_name = request.form.get('player_name')
+    card_id = request.form.get('card_id')
+    
+    if not player_name or not card_id:
+        flash("Invalid purchase: Player or Card missing.", "error")
+        return redirect(url_for('reveal_phase'))
+
+    is_valid, message = process_buy_card(game_state, player_name, card_id, cards_db)
+    
+    if is_valid:
+        if save_json_file(GAME_STATE_FILE, game_state):
+            flash(message, "success")
+        else:
+            flash("CRITICAL ERROR: Cannot save game state after buying card.", "error")
+    else:
+        flash(f"Invalid purchase: {message}", "error")
+        
+    return redirect(url_for('reveal_phase'))
+
+# --- NOWA TRASA (Punkt 4) ---
+@app.route('/add_to_market', methods=['POST'])
+def add_to_market():
+    """Ręcznie dodaje kartę do rynku (Imperium Row)."""
+    game_state, _, cards_db, _ = load_game_data()
+    
+    if game_state.get("current_phase") != "REVEAL":
+        flash("Cannot modify market: Not in REVEAL phase.", "error")
+        return redirect(url_for('reveal_phase'))
+        
+    # Używamy 'card_id_typed' jako nazwy pola z formularza
+    card_id_input = request.form.get('card_id_typed') 
+    if not card_id_input:
+        flash("Invalid input: No card ID or name provided.", "error")
+        return redirect(url_for('reveal_phase'))
+        
+    # Sprawdź, czy użytkownik wpisał ID, czy nazwę
+    card_id_to_add = None
+    if card_id_input in cards_db:
+        card_id_to_add = card_id_input
+    else:
+        # Przeszukaj po nazwie (case-insensitive)
+        for c_id, c_data in cards_db.items():
+            if c_data.get("name", "").lower() == card_id_input.lower():
+                card_id_to_add = c_id
+                break
+                
+    if not card_id_to_add:
+        flash(f"Invalid card: '{card_id_input}' not found as ID or Name.", "error")
+        return redirect(url_for('reveal_phase'))
+
+    is_valid, message = add_card_to_market(game_state, card_id_to_add, cards_db)
+
+    if is_valid:
+        if save_json_file(GAME_STATE_FILE, game_state):
+            flash(message, "success")
+        else:
+            flash("CRITICAL ERROR: Cannot save game state after modifying market.", "error")
+    else:
+        flash(f"Failed to add card: {message}", "error")
+        
+    return redirect(url_for('reveal_phase'))
 
 
 @app.route('/ai_prompt')
 def ai_prompt():
-    game_state, _, _, _ = load_game_data()
+    game_state, _, cards_db, _ = load_game_data()
     
-    if game_state is None:
-        flash("CRITICAL ERROR: Cannot load game data.", "error")
+    if game_state is None or cards_db is None:
+        flash("CRITICAL ERROR: Cannot load game data or cards data.", "error")
         return render_template('error.html'), 500
         
-    prompt_text = generate_ai_prompt(game_state) 
+    prompt_text = generate_ai_prompt(game_state, cards_db) 
     
     return render_template('ai_prompt.html', 
         prompt_text=prompt_text,

@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <title>Dune: Imperium - Reveal Phase</title>
     <style>
-        body { font-family: sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; }
+        body { font-family: sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; display: flex; gap: 20px; }
+        .main-column { flex: 2; }
+        .sidebar-column { flex: 1; }
         h1, h2 { text-align: center; color: #3f51b5; }
-        .player-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .player-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
         .player-card { border: 1px solid #ccc; padding: 15px; background: #f9f9f9; border-radius: 8px; }
         .player-card h3 { margin-top: 0; border-bottom: 2px solid #ccc; padding-bottom: 5px; }
         ul { list-style: none; padding-left: 10px; }
@@ -14,58 +16,154 @@
         .stats { font-size: 1.2em; font-weight: bold; margin-top: 10px; }
         .persuasion { color: #00897b; }
         .swords { color: #d81b60; }
+        .influence { font-size: 0.9em; color: #555; }
         .management { text-align: center; margin-top: 30px; }
-        button { background-color: #f44336; color: white; cursor: pointer; padding: 15px 30px; font-size: 1.1em; border: none; border-radius: 5px; }
-        button:hover { background-color: #d32f2f; }
+        button { background-color: #4CAF50; color: white; cursor: pointer; padding: 10px 15px; font-size: 1em; border: none; border-radius: 5px; }
+        button:hover { background-color: #45a049; }
+        fieldset { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; background: #f9f9f9; }
+        legend { font-size: 1.2em; font-weight: bold; padding: 0 10px; }
+        select, input { padding: 8px; margin: 5px; box-sizing: border-box; width: calc(100% - 10px); }
+        .message-success { color: green; font-weight: bold; }
+        .message-error { color: red; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>Reveal Phase (Round {{ current_round }})</h1>
-    <h2>All agents have been placed. Revealing cards...</h2>
 
-    <div class="player-grid">
-        {% for player_stats in all_player_stats %}
-        <div class="player-card">
-            <h3>{{ player_stats.name }}</h3>
-            
-            <h4>Cards Played (Agent Cards):</h4>
-            <ul>
-                {% for card in player_stats.cards_played %}
-                    <li>{{ card.name }} ({{ card.persuasion }} Perswazji, {{ card.swords }} Siły)</li>
-                {% else %}
-                    <li>(No cards played)</li>
+    <div class="main-column">
+        <h1>Reveal Phase (Round {{ current_round }})</h1>
+        <h2>All agents placed. Revealing cards and buying...</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="message-{{ category }}">{{ message }}</p>
                 {% endfor %}
-            </ul>
-            
-            <h4>Cards in Hand (Reveal Only):</h4>
-            <ul>
-                {% for card in player_stats.cards_in_hand %}
-                    <li>{{ card.name }} ({{ card.persuasion }} Perswazji, {{ card.swords }} Siły)</li>
-                {% else %}
-                    <li>(No cards in hand)</li>
-                {% endfor %}
-            </ul>
-            
-            <hr>
-            <div class="stats">
-                <span class="persuasion">Total Persuasion: {{ player_stats.total_persuasion }}</span><br>
-                <span class="swords">Total Swords: {{ player_stats.total_swords }}</span>
+            {% endif %}
+        {% endwith %}
+
+        <div class="player-grid">
+            {% for player_stats in all_player_stats %}
+            <div class="player-card">
+                <h3>{{ player_stats.name }}</h3>
+                
+                <div class="stats">
+                    <span class="persuasion">Total Persuasion: {{ player_stats.total_persuasion }}</span><br>
+                    <span class="swords">Total Swords: {{ player_stats.total_swords }}</span>
+                </div>
+                
+                <div class="influence">
+                    <hr>
+                    **Influence:**
+                    Emperor: {{ player_stats.influence.emperor | default(0) }} |
+                    Guild: {{ player_stats.influence.guild | default(0) }} |
+                    Fremen: {{ player_stats.influence.fremen | default(0) }} |
+                    B.G.: {{ player_stats.influence.bene_gesserit | default(0) }}
+                </div>
+                <hr>
+
+                <h4>Cards Played (Agent Cards):</h4>
+                <ul>
+                    {% for card in player_stats.cards_played %}
+                        <li>{{ card.name }} ({{ card.persuasion }}P, {{ card.swords }}S)</li>
+                    {% else %}
+                        <li>(No cards played)</li>
+                    {% endfor %}
+                </ul>
+                
+                <h4>Cards in Hand (Reveal Only):</h4>
+                <ul>
+                    {% for card in player_stats.cards_in_hand %}
+                        <li>{{ card.name }} ({{ card.persuasion }}P, {{ card.swords }}S)</li>
+                    {% else %}
+                        <li>(No cards in hand)</li>
+                    {% endfor %}
+                </ul>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
 
-    <div class="management">
-        <fieldset>
-            <legend>End of Round</legend>
-            <p>TODO: Implement Combat and Card Buying (using Persuasion).</p>
-            <p>After resolving combat and buying, reset the board for the next round.</p>
-            <p>
-                <a href="{{ url_for('reset_board') }}" onclick="return confirm('Are you sure you want to reset the board and start a new round?');">
-                    <button>Start New Round (Cleanup)</button>
-                </a>
-            </p>
-        </fieldset>
+        <hr>
+        
+        <div style="display: flex; gap: 20px;">
+            <fieldset style="flex: 2;">
+                <legend>Market (Imperium Row)</legend>
+                <form method="POST" action="{{ url_for('buy_card') }}">
+                    <p>
+                        <label for="player_name">Who is buying?</label>
+                        <select id="player_name" name="player_name" required>
+                            <option value="">-- Select Player --</option>
+                            {% for name in player_names %}
+                                <option value="{{ name }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </p>
+                    <p>
+                        <label for="card_id">Which card to buy?</label>
+                        <select id="card_id" name="card_id" required>
+                             <option value="">-- Select Card --</option>
+                            {% for card in market_cards %}
+                                <option value="{{ card.id }}">{{ card.name }} (Cost: {{ card.cost }})</option>
+                            {% else %}
+                                <option value="" disabled>(Market is empty)</option>
+                            {% endfor %}
+                        </select>
+                    </p>
+                    <button type="submit" style="background-color: #00897b;">Buy Card</button>
+                </form>
+            </fieldset>
+            
+            <fieldset style="flex: 1;">
+                <legend>Replenish Market (Manual)</legend>
+                <form method="POST" action="{{ url_for('add_to_market') }}">
+                    <label for="card_id_typed">Find Card (by Name or ID):</label>
+                    <input list="all_cards_list" id="card_id_typed" name="card_id_typed" placeholder="Type card name or ID..." required>
+                    
+                    <datalist id="all_cards_list">
+                        {% for card in all_buyable_cards %}
+                            <option value="{{ card.name }}">{{ card.id }}</option>
+                        {% endfor %}
+                    </datalist>
+                    
+                    <button type="submit" style="background-color: #757575; margin-top: 10px;">Add to Market</button>
+                </form>
+            </fieldset>
+        </div>
+        
+        <div style="display: flex; gap: 20px; margin-top: 20px;">
+             <fieldset style="flex: 1;">
+                <legend>AI Assistant for **{{ ai_player_name }}**</legend>
+                 <p>Click to get AI advice for the **Reveal/Buy Phase**.</p>
+                <p><a href="{{ url_for('ai_prompt') }}" target="_blank"><button style="background-color: #3f51b5;">Generate AI Prompt</button></a></p>
+            </fieldset>
+
+            <fieldset style="flex: 1;">
+                <legend>End of Round</legend>
+                <p>TODO: Implement Combat (using Total Swords).</p>
+                <p>
+                    <a href="{{ url_for('reset_board') }}" onclick="return confirm('Are you sure you want to reset the board and start a new round?');">
+                        <button style="background-color: #f44336;">Start New Round (Cleanup)</button>
+                    </a>
+                </p>
+            </fieldset>
+        </div>
+
+    </div>
+    
+    <div class="sidebar-column">
+        <h2>Move History (This Round)</h2>
+        {% if round_history %}
+            <ul>
+                {% for move in round_history %}
+                    {% if move.summary %}
+                        <li>{{ move.summary }}</li>
+                    {% else %}
+                        <li>{{ move }}</li> 
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>(No moves or purchases this round)</p>
+        {% endif %}
     </div>
 
 </body>

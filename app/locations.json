@@ -1,27 +1,34 @@
 {
   "arrakeen": {
     "name": "Arrakeen",
-    "symbol_required": "fremen",
+    "symbol_required": "populated areas",
     "cost": [
       { "type": "resource", "resource": "water", "amount": 2 }
     ]
   },
   "carthag": {
     "name": "Carthag",
-    "symbol_required": "fremen",
+    "symbol_required": "populated areas",
     "cost": []
   },
   "high_council": {
     "name": "High Council",
-    "symbol_required": "imperium",
+    "symbol_required": "Landsraad",
     "cost": [
       { "type": "resource", "resource": "solari", "amount": 5 }
     ]
   },
   "swordmaster": {
     "name": "Swordmaster",
-    "symbol_required": "bene_gesserit",
+    "symbol_required": "bene gesserit",
     "cost": [],
     "effect": "gain_third_agent"
+  },
+  "choam_contract": {
+    "name": "CHOAM Contract",
+    "symbol_required": "CHOAM",
+    "cost": [
+       { "type": "resource", "resource": "solari", "amount": 2 }
+    ]
   }
 }

@@ -1,26 +1,56 @@
 {
   "round": 2,
-  "currentPlayer": "Helen",
-  "current_phase": "AGENT_TURN",
-  "round_history": [],
+  "currentPlayer": "SYSTEM",
+  "current_phase": "REVEAL",
+  "round_history": [
+    {
+      "summary": "Player Helen passed their agent turn."
+    },
+    {
+      "summary": "Player Paul passed their agent turn."
+    },
+    {
+      "summary": "Player Peter passed their agent turn."
+    }
+  ],
+  "destroyed_pile": [],
+  "imperium_row": [
+    "scout",
+    "spice_smugglers",
+    "gurney_halleck",
+    "liet_kynes",
+    "firm_grip",
+    "sardaukar_infantry",
+    "sietch_reverend_mother",
+    "imperial_spy"
+  ],
   "players": {
     "Peter": {
       "resources": {
         "solari": 0,
         "water": 1,
-        "spice": 2
+        "Spice": 2,
+        "troops": 0
+      },
+      "influence": {
+        "emperor": 0,
+        "guild": 0,
+        "fremen": 0,
+        "bene_gesserit": 0
       },
       "deck_pool": [
         "dagger",
         "dagger",
         "dune_the_desert_planet",
-        "desert_scout"
+        "reconnaissance",
+        "convincing_argument"
       ],
       "hand": [
         "dagger",
         "dagger",
         "dune_the_desert_planet",
-        "desert_scout"
+        "reconnaissance",
+        "convincing_argument"
       ],
       "discard_pile": [],
       "draw_deck": [],
@@ -30,23 +60,66 @@
         "plot_twist",
         "diplomacy"
       ],
-      "has_passed": false
+      "has_passed": true,
+      "reveal_stats": {
+        "total_persuasion": 4,
+        "total_swords": 2,
+        "cards_in_hand": [
+          {
+            "name": "Dagger",
+            "persuasion": 0,
+            "swords": 1
+          },
+          {
+            "name": "Dagger",
+            "persuasion": 0,
+            "swords": 1
+          },
+          {
+            "name": "Dune, The Desert Planet",
+            "persuasion": 1,
+            "swords": 0
+          },
+          {
+            "name": "Reconnaissance",
+            "persuasion": 1,
+            "swords": 0
+          },
+          {
+            "name": "Convincing Argument",
+            "persuasion": 2,
+            "swords": 0
+          }
+        ],
+        "cards_played": []
+      }
     },
     "Helen": {
       "resources": {
         "solari": 5,
         "water": 0,
-        "spice": 1
+        "Spice": 1,
+        "troops": 0
+      },
+      "influence": {
+        "emperor": 0,
+        "guild": 0,
+        "fremen": 0,
+        "bene_gesserit": 0
       },
       "deck_pool": [
-        "desert_scout",
         "dagger",
-        "shroud"
+        "dagger",
+        "dune_the_desert_planet",
+        "reconnaissance",
+        "convincing_argument"
       ],
       "hand": [
-        "desert_scout",
         "dagger",
-        "shroud"
+        "dagger",
+        "dune_the_desert_planet",
+        "reconnaissance",
+        "convincing_argument"
       ],
       "discard_pile": [],
       "draw_deck": [],
@@ -55,28 +128,105 @@
       "intrigue_hand": [
         "ambush"
       ],
-      "has_passed": false
+      "has_passed": true,
+      "reveal_stats": {
+        "total_persuasion": 4,
+        "total_swords": 2,
+        "cards_in_hand": [
+          {
+            "name": "Dagger",
+            "persuasion": 0,
+            "swords": 1
+          },
+          {
+            "name": "Dagger",
+            "persuasion": 0,
+            "swords": 1
+          },
+          {
+            "name": "Dune, The Desert Planet",
+            "persuasion": 1,
+            "swords": 0
+          },
+          {
+            "name": "Reconnaissance",
+            "persuasion": 1,
+            "swords": 0
+          },
+          {
+            "name": "Convincing Argument",
+            "persuasion": 2,
+            "swords": 0
+          }
+        ],
+        "cards_played": []
+      }
     },
     "Paul": {
       "resources": {
         "solari": 2,
         "water": 0,
-        "spice": 4
+        "Spice": 4,
+        "troops": 0
+      },
+      "influence": {
+        "emperor": 0,
+        "guild": 0,
+        "fremen": 0,
+        "bene_gesserit": 0
       },
       "deck_pool": [
         "dagger",
-        "desert_scout"
+        "dagger",
+        "dune_the_desert_planet",
+        "reconnaissance",
+        "convincing_argument"
       ],
       "hand": [
         "dagger",
-        "desert_scout"
+        "dagger",
+        "dune_the_desert_planet",
+        "reconnaissance",
+        "convincing_argument"
       ],
       "discard_pile": [],
       "draw_deck": [],
       "agents_total": 2,
       "agents_placed": 0,
       "intrigue_hand": [],
-      "has_passed": false
+      "has_passed": true,
+      "reveal_stats": {
+        "total_persuasion": 4,
+        "total_swords": 2,
+        "cards_in_hand": [
+          {
+            "name": "Dagger",
+            "persuasion": 0,
+            "swords": 1
+          },
+          {
+            "name": "Dagger",
+            "persuasion": 0,
+            "swords": 1
+          },
+          {
+            "name": "Dune, The Desert Planet",
+            "persuasion": 1,
+            "swords": 0
+          },
+          {
+            "name": "Reconnaissance",
+            "persuasion": 1,
+            "swords": 0
+          },
+          {
+            "name": "Convincing Argument",
+            "persuasion": 2,
+            "swords": 0
+          }
+        ],
+        "cards_played": []
+      }
     }
   },
   "locations_state": {
@@ -90,6 +240,9 @@
       "occupied_by": null
     },
     "swordmaster": {
+      "occupied_by": null
+    },
+    "choam_contract": {
       "occupied_by": null
     }
   }
