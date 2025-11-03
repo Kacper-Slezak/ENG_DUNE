@@ -1,0 +1,114 @@
+{
+  "round": 1,
+  "currentPlayer": "Peter",
+  "current_phase": "AGENT_TURN",
+  "round_history": [
+    {
+      "player": "Paul",
+      "card": "Dagger",
+      "location": "Carthag",
+      "summary": "Paul played 'Dagger' on 'Carthag'."
+    },
+    {
+      "player": "Peter",
+      "card": "Dagger",
+      "location": "High Council",
+      "summary": "Peter played 'Dagger' on 'High Council'."
+    },
+    {
+      "player": "Peter",
+      "card": "Dune, The Desert Planet",
+      "location": "Arrakeen",
+      "summary": "Peter played 'Dune, The Desert Planet' on 'Arrakeen'."
+    }
+  ],
+  "players": {
+    "Peter": {
+      "resources": {
+        "solari": 0,
+        "water": 1,
+        "spice": 2
+      },
+      "deck_pool": [
+        "dagger",
+        "dagger",
+        "desert_scout",
+        "dune_the_desert_planet"
+      ],
+      "hand": [
+        "desert_scout"
+      ],
+      "discard_pile": [
+        "dagger",
+        "dagger",
+        "dune_the_desert_planet"
+      ],
+      "draw_deck": [],
+      "agents_total": 2,
+      "agents_placed": 2,
+      "intrigue_hand": [
+        "plot_twist",
+        "diplomacy"
+      ]
+    },
+    "Helen": {
+      "resources": {
+        "solari": 5,
+        "water": 0,
+        "spice": 1
+      },
+      "deck_pool": [
+        "dagger",
+        "desert_scout",
+        "shroud"
+      ],
+      "hand": [
+        "dagger",
+        "desert_scout",
+        "shroud"
+      ],
+      "discard_pile": [],
+      "draw_deck": [],
+      "agents_total": 2,
+      "agents_placed": 0,
+      "intrigue_hand": [
+        "ambush"
+      ]
+    },
+    "Paul": {
+      "resources": {
+        "solari": 2,
+        "water": 0,
+        "spice": 4
+      },
+      "deck_pool": [
+        "dagger",
+        "desert_scout"
+      ],
+      "hand": [
+        "desert_scout"
+      ],
+      "discard_pile": [
+        "dagger"
+      ],
+      "draw_deck": [],
+      "agents_total": 2,
+      "agents_placed": 1,
+      "intrigue_hand": []
+    }
+  },
+  "locations_state": {
+    "arrakeen": {
+      "occupied_by": "Peter"
+    },
+    "carthag": {
+      "occupied_by": "Paul"
+    },
+    "high_council": {
+      "occupied_by": "Peter"
+    },
+    "swordmaster": {
+      "occupied_by": null
+    }
+  }
+}

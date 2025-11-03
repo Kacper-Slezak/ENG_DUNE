@@ -1,0 +1,58 @@
+{
+  "dagger": {
+    "name": "Dagger",
+    "type": "Agent",
+    "agent_symbols": ["fremen", "bene_gesserit", "gildia", "imperium"],
+    "agent_effect": {
+      "gain": [],
+      "description": "No agent effect."
+    },
+    "reveal_effect": {
+      "persuasion": 0,
+      "swords": 1
+    }
+  },
+  "desert_scout": {
+    "name": "Desert Scout",
+    "type": "Agent",
+    "agent_symbols": ["fremen"],
+    "agent_effect": {
+      "gain": [
+        { "type": "resource", "resource": "water", "amount": 1 }
+      ],
+      "description": "Gain 1 Water."
+    },
+    "reveal_effect": {
+      "persuasion": 1,
+      "swords": 0
+    }
+  },
+  "dune_the_desert_planet": {
+    "name": "Dune, The Desert Planet",
+    "type": "Agent",
+    "agent_symbols": ["fremen", "bene_gesserit"],
+    "agent_effect": {
+      "gain": [
+        { "type": "draw_card", "amount": 1 }
+      ],
+      "description": "Draw 1 card."
+    },
+    "reveal_effect": {
+      "persuasion": 1,
+      "swords": 0
+    }
+  },
+  "shroud": {
+    "name": "Shroud",
+    "type": "Agent",
+    "agent_symbols": ["bene_gesserit"],
+    "agent_effect": {
+      "gain": [],
+      "description": "Copy the effect of your destination (special effect)."
+    },
+    "reveal_effect": {
+      "persuasion": 2,
+      "swords": 0
+    }
+  }
+}
