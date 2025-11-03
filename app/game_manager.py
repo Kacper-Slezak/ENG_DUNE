@@ -1,3 +1,4 @@
+# app/game_manager.py
 import json
 import os
 import random 
@@ -186,13 +187,34 @@ def process_move(game_state, locations_db, cards_db, player_name, card_id, locat
                     player_state["intrigue_hand"] = []
                 # TODO: Implementacja dobierania konkretnej intrygi
                 player_state["intrigue_hand"].append(f"Intrigue_Card_{random.randint(100,999)}")
+            
+            # --- NOWA LOGIKA: Generyczne zdobywanie wpływów ---
+            elif "influence" in str(resource_name): 
+                if "or" in str(resource_name):
+                    # Nie można zautomatyzować wyboru, oznacz do akcji ręcznej
+                    move_summary += f" (NEEDS MANUAL ACTION: {gain_item.get('description')})"
+                else:
+                    # np. "gild influence point" -> "gild"
+                    faction = resource_name.split(" ")[0] 
+                    if "influence" not in player_state:
+                        player_state["influence"] = {}
+                    if faction not in player_state["influence"]:
+                        player_state["influence"][faction] = 0
+                    
+                    player_state["influence"][faction] += resource_amount
+                    move_summary += f" (gained {resource_amount} {faction} influence)"
+            # --- KONIEC NOWEJ LOGIKI ---
         
         elif item_type == "pay":
              if resource_name in player_resources:
                 current_amount = player_resources.get(resource_name, 0)
                 player_resources[resource_name] = max(0, current_amount - resource_amount)
         
-        # TODO: Obsługa 'destroy card' (innej niż 'this card')
+        # --- NOWA LOGIKA: Obsługa 'destroy card' (innej niż 'this card') ---
+        elif item_type == "destroy card": # Inne niż 'destroy this card'
+            # Nie można zautomatyzować wyboru, oznacz do akcji ręcznej
+            move_summary += f" (NEEDS MANUAL ACTION: Destroy {resource_amount} card(s))"
+        # --- KONIEC NOWEJ LOGIKI ---
 
     player_state["agents_placed"] = player_state.get("agents_placed", 0) + 1
     
@@ -287,7 +309,7 @@ def calculate_and_store_reveal_stats(game_state, cards_db):
 def calculate_reveal_stats(player_state, cards_db):
     """
     Oblicza sumę Perswazji i Siły dla gracza.
-    UWAGA: Na razie ignoruje złożone "possible actions".
+    UWAGA: Implementuje prostą logikę "possible actions".
     """
     total_persuasion = 0
     total_swords = 0
@@ -318,8 +340,45 @@ def calculate_reveal_stats(player_state, cards_db):
             else:
                 cards_played_details.append(card_detail)
     
-    # TODO: Zaimplementuj logikę "possible actions" z reveal_effect,
-    # np. "if you have emperor token you gain 4 persuasion."
+    # --- NOWA LOGIKA: Obsługa "possible actions" (TODO) ---
+    
+    # Sprawdź, czy gracz ma "token" cesarza (zakładamy, że > 0 wpływu)
+    has_emperor_token = player_state.get("influence", {}).get("emperor", 0) > 0
+    
+    # Sprawdź, czy zagrano kartę fremena (jest w discard_pile)
+    has_fremen_card_in_play = False
+    for card_id in player_state.get("discard_pile", []):
+        card_data = cards_db.get(card_id)
+        if card_data and "fremen" in card_data.get("agent_symbols", []):
+            has_fremen_card_in_play = True
+            break
+
+    # Przejdź przez wszystkie karty (ręka + discard) ponownie, aby zastosować bonusy
+    for card_id in cards_to_reveal_ids:
+        card_data = cards_db.get(card_id)
+        if not card_data:
+            continue
+            
+        reveal_effect = card_data.get("reveal_effect", {})
+        possible_actions = reveal_effect.get("possible actions", {})
+        description = possible_actions.get("description", "")
+        
+        # Logika dla "Firm grip"
+        if "if you have emperor token you gain 4 persuasion" in description:
+            if has_emperor_token:
+                total_persuasion += 4
+                # TODO: Można dodać to do 'card_detail' aby było widoczne w UI
+                # Na razie po prostu zwiększamy sumę
+                
+        # Logika dla "Sietch Reverend Mother"
+        elif "if you already have a fremen card in play, you gain 3 persuasion and 1 spice" in description:
+            if has_fremen_card_in_play:
+                total_persuasion += 3
+                # Uwaga: Ten framework nie ma jak dodać "1 spice" w fazie reveal (tylko liczy).
+                # Użytkownik musi ręcznie dodać przyprawę.
+                # Implementujemy tylko Perswazję.
+    
+    # --- KONIEC NOWEJ LOGIKI ---
 
     return {
         "total_persuasion": total_persuasion,
@@ -376,17 +435,19 @@ def process_buy_card(game_state, player_name, card_id, cards_db):
             resource = item.get("resource")
             amount = item.get("amount", 0)
             
-            # Obsługa wpływu u Imperatora
-            if resource == "emperor influence":
+            # --- ZMIENIONA LOGIKA: Generyczna obsługa wpływów ---
+            if "influence" in str(resource):
+                # np. "emperor influence" -> "emperor"
+                faction = resource.split(" ")[0] 
+                
                 if "influence" not in player_state:
                      player_state["influence"] = {}
-                if "emperor" not in player_state["influence"]:
-                     player_state["influence"]["emperor"] = 0
+                if faction not in player_state["influence"]:
+                     player_state["influence"][faction] = 0
                 
-                player_state["influence"]["emperor"] += amount
-                summary += f" (and gained {amount} Emperor influence)"
-            
-            # TODO: dodać 'guild influence' etc.
+                player_state["influence"][faction] += amount
+                summary += f" (and gained {amount} {faction} influence)"
+            # --- KONIEC ZMIENIONEJ LOGIKI ---
     
     
     if "round_history" not in game_state:

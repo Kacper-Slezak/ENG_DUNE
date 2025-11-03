@@ -59,6 +59,10 @@ def generate_ai_prompt(game_state_data, cards_db):
                             reveal_effect = card_data.get("reveal_effect", {})
                             opponent_persuasion += reveal_effect.get("persuasion", 0)
                             opponent_swords += reveal_effect.get("swords", 0)
+                            
+                            # TODO: Ta logika nie uwzględnia jeszcze "possible actions"
+                            # dla przeciwników, ponieważ jest obliczana globalnie 
+                            # dopiero na końcu fazy. Na razie wystarczy.
 
                     hand_size = len(player_data.get("hand", [])) 
                     
@@ -75,13 +79,29 @@ def generate_ai_prompt(game_state_data, cards_db):
     elif current_phase == "REVEAL":
         prompt_lines.append("\n### Faza Odkrycia (Kupowanie Kart) ###")
         
-        ai_player_data = game_state.get("players", {}).get(AI_PLAYER_NAME, {})
-        ai_stats = ai_player_data.get("reveal_stats", {})
-        my_persuasion = ai_stats.get("total_persuasion", 0)
-        my_swords = ai_stats.get("total_swords", 0)
+        # --- NOWA LOGIKA: Pokaż statystyki wszystkich graczy ---
+        prompt_lines.append("\n### Statystyki Odkrycia (Wszyscy Gracze) ###")
+        prompt_lines.append("To jest publiczna informacja, kluczowa do podejmowania decyzji o zakupie.")
         
-        prompt_lines.append(f"Posiadasz: {my_persuasion} Perswazji (do kupowania).")
-        prompt_lines.append(f"Posiadasz: {my_swords} Siły (do walki).")
+        all_player_stats = {}
+        ai_persuasion = 0
+        
+        for player_name, player_data in game_state.get("players", {}).items():
+            stats = player_data.get("reveal_stats", {})
+            persuasion = stats.get("total_persuasion", 0)
+            swords = stats.get("total_swords", 0)
+            all_player_stats[player_name] = f"Perswazja: {persuasion}, Siła: {swords}"
+            if player_name == AI_PLAYER_NAME:
+                ai_persuasion = persuasion
+        
+        for player_name, stats_str in sorted(all_player_stats.items()):
+            if player_name == AI_PLAYER_NAME:
+                prompt_lines.append(f"- **{player_name} (Ty)**: {stats_str}")
+            else:
+                prompt_lines.append(f"- {player_name}: {stats_str}")
+        # --- KONIEC NOWEJ LOGIKI ---
+        
+        prompt_lines.append(f"\nPosiadasz: {ai_persuasion} Perswazji (do kupowania).")
 
         prompt_lines.append("\n### Dostępne Karty (Imperium Row) ###")
         market_ids = game_state.get("imperium_row", [])
@@ -104,8 +124,10 @@ def generate_ai_prompt(game_state_data, cards_db):
     if "players" in game_state:
         for player_name, player_data in game_state["players"].items():
             if player_name == AI_PLAYER_NAME:
+                # Zachowaj 'reveal_stats' dla AI
                 player_data.pop("draw_deck", None)
             else:
+                # Dla przeciwników ukryj wszystko, ale POKAŻ 'reveal_stats'
                 player_data.pop("hand", None)
                 player_data.pop("deck_pool", None)
                 player_data.pop("draw_deck", None)
@@ -116,4 +138,4 @@ def generate_ai_prompt(game_state_data, cards_db):
     final_prompt = "\n".join(prompt_lines)
     final_prompt += f"\n```json\n{game_state_json_string}\n```"
     
-    return final_prompt 
+    return final_prompt
