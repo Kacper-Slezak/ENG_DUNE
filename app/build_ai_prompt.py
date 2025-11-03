@@ -10,8 +10,8 @@ AI_PLAYER_NAME = 'Peter'
 
 def generate_ai_prompt(game_state_data, cards_db):
     """
-    Generuje uproszczony prompt dla AI, zawierający tylko stan gry
-    oraz podsumowanie publicznych efektów 'reveal' przeciwników.
+    Generates a simplified prompt for the AI, containing only the game state
+    and a summary of opponents' public reveal effects.
     
     Args:
         game_state_data (dict): The current state of the game.
@@ -30,22 +30,22 @@ def generate_ai_prompt(game_state_data, cards_db):
     current_phase = game_state.get('current_phase', 'Unknown')
     
     prompt_lines = []
-    prompt_lines.append(f"Jesteś graczem {AI_PLAYER_NAME}. Przeanalizuj stan gry i podejmij decyzję.")
-    prompt_lines.append(f"Obecna runda: {game_state.get('round', 1)}, Faza: {current_phase}.")
+    prompt_lines.append(f"You are player {AI_PLAYER_NAME}. Analyze the game state and make your decision.")
+    prompt_lines.append(f"Current round: {game_state.get('round', 1)}, Phase: {current_phase}.")
 
-    prompt_lines.append("\n### Historia Ruchów (ta runda) ###")
+    prompt_lines.append("\n### Move History (This Round) ###")
     history_to_display = game_state.pop("round_history", []) 
     if history_to_display :
         for move in history_to_display:
             prompt_lines.append(f"- {move.get('summary', 'Unknown history item')}")
     else:
-        prompt_lines.append("(Brak ruchów)")
+        prompt_lines.append("(No moves this round)")
     
     
     if current_phase == "AGENT_TURN":
-        prompt_lines.append("\n### Faza Akcji Agentów ###")
-        prompt_lines.append("\n### Publiczne Efekty Odkrycia Przeciwników ###")
-        prompt_lines.append("(Oparte na kartach, które już zagrali w tej rundzie)")
+        prompt_lines.append("\n### Agent Turn Phase ###")
+        prompt_lines.append("\n### Opponents' Public Reveal Effects ###")
+        prompt_lines.append("(Based on cards they have already played this round)")
         
         if "players" in game_state:
             for player_name, player_data in game_state["players"].items():
@@ -60,28 +60,28 @@ def generate_ai_prompt(game_state_data, cards_db):
                             opponent_persuasion += reveal_effect.get("persuasion", 0)
                             opponent_swords += reveal_effect.get("swords", 0)
                             
-                            # TODO: Ta logika nie uwzględnia jeszcze "possible actions"
-                            # dla przeciwników, ponieważ jest obliczana globalnie 
-                            # dopiero na końcu fazy. Na razie wystarczy.
+                            # TODO: This logic doesn't yet account for "possible actions"
+                            # for opponents, as it's calculated globally at the
+                            # end of the phase. This is sufficient for now.
 
                     hand_size = len(player_data.get("hand", [])) 
                     
                     prompt_lines.append(
                         f"- **{player_name}**: "
-                        f"ZAGRAŁ: {opponent_persuasion} Perswazji, {opponent_swords} Siły. "
-                        f"(Ma jeszcze {hand_size} kart na ręce)."
+                        f"PLAYED: {opponent_persuasion} Persuasion, {opponent_swords} Swords. "
+                        f"(Has {hand_size} cards left in hand)."
                     )
         
-        prompt_lines.append(f"\n### Aktualny Stan Gry (Source of Truth) ###")
-        prompt_lines.append("Twoja ręka, zasoby i intrygi są widoczne poniżej.")
-        prompt_lines.append("Przeanalizuj swój ruch agenta (karta + lokacja) lub spasowanie.")
+        prompt_lines.append(f"\n### Current Game State (Source of Truth) ###")
+        prompt_lines.append("Your hand, resources, and intrigues are visible below.")
+        prompt_lines.append("Analyze your agent move (card + location) or decide to pass.")
 
     elif current_phase == "REVEAL":
-        prompt_lines.append("\n### Faza Odkrycia (Kupowanie Kart) ###")
+        prompt_lines.append("\n### Reveal Phase (Buying Cards) ###")
         
-        # --- NOWA LOGIKA: Pokaż statystyki wszystkich graczy ---
-        prompt_lines.append("\n### Statystyki Odkrycia (Wszyscy Gracze) ###")
-        prompt_lines.append("To jest publiczna informacja, kluczowa do podejmowania decyzji o zakupie.")
+        # --- NEW LOGIC: Show stats for all players ---
+        prompt_lines.append("\n### Reveal Stats (All Players) ###")
+        prompt_lines.append("This is public information, crucial for making buying decisions.")
         
         all_player_stats = {}
         ai_persuasion = 0
@@ -90,44 +90,44 @@ def generate_ai_prompt(game_state_data, cards_db):
             stats = player_data.get("reveal_stats", {})
             persuasion = stats.get("total_persuasion", 0)
             swords = stats.get("total_swords", 0)
-            all_player_stats[player_name] = f"Perswazja: {persuasion}, Siła: {swords}"
+            all_player_stats[player_name] = f"Persuasion: {persuasion}, Swords: {swords}"
             if player_name == AI_PLAYER_NAME:
                 ai_persuasion = persuasion
         
         for player_name, stats_str in sorted(all_player_stats.items()):
             if player_name == AI_PLAYER_NAME:
-                prompt_lines.append(f"- **{player_name} (Ty)**: {stats_str}")
+                prompt_lines.append(f"- **{player_name} (You)**: {stats_str}")
             else:
                 prompt_lines.append(f"- {player_name}: {stats_str}")
-        # --- KONIEC NOWEJ LOGIKI ---
+        # --- END NEW LOGIC ---
         
-        prompt_lines.append(f"\nPosiadasz: {ai_persuasion} Perswazji (do kupowania).")
+        prompt_lines.append(f"\nYou have: {ai_persuasion} Persuasion (for buying).")
 
-        prompt_lines.append("\n### Dostępne Karty (Imperium Row) ###")
+        prompt_lines.append("\n### Available Cards (Imperium Row) ###")
         market_ids = game_state.get("imperium_row", [])
         if market_ids:
             for card_id in market_ids:
                 card_data = cards_db.get(card_id, {})
                 
-                # --- ZMIANA: Użyj nowej funkcji do pobrania kosztu ---
+                # --- CHANGE: Use the new function to get cost ---
                 card_cost = get_card_persuasion_cost(card_data)
-                cost_display = f"Koszt: {card_cost}" if card_cost != 999 else "Koszt: N/A"
+                cost_display = f"Cost: {card_cost}" if card_cost != 999 else "Cost: N/A"
                 
-                prompt_lines.append(f"- ID: {card_id}, Nazwa: {card_data.get('name')}, {cost_display}")
+                prompt_lines.append(f"- ID: {card_id}, Name: {card_data.get('name')}, {cost_display}")
         else:
-            prompt_lines.append("(Rynek jest pusty)")
+            prompt_lines.append("(Market is empty)")
 
-        prompt_lines.append(f"\n### Aktualny Stan Gry (Source of Truth) ###")
-        prompt_lines.append("Przeanalizuj, które karty kupić za posiadaną Perswazję. Wymień ID kart, które chcesz kupić.")
+        prompt_lines.append(f"\n### Current Game State (Source of Truth) ###")
+        prompt_lines.append("Analyze which cards to buy with your Persuasion. List the IDs of the cards you want to buy.")
 
 
     if "players" in game_state:
         for player_name, player_data in game_state["players"].items():
             if player_name == AI_PLAYER_NAME:
-                # Zachowaj 'reveal_stats' dla AI
+                # Keep 'reveal_stats' for the AI
                 player_data.pop("draw_deck", None)
             else:
-                # Dla przeciwników ukryj wszystko, ale POKAŻ 'reveal_stats'
+                # For opponents, hide everything BUT show 'reveal_stats'
                 player_data.pop("hand", None)
                 player_data.pop("deck_pool", None)
                 player_data.pop("draw_deck", None)
