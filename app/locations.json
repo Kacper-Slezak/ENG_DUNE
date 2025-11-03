@@ -1,0 +1,27 @@
+{
+  "arrakeen": {
+    "name": "Arrakeen",
+    "symbol_required": "fremen",
+    "cost": [
+      { "type": "resource", "resource": "water", "amount": 2 }
+    ]
+  },
+  "carthag": {
+    "name": "Carthag",
+    "symbol_required": "fremen",
+    "cost": []
+  },
+  "high_council": {
+    "name": "High Council",
+    "symbol_required": "imperium",
+    "cost": [
+      { "type": "resource", "resource": "solari", "amount": 5 }
+    ]
+  },
+  "swordmaster": {
+    "name": "Swordmaster",
+    "symbol_required": "bene_gesserit",
+    "cost": [],
+    "effect": "gain_third_agent"
+  }
+}
