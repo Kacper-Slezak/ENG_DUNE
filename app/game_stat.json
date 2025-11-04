@@ -1,66 +1,16 @@
 {
-  "round": 5,
-  "currentPlayer": "Helen",
+  "round": 1,
+  "currentPlayer": "Peter",
   "current_phase": "AGENT_TURN",
   "round_history": [],
   "destroyed_pile": [],
-  "imperium_row": [
-    "scout",
-    "spice_smugglers",
-    "gurney_halleck",
-    "liet_kynes",
-    "firm_grip",
-    "sardaukar_infantry",
-    "sietch_reverend_mother",
-    "imperial_spy"
-  ],
+  "imperium_row": [],
   "players": {
     "Peter": {
       "resources": {
         "solari": 0,
         "water": 1,
-        "Spice": 2,
-        "troops": 0
-      },
-      "influence": {
-        "emperor": 0,
-        "guild": 0,
-        "fremen": 0,
-        "bene_gesserit": 0
-      },
-      "deck_pool": [
-        "dagger",
-        "dagger",
-        "dune_the_desert_planet",
-        "reconnaissance",
-        "convincing_argument"
-      ],
-      "hand": [
-        "convincing_argument",
-        "dune_the_desert_planet",
-        "reconnaissance",
-        "dagger",
-        "dagger"
-      ],
-      "discard_pile": [],
-      "draw_deck": [],
-      "agents_total": 2,
-      "agents_placed": 0,
-      "intrigue_hand": [
-        "plot_twist",
-        "diplomacy"
-      ],
-      "has_passed": false,
-      "reveal_stats": {
-        "total_persuasion": 0,
-        "total_swords": 0
-      }
-    },
-    "Helen": {
-      "resources": {
-        "solari": 5,
-        "water": 0,
-        "Spice": 1,
+        "Spice": 0,
         "troops": 0
       },
       "influence": {
@@ -78,50 +28,10 @@
       ],
       "hand": [
         "dagger",
-        "convincing_argument",
-        "dagger",
-        "dune_the_desert_planet",
-        "reconnaissance"
-      ],
-      "discard_pile": [],
-      "draw_deck": [],
-      "agents_total": 3,
-      "agents_placed": 0,
-      "intrigue_hand": [
-        "ambush"
-      ],
-      "has_passed": false,
-      "reveal_stats": {
-        "total_persuasion": 0,
-        "total_swords": 0
-      }
-    },
-    "Paul": {
-      "resources": {
-        "solari": 2,
-        "water": 0,
-        "Spice": 4,
-        "troops": 0
-      },
-      "influence": {
-        "emperor": 0,
-        "guild": 0,
-        "fremen": 0,
-        "bene_gesserit": 0
-      },
-      "deck_pool": [
-        "dagger",
         "dagger",
         "dune_the_desert_planet",
         "reconnaissance",
         "convincing_argument"
-      ],
-      "hand": [
-        "dagger",
-        "convincing_argument",
-        "dune_the_desert_planet",
-        "dagger",
-        "reconnaissance"
       ],
       "discard_pile": [],
       "draw_deck": [],
@@ -131,7 +41,89 @@
       "has_passed": false,
       "reveal_stats": {
         "total_persuasion": 0,
-        "total_swords": 0
+        "total_swords": 0,
+        "cards_in_hand": [],
+        "cards_played": []
+      }
+    },
+    "Helen": {
+      "resources": {
+        "solari": 0,
+        "water": 1,
+        "Spice": 0,
+        "troops": 0
+      },
+      "influence": {
+        "emperor": 0,
+        "guild": 0,
+        "fremen": 0,
+        "bene_gesserit": 0
+      },
+      "deck_pool": [
+        "dagger",
+        "dagger",
+        "dune_the_desert_planet",
+        "reconnaissance",
+        "convincing_argument"
+      ],
+      "hand": [
+        "dagger",
+        "dagger",
+        "dune_the_desert_planet",
+        "reconnaissance",
+        "convincing_argument"
+      ],
+      "discard_pile": [],
+      "draw_deck": [],
+      "agents_total": 2,
+      "agents_placed": 0,
+      "intrigue_hand": [],
+      "has_passed": false,
+      "reveal_stats": {
+        "total_persuasion": 0,
+        "total_swords": 0,
+        "cards_in_hand": [],
+        "cards_played": []
+      }
+    },
+    "Paul": {
+      "resources": {
+        "solari": 0,
+        "water": 1,
+        "Spice": 0,
+        "troops": 0
+      },
+      "influence": {
+        "emperor": 0,
+        "guild": 0,
+        "fremen": 0,
+        "bene_gesserit": 0
+      },
+      "deck_pool": [
+        "dagger",
+        "dagger",
+        "dune_the_desert_planet",
+        "reconnaissance",
+        "convincing_argument"
+      ],
+      "hand": [
+        "dagger",
+        "dagger",
+        "dune_the_desert_planet",
+        "reconnaissance",
+        "convincing_argument"
+      ],
+      "discard_pile": [],
+      "draw_deck": [],
+      "agents_total": 2,
+      "agents_placed": 0,
+      "intrigue_hand": [],
+      "has_passed": false,
+      "reveal_stats": {
+        "total_persuasion": 0,
+        "total_swords": 0,
+        "cards_in_hand": [],
+        "cards_played": []
       }
     }
   },
@@ -142,13 +134,64 @@
     "carthag": {
       "occupied_by": null
     },
+    "research_station": {
+      "occupied_by": null
+    },
+    "sietch_tabr": {
+      "occupied_by": null
+    },
+    "the_greate_flat": {
+      "occupied_by": null
+    },
+    "hagga_basin": {
+      "occupied_by": null
+    },
+    "imperial_basin": {
+      "occupied_by": null
+    },
+    "sell_melange": {
+      "occupied_by": null
+    },
+    "secure_contract": {
+      "occupied_by": null
+    },
     "high_council": {
+      "occupied_by": null
+    },
+    "mentat": {
+      "occupied_by": null
+    },
+    "rally_troops": {
+      "occupied_by": null
+    },
+    "hall_of_oratory": {
       "occupied_by": null
     },
     "swordmaster": {
       "occupied_by": null
     },
-    "choam_contract": {
+    "conspire": {
+      "occupied_by": null
+    },
+    "wealth": {
+      "occupied_by": null
+    },
+    "highliner": {
+      "occupied_by": null
+    },
+    "foldspace": {
+      "occupied_by": null
+    },
+    "selective_breeding": {
+      "occupied_by": null
+    },
+    "secrets": {
+      "occupied_by": null
+    },
+    "hardy_warriors": {
+      "occupied_by": null
+    },
+    "stillsuits": {
       "occupied_by": null
     }
   }

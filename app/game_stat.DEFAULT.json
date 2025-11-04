@@ -8,9 +8,9 @@
   "players": {
     "Peter": {
       "resources": {
-        "solari": 5,
+        "solari": 0,
         "water": 1,
-        "Spice": 1,
+        "Spice": 0,
         "troops": 0
       },
       "influence": {
@@ -48,9 +48,9 @@
     },
     "Helen": {
       "resources": {
-        "solari": 5,
+        "solari": 0,
         "water": 1,
-        "Spice": 1,
+        "Spice": 0,
         "troops": 0
       },
       "influence": {
@@ -88,9 +88,9 @@
     },
     "Paul": {
       "resources": {
-        "solari": 5,
+        "solari": 0,
         "water": 1,
-        "Spice": 1,
+        "Spice": 0,
         "troops": 0
       },
       "influence": {
@@ -134,37 +134,37 @@
     "carthag": {
       "occupied_by": null
     },
-    "research station": {
+    "research_station": {
       "occupied_by": null
     },
-    "sietch tabr": {
+    "sietch_tabr": {
       "occupied_by": null
     },
-    "the greate flat": {
+    "the_greate_flat": {
       "occupied_by": null
     },
-    "hagga basin": {
+    "hagga_basin": {
       "occupied_by": null
     },
-    "imperial basin": {
+    "imperial_basin": {
       "occupied_by": null
     },
-    "sell melange": {
+    "sell_melange": {
       "occupied_by": null
     },
-    "secure contract": {
+    "secure_contract": {
       "occupied_by": null
     },
-    "high council": {
+    "high_council": {
       "occupied_by": null
     },
     "mentat": {
       "occupied_by": null
     },
-    "rally troops": {
+    "rally_troops": {
       "occupied_by": null
     },
-    "hall of oratory": {
+    "hall_of_oratory": {
       "occupied_by": null
     },
     "swordmaster": {
@@ -182,13 +182,13 @@
     "foldspace": {
       "occupied_by": null
     },
-    "selective breeding": {
+    "selective_breeding": {
       "occupied_by": null
     },
     "secrets": {
       "occupied_by": null
     },
-    "hardy warriors": {
+    "hardy_warriors": {
       "occupied_by": null
     },
     "stillsuits": {

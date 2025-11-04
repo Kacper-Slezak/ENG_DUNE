@@ -85,7 +85,7 @@
   },
 
  
-  "Spice Smugglers": {
+  "spice_smugglers": {
     "name": "Spice Smugglers",
     "type": "Agent",
     "buy_cost": [
@@ -112,9 +112,10 @@
       "possible actions": {
         "description": "No more effects."
     }
+  }
   },
 
-   "Gurney Halleck": {
+   "gurney_halleck": {
     "name": "Gurney Halleck",
     "type": "Agent",
     "buy_cost": [
@@ -144,7 +145,7 @@
     }
   },
 
-  "Reconnaissance": {
+  "reconnaissance": {
     "name": "Reconnaissance",
     "type": "Agent",
     "buy_cost": [
@@ -170,7 +171,7 @@
     }
   },
 
-  "Liet Kynes": {
+  "liet_kynes": {
     "name": "Liet Kynes",
     "type": "Agent",
     "agent_symbols": ["fremen", "populated areas"],
@@ -200,7 +201,7 @@
     }
   },
 
-  "Convincing Argument": {
+  "convincing_argument": {
     "name": "Convincing Argument",
     "type": "Agent",
     "agent_symbols": ["none"],
@@ -228,7 +229,7 @@
     }
   },
 
-  "Firm grip": {
+  "firm_grip": {
     "name": "Firm grip",
     "type": "Agent",
     "agent_symbols": ["Landsraad", "emperor"],
@@ -257,7 +258,7 @@
     }
   },
 
-  "Sardaukar Infantry": {
+  "sardaukar_infantry": {
     "name": "Sardaukar Infantry",
     "type": "Agent",
     "agent_symbols": ["none"],
@@ -285,7 +286,7 @@
     }
   },
 
-  "Sietch Reverend Mother": {
+  "sietch_reverend_mother": {
     "name": "Sietch Reverend Mother",
     "type": "Agent",
     "agent_symbols": ["bene gesserit", "fremen"],
@@ -315,7 +316,7 @@
     }
   },
 
-  "Diplomacy": {
+  "diplomacy": {
     "name": "Diplomacy",
     "type": "Agent",
     "agent_symbols": ["bene gesserit", "fremen", "emperor","guild"],
@@ -343,7 +344,7 @@
     }
   },
 
-  "imperial Spy": {
+  "imperial_spy": {
     "name": "Imperial Spy",
     "type": "Agent",
     "agent_symbols": ["emperor"],
@@ -372,7 +373,7 @@
     }
   },
 
-  "Power play": {
+  "power_play": {
     "name": "Power play",
     "type": "Agent",
     "agent_symbols": ["emperor","guild","bene gesserit","fremen"],
@@ -401,7 +402,7 @@
   },
 
 
-  "Sardaukar Legion": {
+  "sardaukar_legion": {
     "name": "Sardaukar Legion",
     "type": "Agent",
     "agent_symbols": ["emperor","Landsraad"],
@@ -429,7 +430,7 @@
     }
   },
 
-  "Other Memory": {
+  "other_memory": {
     "name": "Other Memory",
     "type": "Agent",
     "agent_symbols": ["populated areas","CHOAM"],
@@ -457,7 +458,7 @@
     }
   },
 
-  "Shifting Allegiances": {
+  "shifting_allegiances": {
     "name": "Shifting Allegiances",
     "type": "Agent",
     "agent_symbols": ["Landsraad","CHOAM"],
@@ -487,7 +488,7 @@
     }
   },
 
-  "Piter De Vries": {
+  "piter_de_vries": {
     "name": "Piter De Vries",
     "type": "Agent",
     "agent_symbols": ["Landsraad","populated areas"],
@@ -515,7 +516,7 @@
     }
   },
 
-  "Duncan Idaho": {
+  "duncan_idaho": {
     "name": "Duncan Idaho",
     "type": "Agent",
     "agent_symbols": ["populated areas"],
@@ -544,7 +545,7 @@
       }
     }
   },
-  "Thufir Hawat": {
+  "thufir_hawat": {
       "name": "Thufir Hawat",
       "type": "Agent",
       "agent_symbols": ["populated areas","CHOAM","bene gesserit","emperor","guild","fremen"],
@@ -572,7 +573,7 @@
       }
   },
 
-  "Worm Riders": {
+  "worm_riders": {
       "name": "Worm Riders",
       "type": "Agent",
       "agent_symbols": ["populated areas","CHOAM"],
@@ -602,7 +603,7 @@
       }
   },
 
-  "Space Travel": {
+  "space_travel": {
       "name": "Space Travel",
       "type": "Agent",
       "agent_symbols": ["guild"],
@@ -630,7 +631,7 @@
       }
   },
 
-  "Lady Jessica": {
+  "lady_jessica": {
       "name": "Lady Jessica",
       "type": "Agent",
       "agent_symbols": ["bene gesserit","Landsraad","populated areas","CHOAM"],
@@ -658,7 +659,7 @@
       }
   },
 
-  "Reverend Mother Mohiam": {
+  "reverend_mother_mohiam": {
       "name": "Reverend Mother Mohiam",
       "type": "Agent",
       "agent_symbols": ["emperor", "bene gesserit"],
@@ -687,7 +688,7 @@
       }
   },
 
-  "Test Of Humanity": {
+  "test_of_humanity": {
       "name": "Test Of Humanity",
       "type": "Agent",
       "agent_symbols": ["bene gesserit", "populated areas","Landsraad"],
@@ -713,7 +714,7 @@
       }
   },
 
-  "Stilgar": {
+  "stilgar": {
       "name": "Stilgar",
       "type": "Agent",
       "agent_symbols": ["fremen", "CHOAM","populated areas"],
@@ -741,7 +742,7 @@
       }
   },
 
-  "Signet Ring": {
+  "signet_ring": {
       "name": "Signet Ring",
       "type": "Agent",
       "agent_symbols": ["Landsraad","populated areas","CHOAM"],
@@ -768,7 +769,7 @@
         }
       }
   },
-  "Smuggler's Thopter": {
+  "smugglers_thopter": {
     "name": "Smuggler's Thopter",
     "type": "Agent",
     "agent_symbols": ["CHOAM"],
@@ -797,7 +798,7 @@
       }
     }
   },
-  "Seek Allies": {
+  "seek_allies": {
     "name": "Seek Allies",
     "type": "Agent",
     "agent_symbols": ["emperor", "guild", "bene gesserit", "fremen"],
@@ -825,7 +826,7 @@
     }
 },
 
-"Guild Bankers": {
+"guild_bankers": {
     "name": "Guild Bankers",
     "type": "Agent",
     "agent_symbols": ["guild", "emperor", "Landsraad"],
@@ -852,7 +853,7 @@
       }
     }
 },
-"Spice Hunter": {
+"spice_hunter": {
     "name": "Spice Hunter",
     "type": "Agent",
     "agent_symbols": ["fremen", "CHOAM"],
@@ -881,7 +882,7 @@
     }
   },
 
-  "Gene Manipulation": {
+  "gene_manipulation": {
     "name": "Gene Manipulation",
     "type": "Agent",
     "agent_symbols": ["Landsraad", "populated areas"],
@@ -911,7 +912,7 @@
     }
   },
 
-  "Dr. Yueh": {
+  "dr_yueh": {
       "name": "Dr. Yueh",
       "type": "Agent",
       "agent_symbols": ["populated areas"],
@@ -939,7 +940,7 @@
       }
   },
 
-  "Fremen Camp": {
+  "fremen_camp": {
       "name": "Fremen Camp",
       "type": "Agent",
       "agent_symbols": [ "CHOAM"],
@@ -968,7 +969,7 @@
       }
   },
 
-  "Chani": {
+  "chani": {
       "name": "Chani",
       "type": "Agent",
       "agent_symbols": ["fremen", "populated areas", "CHOAM"],
@@ -996,7 +997,7 @@
       }
   },
 
-  "Fedaykin Death Commando": {
+  "fedaykin_death_commando": {
       "name": "Fedaykin Death Commando",
       "type": "Agent",
       "agent_symbols": ["populated areas", "CHOAM"],
@@ -1025,7 +1026,7 @@
       }
   },
 
-  "Opulence": {
+  "opulence": {
       "name": "Opulence",
       "type": "Agent",
       "agent_symbols": ["emperor"],
@@ -1056,7 +1057,7 @@
   },
 
 
-  "Kwisatz Haderach": {
+  "kwisatz_haderach": {
       "name": "Kwisatz Haderach",
       "type": "Agent",
       "agent_symbols": ["none"],
@@ -1084,7 +1085,7 @@
       }
   },
 
-  "Guild Ambassador": {
+  "guild_ambassador": {
       "name": "Guild Ambassador",
       "type": "Agent",
       "agent_symbols": ["Landsraad"],
@@ -1115,7 +1116,7 @@
         }
       }
   },
-  "Bene Gesserit Initiate": {
+  "bene_gesserit_initiate": {
       "name": "Bene Gesserit Initiate",
       "type": "Agent",
       "agent_symbols": ["populated areas", "Landsraad", "CHOAM"],
@@ -1142,7 +1143,7 @@
         }
       }
   },
-  "Arrakis Recruiter": {
+  "arrakis_recruiter": {
       "name": "Arrakis Recruiter",
       "type": "Agent",
       "agent_symbols": ["populated areas"],
@@ -1169,7 +1170,7 @@
         }
       }
   },
-  "Assassination Mission": {
+  "assassination_mission": {
       "name": "Assassination Mission",
       "type": "Agent",
       "agent_symbols": [],
@@ -1197,7 +1198,7 @@
         }
       }
   },
-  "Arrakis Liaison": {
+  "arrakis_liaison": {
       "name": "Arrakis Liaison",
       "type": "Agent",
       "agent_symbols": ["populated areas", "Landsraad"],
@@ -1225,7 +1226,7 @@
       }
   },
 
-  "Crysknife": {
+  "crysknife": {
       "name": "Crysknife",
       "type": "Agent",
       "agent_symbols": ["fremen", "CHOAM"],
@@ -1255,7 +1256,7 @@
       }
   },
 
-  "Choam Directorship": {
+  "choam_directorship": {
       "name": "Choam Directorship",
       "type": "Agent",
       "agent_symbols": ["none"],
@@ -1287,7 +1288,7 @@
       }
   },
 
-  "Carryall": {
+  "carryall": {
       "name": "Carryall",
       "type": "Agent",
       "agent_symbols": ["CHOAM"],
@@ -1315,7 +1316,7 @@
         }
       }
   },
-  "Bene Gesserit Sister": {
+  "bene_gesserit_sister": {
       "name": "Bene Gesserit Sister",
       "type": "Agent",
       "agent_symbols": ["bene gesserit", "Landsraad"],
@@ -1344,35 +1345,8 @@
         }
       }
   },
-  "Scout": {
-    "name": "Scout",
-    "type": "Agent",
-    "agent_symbols": ["CHOAM","populated areas"],
-    "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 1}
-    ],
-    "buy_effect": {
-      "gain": [
-        { "type": "none" }
-      ],
-      "description": "no buy effect."
-    },
-    "agent_effect": {
-      "actions": [
-        { "type": "none" }
-      ],
-      "description": "no agent effect."
-    },
-    "reveal_effect": {
-      "persuasion": 1,
-      "swords": 1,
-      "possible actions": {
-        "description": "Retreat up to two of your troops."
-      }
-    }
-  },
 
-  "The Voice": {
+  "the_voice": {
     "name": "The Voice",
     "type": "Agent",
     "agent_symbols": ["populated areas", "CHOAM"],
@@ -1398,7 +1372,7 @@
     }
   },
 
-  "The Spice Must Flow": {
+  "the_spice_must_flow": {
     "name": "The Spice Must Flow",
     "type": "Agent",
     "agent_symbols": ["none"],
@@ -1426,7 +1400,7 @@
     }
   },
 
-  "Guild Administrator": {
+  "guild_administrator": {
     "name": "Guild Administrator",
     "type": "Agent",
     "agent_symbols": ["guild", "CHOAM"],
@@ -1454,7 +1428,7 @@
     }
   },
 
-  "Foldspace": {
+  "foldspace": {
     "name": "Foldspace",
     "type": "Agent",
     "agent_symbols": ["emperor", "guild", "bene gesserit", "fremen", "Landsraad", "populated areas", "CHOAM"],
@@ -1481,7 +1455,7 @@
       }
     }
   },
-  "Control the Spice": {
+  "control_the_spice": {
     "name": "Control the Spice",
     "type": "Agent",
     "agent_symbols": ["fremen", "CHOAM"],
@@ -1511,7 +1485,7 @@
     }
   },
 
-  "Gun Thopter": {
+  "gun_thopter": {
     "name": "Gun Thopter",
     "type": "Agent",
     "agent_symbols": ["CHOAM","populated areas"],
@@ -1538,5 +1512,4 @@
       }
     }
   }
-}
 }

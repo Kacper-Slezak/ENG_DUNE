@@ -36,7 +36,7 @@
     ]
   },
 
-  "research station": {
+  "research_station": {
     "name": "Research Station",
     "symbol_required": "populated areas",
     "extra_requirement": "none",
@@ -51,7 +51,7 @@
       ]
   },
 
-  "sietch tabr": {
+  "sietch_tabr": {
     "name": "Sietch Tabr",
     "symbol_required": "populated areas",
     "extra_requirement": "2 fremen influence points",
@@ -69,7 +69,7 @@
       ]
   },
 
-  "the greate flat": {
+  "the_greate_flat": {
     "name": "The Great Flat",
     "symbol_required": "CHOAM",
     "extra_requirement": "none",
@@ -87,7 +87,7 @@
       ]
   },
 
-  "hagga basin": {
+  "hagga_basin": {
     "name": "Hagga Basin",
     "symbol_required": "CHOAM",
     "extra_requirement": "none",
@@ -103,7 +103,7 @@
       ]
   },
 
-  "imperial basin": {
+  "imperial_basin": {
     "name": "Imperial Basin",
     "symbol_required": "CHOAM",
     "extra_requirement": "none",
@@ -122,7 +122,7 @@
       ]
   },
 
-  "sell melange": {
+  "sell_melange": {
     "name": "Sell Melange",
     "symbol_required": "CHOAM",
     "extra_requirement": "none",
@@ -155,7 +155,7 @@
       ]
   },
 
-  "secure contract": {
+  "secure_contract": {
     "name": "Secure Contract",
     "symbol_required": "CHOAM",
     "extra_requirement": "none",
@@ -172,9 +172,9 @@
       ]
   },
 
-  "high council": {
-    "name": "High Council",
-    "symbol_required": "landsraad",
+  "high_council": {
+    "name": "High Council", 
+    "symbol_required": "Landsraad",
     "extra_requirement": "none",
     "cost": [
       { "type": "resource", "resource": "solaris", "amount": 5 }
@@ -191,7 +191,7 @@
 
   "mentat": {
     "name": "Mentat",
-    "symbol_required": "landsraad",
+    "symbol_required": "Landsraad",
     "extra_requirement": "none",
     "cost": [
       { "type": "resource", "resource": "solaris", "amount": 2 }
@@ -207,9 +207,9 @@
       ]
   },
 
-  "rally troops": {
+  "rally_troops": {
     "name": "Rally Troops",
-    "symbol_required": "landsraad",
+    "symbol_required": "Landsraad",
     "extra_requirement": "none",
     "cost": [
       { "type": "resource", "resource": "solaris", "amount": 4 }
@@ -224,9 +224,9 @@
       ]
   },
 
-  "hall of oratory": {
+  "hall_of_oratory": {
     "name": "Hall of Oratory",
-    "symbol_required": "landsraad",
+    "symbol_required": "Landsraad",
     "extra_requirement": "none",
     "cost": [
       { "type": "resource", "resource": "solaris", "amount": 4 }
@@ -244,7 +244,7 @@
 
   "swordmaster": {
     "name": "Swordmaster",
-    "symbol_required": "landsraad",
+    "symbol_required": "Landsraad",
     "extra_requirement": "none",
     "cost": [
       { "type": "resource", "resource": "solaris", "amount": 8 }
@@ -334,7 +334,7 @@
       ]
   },
 
-  "selective breeding": {
+  "selective_breeding": {
     "name": "Selective Breeding",
     "symbol_required": "bene gesserit",
     "extra_requirement": "none",
@@ -372,7 +372,7 @@
       ]
   },
 
-  "hardy warriors": {
+  "hardy_warriors": {
     "name": "Hardy Warriors",
     "symbol_required": "fremen",
     "extra_requirement": "none",
@@ -407,138 +407,31 @@
       { "type": "isconflict" }
       ]
   },
-
-
-  "fremen influence path": {
-    "name": "Fremen Influence Path",
-    "max_points_number": 6,
-    "cost": [
-      { "type": "resource", "resource": "fremen influence point", "amount":1 }
+  "missionaria_protectiva": {
+    "name": "Missionaria Protectiva",
+    "type": "Agent",
+    "agent_symbols": ["populated areas"],
+    "buy_cost": [
+      { "type": "pay", "resource": "persuasion", "amount": 1}
     ],
-    "actions": [
-      { 
-        "action1": {
-          "requirements": {
-            "requirement1": { "type": "min_fremen_influence_points", "amount": 2 }
-          },
-          "gain": { "type": "resource", "resource": "victory point", "amount":1 }
-          },
-        "action2": {
-          "requirements": {
-            "requirement1": { "type": "min_fremen_influence_points", "amount": 4 }
-           },
-          "gain1": { "type": "resource", "resource": "water", "amount": 1 }
-        },
-        "action3": {
-          "requirements": {
-            "requirement1": { "type": "min_fremen_influence_points", "amount": 4 },
-            "requirement2": { "description": "you are player with the most fremen influence points"}
-          },
-          "gain1": { "type": "resource", "resource": "fremen token", "amount": 1 },
-          "description": "you gain one fremen token - as long as you have it, you have one extra victory point"
-        }
+    "buy_effect": {
+      "gain": [
+        { "type": "none" }
+      ],
+      "description": "no buy effect."
+    },
+    "agent_effect": {
+      "actions": [
+        { "type": "none" }
+      ],
+      "description": "if you used already another bene gesserit card this turn, gain any 1 influence point."
+    },
+    "reveal_effect": {
+      "persuasion": 1,
+      "swords": 0,
+      "possible actions": {
+        "description": "No more effects."
       }
-    ]
-  },
-
-  "bene gesserit influence path": {
-    "name": "Bene Gesserit Influence Path",
-    "max_points_number": 6,
-    "cost": [
-      { "type": "resource", "resource": "bene gesserit influence point", "amount":1 }
-    ],
-    "actions": [
-      { 
-        "action1": {
-          "requirements": {
-            "requirement1": { "type": "min_bene_gesserit_influence_points", "amount": 2 }
-          },
-          "gain": { "type": "resource", "resource": "victory point", "amount":1 }
-          },
-        "action2": {
-          "requirements": {
-            "requirement1": { "type": "min_bene_gesserit_influence_points", "amount": 4 }
-            },
-          "gain1": { "type": "resource", "resource": "intrigue card", "amount": 1 }
-        },
-        "action3": {
-          "requirements": {
-            "requirement1": { "type": "min_bene_gesserit_influence_points", "amount": 4 },
-            "requirement2": { "description": "you are player with the most bene gesserit influence points"}
-          },
-          "gain1": { "type": "resource", "resource": "bene gesserit token", "amount": 1 },
-          "description": "you gain one bene gesserit token - as long as you have it, you have one extra victory point"
-        }
-      }
-    ]
-  },
-
-  "guild influence path": {
-    "name": "Guild Influence Path",
-    "max_points_number": 6,
-    "cost": [
-      { "type": "resource", "resource": "guild influence point", "amount":1 }
-    ],
-    "actions": [
-      { 
-        "action1": {
-          "requirements": {
-            "requirement1": { "type": "min_guild_influence_points", "amount": 2 }
-          },
-          "gain": { "type": "resource", "resource": "victory point", "amount":1 }
-          },
-        "action2": {
-          "requirements": {
-            "requirement1": { "type": "min_guild_influence_points", "amount": 4 }
-            },
-          "gain1": { "type": "resource", "resource": "solaris", "amount": 3 }
-        },
-        "action3": {
-          "requirements": {
-            "requirement1": { "type": "min_guild_influence_points", "amount": 4 },
-            "requirement2": { "description": "you are player with the most guild influence points"}
-          },
-          "gain1": { "type": "resource", "resource": "guild token", "amount": 1 },
-          "description": "you gain one guild token - as long as you have it, you have one extra victory point"
-        }
-      }
-    ]
-  },
-
-  "emperor influence path": {
-    "name": "Emperor Influence Path",
-    "max_points_number": 6,
-    "cost": [
-      { "type": "resource", "resource": "emperor influence point", "amount":1 }
-    ],
-    "actions": [
-      { 
-        "action1": {
-          "requirements": {
-            "requirement1": { "type": "min_emperor_influence_points", "amount": 2 }
-          },
-          "gain": { "type": "resource", "resource": "victory point", "amount":1 }
-          },
-        "action2": {
-          "requirements": {
-            "requirement1": { "type": "min_emperor_influence_points", "amount": 4 }
-            },
-          "gain1": { "type": "resource", "resource": "troops", "amount": 2 }
-        },
-        "action3": {
-          "requirements": {
-            "requirement1": { "type": "min_emperor_influence_points", "amount": 4 },
-            "requirement2": { "description": "you are player with the most emperor influence points"}
-          },
-          "gain1": { "type": "resource", "resource": "emperor token", "amount": 1 },
-          "description": "you gain one emperor token - as long as you have it, you have one extra victory point"
-        }
-      }
-    ]
+    }
   }
-
-
-  
-
-
 }

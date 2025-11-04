@@ -114,6 +114,14 @@
                 <p>This button is also on the Reveal page.</p>
                 <p><a href="{{ url_for('reset_board') }}" onclick="return confirm('Are you sure you want to reset the board and start a new round?');"><button style="background-color: #f44336;">Reset Board/New Round</button></a></p>
             </fieldset>
+            
+            <fieldset style="flex: 1; border-color: #b71c1c;">
+                <legend style="color: #b71c1c; font-weight: bold;">Full Game Reset</legend>
+                <p>This will erase all progress and reset the game to Round 1.</p>
+                <p><a href="{{ url_for('full_reset') }}" onclick="return confirm('ARE YOU ABSOLUTELY SURE?\n\nThis will delete all game progress and reset to Round 1. This cannot be undone.');">
+                    <button style="background-color: #b71c1c; font-weight: bold;">!!! FULL GAME RESET !!!</button>
+                </a></p>
+            </fieldset>
             </div>
 
     </div>
