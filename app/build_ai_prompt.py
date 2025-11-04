@@ -3,9 +3,7 @@ import json
 import copy # Needed for deep copy
 
 # NOWY IMPORT:
-from game_manager import get_card_persuasion_cost 
-
-AI_PLAYER_NAME = 'Peter'
+from game_manager import get_card_persuasion_cost, AI_PLAYER_NAME
 
 
 def generate_ai_prompt(game_state_data, cards_db):

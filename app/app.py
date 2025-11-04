@@ -11,7 +11,8 @@ from game_manager import (
     process_pass_turn,
     process_buy_card,
     get_card_persuasion_cost,
-    add_card_to_market # <--- NOWY IMPORT
+    add_card_to_market,
+    set_player_hand # <--- NOWY IMPORT
 )
 
 from build_ai_prompt import generate_ai_prompt, AI_PLAYER_NAME
@@ -29,14 +30,30 @@ def get_available_locations(locations_db, game_state):
     """Returns a list of available (free) locations."""
     available_locations = []
     
+    # Upewnij się, że locations_state istnieje
+    if "locations_state" not in game_state:
+         game_state["locations_state"] = {}
+         
+    if not locations_db:
+        return []
+
     for loc_id, loc_data in locations_db.items():
+        # Ignoruj ścieżki wpływu, które nie są lokacjami agentów
+        if loc_id.endswith("_influence_path"):
+            continue
+            
         location_state = game_state.get("locations_state", {}).get(loc_id, {})
+        
+        # Na wypadek, gdyby game_stat był niekompletny
+        if not location_state:
+            game_state["locations_state"][loc_id] = {"occupied_by": None}
+            
         if location_state.get("occupied_by") is None:
              available_locations.append({
                 "id": loc_id,
-                "name": loc_data["name"]
+                "name": loc_data.get("name", loc_id)
             })
-    return available_locations
+    return sorted(available_locations, key=lambda x: x['name'])
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -77,11 +94,17 @@ def index():
     player_names = get_player_names(game_state)
     available_locations = get_available_locations(locations_db, game_state)
     
+    # --- ZMIENIONA LOGIKA TWORZENIA MAPY KART ---
     player_card_map = {}
     player_states = game_state.get("players", {})
     
     for player_name, player_data in player_states.items():
-        card_ids_list = player_data.get("hand", [])
+        
+        if player_name == AI_PLAYER_NAME:
+            card_ids_list = player_data.get("hand", []) # AI używa ścisłej ręki
+        else:
+            card_ids_list = player_data.get("deck_pool", []) # Ludzie używają całej talii
+            
         player_card_list = []
         for card_id in card_ids_list:
             if card_id in cards_db:
@@ -89,7 +112,11 @@ def index():
                     "id": card_id,
                     "name": cards_db[card_id].get("name", card_id)
                 })
+            else:
+                 print(f"Warning: Card ID '{card_id}' not found in cards_db for player {player_name}")
+                 
         player_card_map[player_name] = sorted(player_card_list, key=lambda x: x['name'])
+    # --- KONIEC ZMIENIONEJ LOGIKI ---
     
     player_agent_map = {}
     
@@ -186,7 +213,7 @@ def reveal_phase():
     for player_name, player_data in player_states.items():
         stats = player_data.get("reveal_stats", {}) 
         stats["name"] = player_name
-        stats["influence"] = player_data.get("influence", {}) # <--- DODANO WPŁYWY
+        stats["influence"] = player_data.get("influence", {}) 
         all_player_stats.append(stats)
 
     market_cards_details = []
@@ -202,7 +229,6 @@ def reveal_phase():
             "cost": cost_display
         })
         
-    # ZMIANA: Przygotuj listę wszystkich kart do wyszukiwarki
     all_buyable_cards = []
     for card_id, card_data in cards_db.items():
         if get_card_persuasion_cost(card_data) != 999:
@@ -218,7 +244,7 @@ def reveal_phase():
         player_names=get_player_names(game_state),
         ai_player_name=AI_PLAYER_NAME,
         round_history=game_state.get("round_history", []),
-        all_buyable_cards=all_buyable_cards # <--- Przekaż do szablonu
+        all_buyable_cards=all_buyable_cards
     )
 
 @app.route('/buy_card', methods=['POST'])
@@ -248,7 +274,6 @@ def buy_card():
         
     return redirect(url_for('reveal_phase'))
 
-# --- NOWA TRASA (Punkt 4) ---
 @app.route('/add_to_market', methods=['POST'])
 def add_to_market():
     """Ręcznie dodaje kartę do rynku (Imperium Row)."""
@@ -258,18 +283,15 @@ def add_to_market():
         flash("Cannot modify market: Not in REVEAL phase.", "error")
         return redirect(url_for('reveal_phase'))
         
-    # Używamy 'card_id_typed' jako nazwy pola z formularza
     card_id_input = request.form.get('card_id_typed') 
     if not card_id_input:
         flash("Invalid input: No card ID or name provided.", "error")
         return redirect(url_for('reveal_phase'))
         
-    # Sprawdź, czy użytkownik wpisał ID, czy nazwę
     card_id_to_add = None
     if card_id_input in cards_db:
         card_id_to_add = card_id_input
     else:
-        # Przeszukaj po nazwie (case-insensitive)
         for c_id, c_data in cards_db.items():
             if c_data.get("name", "").lower() == card_id_input.lower():
                 card_id_to_add = c_id
@@ -312,6 +334,7 @@ def reset_board():
     """Resetuje planszę na kolejną rundę."""
     game_state, _, _, _ = load_game_data()
     if game_state:
+        # ZMIANA: Ta funkcja teraz automatycznie dobiera karty
         new_game_state = perform_cleanup_and_new_round(game_state)
 
         if save_json_file(GAME_STATE_FILE, new_game_state):
@@ -320,6 +343,53 @@ def reset_board():
             flash("ERROR: Failed to save game state changes.", "error")
     
     return redirect(url_for('index'))
+
+# --- NOWA TRASA DO ZARZĄDZANIA RĘKĄ AI ---
+@app.route('/manage_ai_hand', methods=['GET', 'POST'])
+def manage_ai_hand():
+    """Wyświetla stronę do ręcznego ustawiania ręki gracza AI."""
+    game_state, _, cards_db, _ = load_game_data()
+
+    if game_state is None or cards_db is None:
+        flash("CRITICAL ERROR: Cannot load core game data. Check JSON files.", "error")
+        return render_template('error.html'), 500
+
+    if request.method == 'POST':
+        # Ustawiamy rękę tylko dla AI
+        player_name = AI_PLAYER_NAME
+        card_ids = request.form.getlist('card_ids') # Pobiera listę zaznaczonych kart
+        
+        is_valid, message = set_player_hand(game_state, player_name, card_ids, cards_db)
+        
+        if is_valid:
+            if save_json_file(GAME_STATE_FILE, game_state):
+                flash(message, "success")
+            else:
+                flash("CRITICAL ERROR: Cannot save game state after setting hand.", "error")
+        else:
+            flash(f"Invalid hand: {message}", "error")
+        
+        return redirect(url_for('manage_ai_hand'))
+
+    # --- Logika GET ---
+    player_data = game_state.get("players", {}).get(AI_PLAYER_NAME, {})
+    deck_pool_ids = player_data.get("deck_pool", [])
+    current_hand_ids = player_data.get("hand", [])
+    
+    deck_pool_details = []
+    for card_id in deck_pool_ids:
+        card_data = cards_db.get(card_id, {})
+        deck_pool_details.append({
+            "id": card_id,
+            "name": card_data.get("name", card_id)
+        })
+    
+    return render_template('manage_ai_hand.html',
+        ai_player_name=AI_PLAYER_NAME,
+        deck_cards=sorted(deck_pool_details, key=lambda x: x['name']),
+        current_hand=current_hand_ids
+    )
+# --- KONIEC NOWEJ TRASY ---
 
 
 if __name__ == '__main__':

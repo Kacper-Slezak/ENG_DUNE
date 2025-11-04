@@ -11,7 +11,7 @@
         .message-error { color: red; font-weight: bold; }
         fieldset { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; background: #f9f9f9; }
         legend { font-size: 1.2em; font-weight: bold; padding: 0 10px; }
-        select, button, input[type="text"] { /* Dodano input */
+        select, button, input[type="text"] {
             padding: 10px; 
             margin-top: 5px; 
             border: 1px solid #ccc; 
@@ -69,7 +69,7 @@
                     </select>
                 </p>
 
-                <p><label for="card_id">Which card to use? (from HAND)</label>
+                <p><label for="card_id">Which card to use? (Hand for AI, Full Deck for Humans)</label>
                     <select id="card_id" name="card_id" required>
                         <option value="">-- First select a player --</option>
                     </select>
@@ -107,12 +107,14 @@
             <fieldset style="flex: 1;">
                 <legend>AI Assistant for **{{ ai_player_name }}**</legend>
                 <p><a href="{{ url_for('ai_prompt') }}" target="_blank"><button style="background-color: #3f51b5;">Generate AI Prompt</button></a></p>
+                <p style="font-size: 0.9em; margin-bottom: 5px;">If AI's hand is wrong, set it manually (after live draw):</p>
+                <p><a href="{{ url_for('manage_ai_hand') }}"><button style="background-color: #ff9800; margin-top: 0;">Manage AI Hand (Draw 5)</button></a></p>
             </fieldset>
             
             <fieldset style="flex: 1;">
                 <legend>End of Round</legend>
-                <p>This button is also on the Reveal page.</p>
-                <p><a href="{{ url_for('reset_board') }}" onclick="return confirm('Are you sure you want to reset the board and start a new round?');"><button style="background-color: #f44336;">Reset Board/New Round</button></a></p>
+                <p>This button auto-draws 5 cards for all players.</p>
+                <p><a href="{{ url_for('reset_board') }}" onclick="return confirm('Are you sure you want to reset the board and start a new round? This will auto-draw 5 cards.');"><button style="background-color: #f44336;">Reset Board/New Round</button></a></p>
             </fieldset>
             
             <fieldset style="flex: 1; border-color: #b71c1c;">
@@ -148,24 +150,23 @@
         // --- Bezpieczne wczytanie danych z Flaska ---
         const playerCardMap = {{ player_card_map | tojson }};
         const playerAgentMap = {{ player_agent_map | tojson }};
-        // USUNIĘTO playerIntrigueMap
         const currentPhase = {{ current_phase | tojson }};
-        // 'currentPlayer' jest używane tylko do domyślnego wybrania z listy
         const currentPlayer = {{ current_player | tojson }};
+        const aiPlayerName = {{ ai_player_name | tojson }}; // NOWOŚĆ
 
         // --- Elementy DOM ---
         const playerDropdown = document.getElementById('player_name');
         const cardDropdown = document.getElementById('card_id');
+        const cardDropdownLabel = document.querySelector('label[for="card_id"]'); // NOWOŚĆ
         const agentMoveButton = document.getElementById('agentMoveButton');
         
-        // Nowe elementy Intrygi
         const intriguePlayerInput = document.getElementById('intrigue_player_name');
         const intrigueButton = document.getElementById('intrigueButton');
         
         const passTurnButton = document.getElementById('passTurnButton');
         const passPlayerNameInput = document.getElementById('pass_player_name');
 
-        // --- Funkcja aktualizująca karty Agenta (bez zmian) ---
+        // --- Funkcja aktualizująca karty Agenta (ZMIENIONA) ---
         function updateCardOptions() {
             const selectedPlayer = playerDropdown.value;
             const cardsForPlayer = playerCardMap[selectedPlayer] || [];
@@ -176,11 +177,20 @@
             
             if (selectedPlayer === "") {
                 defaultOption.textContent = "-- First select a player --";
+                cardDropdownLabel.textContent = "Which card to use?"; // Reset
             } else if (cardsForPlayer.length === 0) {
-                defaultOption.textContent = "-- No cards in hand --";
+                defaultOption.textContent = "-- No cards available --";
             } else {
-                defaultOption.textContent = "-- Select Card from Hand --";
+                defaultOption.textContent = "-- Select Card --";
             }
+            
+            // Zmień etykietę w zależności od gracza
+            if (selectedPlayer === aiPlayerName) {
+                 cardDropdownLabel.textContent = `Which card to use? (From AI's Hand [${cardsForPlayer.length}])`;
+            } else {
+                 cardDropdownLabel.textContent = `Which card to use? (From Player's Deck [${cardsForPlayer.length}])`;
+            }
+            
             cardDropdown.appendChild(defaultOption);
             
             cardsForPlayer.forEach(function(card) {
@@ -191,9 +201,7 @@
             });
         }
         
-        // --- USUNIĘTO 'updateIntrigueOptions' ---
-
-        // --- GŁÓWNA ZMIANA: Funkcja sprawdzająca stan gry (bez kolejki) ---
+        // --- Funkcja sprawdzająca stan gry (bez zmian) ---
         function checkGameState() {
             const selectedPlayer = playerDropdown.value; 
             const agentInfo = playerAgentMap[selectedPlayer]; 
@@ -202,49 +210,34 @@
             let canPass = false;
             let canPlayIntrigue = false;
 
-            // Zaktualizuj ukryte pola (dla obu formularzy)
             passPlayerNameInput.value = selectedPlayer;
-            intriguePlayerInput.value = selectedPlayer; // <-- NOWOŚĆ
+            intriguePlayerInput.value = selectedPlayer;
 
             if (currentPhase === 'AGENT_TURN' && agentInfo) {
                 
-                // Warunki, czy gracz MOŻE wykonać akcję
                 const hasAgentsLeft = agentInfo.placed < agentInfo.total;
                 const hasNotPassed = !agentInfo.has_passed;
                 
-                // 1. Kiedy można zagrać agenta?
-                //    Gdy ma agentów I nie spasował
                 if (hasAgentsLeft && hasNotPassed) {
                     canPlayAgent = true;
                 }
                 
-                // 2. Kiedy można spasować?
-                //    Gdy nie spasował (można pasować nawet z agentami)
                 if (hasNotPassed) {
                     canPass = true;
                 }
 
-                // 3. Kiedy można zagrać intrygę?
-                //    Zawsze można próbować, jeśli jest tura agentów
                 canPlayIntrigue = true;
-
             }
             
-            // --- Zastosuj stany do przycisków ---
-            
-            // Przycisk RUCHU AGENTA
             agentMoveButton.disabled = !canPlayAgent;
             agentMoveButton.textContent = `Save Agent Move (for ${selectedPlayer || '...'})`;
             
-            // Przycisk PASOWANIA
             passTurnButton.disabled = !canPass;
             passTurnButton.textContent = `Pass Turn (for ${selectedPlayer || '...'})`;
 
-            // Przycisk INTRYGI
             intrigueButton.disabled = !canPlayIntrigue;
             intrigueButton.textContent = `Play Manual Intrigue (for ${selectedPlayer || '...'})`;
 
-            // Ustaw komunikaty błędów, jeśli gracz nie może grać
             if (agentInfo && !hasAgentsLeft) {
                 agentMoveButton.textContent = 'No Agents Left';
             } else if (agentInfo && !hasNotPassed) {
@@ -271,7 +264,6 @@
         // --- Inicjalizacja strony ---
         function initializePage() {
             updateCardOptions();
-            // USUNIĘTO 'updateIntrigueOptions'
             checkGameState();      
         }
         
