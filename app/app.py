@@ -4,7 +4,7 @@ import json
 import os
 
 from game_manager import (
-    load_game_data, save_json_file, is_move_valid, process_move, 
+    load_game_data, perform_full_game_reset, save_json_file, is_move_valid, process_move, 
     check_and_advance_phase, process_intrigue,
     calculate_reveal_stats, perform_cleanup_and_new_round, 
     GAME_STATE_FILE,
@@ -111,6 +111,16 @@ def index():
         locations=available_locations,
         ai_player_name=AI_PLAYER_NAME
     )
+
+@app.route('/full_reset')
+def full_reset():
+    """Kasuje całą grę i przywraca stan z game_stat.DEFAULT.json"""
+    success, message = perform_full_game_reset()
+    if success:
+        flash(message, "success")
+    else:
+        flash(message, "error")
+    return redirect(url_for('index'))
 
 @app.route('/play_intrigue', methods=['POST'])
 def play_intrigue():

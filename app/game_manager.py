@@ -6,6 +6,7 @@ import random
 LOCATIONS_DB_FILE = 'locations.json'
 CARDS_DB_FILE = 'cards.json'
 GAME_STATE_FILE = 'game_stat.json'
+GAME_STATE_DEFAULT_FILE = 'game_stat.DEFAULT.json' # <-- NOWA STAŁA
 
 def load_json_file(filename):
     """Wczytuje plik JSON i zwraca jego zawartość."""
@@ -137,9 +138,57 @@ def process_move(game_state, locations_db, cards_db, player_name, card_id, locat
     
     move_summary = f"{player_name} played '{card_name}' on '{location_name}'."
     
+    # --- POPRAWKA 2 (FIX 2): Przetwarzanie efektów LOKACJI ---
+    location_actions_list = location_data.get("actions", [])
+    
+    # Przejdź przez listę akcji (zwykle tylko jeden element)
+    for action_object in location_actions_list:
+        # Przejdź przez wszystkie klucze w obiekcie akcji (np. "gain", "gain1", "exchange")
+        for key, data in action_object.items():
+            
+            # Interesują nas tylko klucze typu "gain"
+            if key.startswith("gain") and isinstance(data, dict):
+                gain_data = data
+                
+                if gain_data.get("type") == "resource":
+                    resource_name = gain_data.get("resource")
+                    resource_amount = gain_data.get("amount", 0)
+                    
+                    if resource_name in player_resources:
+                        current_amount = player_resources.get(resource_name, 0)
+                        player_resources[resource_name] = current_amount + resource_amount
+                    
+                    elif resource_name == "troops":
+                        current_amount = player_resources.get("troops", 0)
+                        player_resources["troops"] = current_amount + resource_amount
+                        
+                    elif resource_name == "intrigue card": # Specjalny case z locations.json
+                        if "intrigue_hand" not in player_state:
+                            player_state["intrigue_hand"] = []
+                        player_state["intrigue_hand"].append(f"Intrigue_Card_{random.randint(100,999)}")
+                        move_summary += f" (gained 1 intrigue from location)"
+                    
+                    elif "influence point" in str(resource_name): # Generyczne wpływy z lokacji
+                        faction = resource_name.split(" ")[0] 
+                        if "influence" not in player_state:
+                            player_state["influence"] = {}
+                        if faction not in player_state["influence"]:
+                            player_state["influence"][faction] = 0
+                        
+                        player_state["influence"][faction] += resource_amount
+                        move_summary += f" (gained {resource_amount} {faction} influence from location)"
+                        
+                elif gain_data.get("type") == "extra gain":
+                    # To są efekty nieautomatyczne, dodajemy notatkę
+                    move_summary += f" (NEEDS MANUAL ACTION: {gain_data.get('description')})"
+    # --- KONIEC POPRAWKI 2 ---
+
+    
     # ZMIANA: Logika niszczenia karty (np. Imperial Spy)
     agent_effect = card_data.get("agent_effect", {})
-    agent_gain_list = agent_effect.get("gain", [])
+    
+    # --- POPRAWKA 1 (FIX 1): Czytaj z "actions" zamiast "gain" ---
+    agent_gain_list = agent_effect.get("actions", [])
     
     is_destroyed = False
     for item in agent_gain_list:
@@ -475,6 +524,24 @@ def add_card_to_market(game_state, card_id, cards_db):
     game_state["imperium_row"].append(card_id)
     
     return True, f"Card '{card_data.get('name')}' has been added to the Imperium Row."
+
+
+# --- NOWA FUNKCJA (Reset Gry) ---
+def perform_full_game_reset():
+    """
+    Kasuje game_stat.json i zastępuje go zawartością z game_stat.DEFAULT.json.
+    """
+    default_state = load_json_file(GAME_STATE_DEFAULT_FILE)
+    
+    if default_state is None:
+        print(f"CRITICAL: Could not load default state from {GAME_STATE_DEFAULT_FILE}")
+        return False, f"Error: Default state file '{GAME_STATE_DEFAULT_FILE}' not found. Please create this file."
+        
+    if save_json_file(GAME_STATE_FILE, default_state):
+        return True, "Success! The game has been fully reset to Round 1."
+    else:
+        print(f"CRITICAL: Could not save default state to {GAME_STATE_FILE}")
+        return False, "Error: Could not write to game_stat.json."
 
 
 def perform_cleanup_and_new_round(game_state):
