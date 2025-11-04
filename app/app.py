@@ -12,10 +12,13 @@ from game_manager import (
     process_buy_card,
     get_card_persuasion_cost,
     add_card_to_market,
-    set_player_hand # <--- NOWY IMPORT
+    set_player_hand,
+    AI_PLAYER_NAME,
+    process_conflict_set, # <--- NOWY IMPORT
+    process_conflict_resolve # <--- NOWY IMPORT
 )
 
-from build_ai_prompt import generate_ai_prompt, AI_PLAYER_NAME
+from build_ai_prompt import generate_ai_prompt
 
 app = Flask(__name__)
 app.secret_key = 'your_super_secret_dune_key' 
@@ -30,7 +33,6 @@ def get_available_locations(locations_db, game_state):
     """Returns a list of available (free) locations."""
     available_locations = []
     
-    # Upewnij się, że locations_state istnieje
     if "locations_state" not in game_state:
          game_state["locations_state"] = {}
          
@@ -38,14 +40,13 @@ def get_available_locations(locations_db, game_state):
         return []
 
     for loc_id, loc_data in locations_db.items():
-        # Ignoruj ścieżki wpływu, które nie są lokacjami agentów
         if loc_id.endswith("_influence_path"):
             continue
             
         location_state = game_state.get("locations_state", {}).get(loc_id, {})
         
-        # Na wypadek, gdyby game_stat był niekompletny
         if not location_state:
+            print(f"Warning: Location ID {loc_id} missing from locations_state. Re-adding.")
             game_state["locations_state"][loc_id] = {"occupied_by": None}
             
         if location_state.get("occupied_by") is None:
@@ -94,16 +95,18 @@ def index():
     player_names = get_player_names(game_state)
     available_locations = get_available_locations(locations_db, game_state)
     
-    # --- ZMIENIONA LOGIKA TWORZENIA MAPY KART ---
+    # NOWOŚĆ: Pobierz dane konfliktu
+    current_conflict = game_state.get("current_conflict_card", {"name": "N/A", "rewards": []})
+    
     player_card_map = {}
     player_states = game_state.get("players", {})
     
     for player_name, player_data in player_states.items():
         
         if player_name == AI_PLAYER_NAME:
-            card_ids_list = player_data.get("hand", []) # AI używa ścisłej ręki
+            card_ids_list = player_data.get("hand", []) 
         else:
-            card_ids_list = player_data.get("deck_pool", []) # Ludzie używają całej talii
+            card_ids_list = player_data.get("deck_pool", [])
             
         player_card_list = []
         for card_id in card_ids_list:
@@ -116,7 +119,6 @@ def index():
                  print(f"Warning: Card ID '{card_id}' not found in cards_db for player {player_name}")
                  
         player_card_map[player_name] = sorted(player_card_list, key=lambda x: x['name'])
-    # --- KONIEC ZMIENIONEJ LOGIKI ---
     
     player_agent_map = {}
     
@@ -136,7 +138,8 @@ def index():
         player_card_map=player_card_map,
         player_agent_map=player_agent_map, 
         locations=available_locations,
-        ai_player_name=AI_PLAYER_NAME
+        ai_player_name=AI_PLAYER_NAME,
+        current_conflict=current_conflict # <--- Przekaż do szablonu
     )
 
 @app.route('/full_reset')
@@ -147,6 +150,32 @@ def full_reset():
         flash(message, "success")
     else:
         flash(message, "error")
+    return redirect(url_for('index'))
+
+# --- NOWA TRASA: USTAW KARTĘ KONFLIKTU ---
+@app.route('/set_conflict', methods=['POST'])
+def set_conflict():
+    game_state, _, _, _ = load_game_data()
+
+    if game_state.get("current_phase") != "AGENT_TURN":
+        flash("Cannot set conflict: Not in AGENT_TURN phase.", "error")
+        return redirect(url_for('index'))
+
+    conflict_name = request.form.get('conflict_name')
+    reward1 = request.form.get('reward1')
+    reward2 = request.form.get('reward2')
+    reward3 = request.form.get('reward3')
+    
+    is_valid, message = process_conflict_set(game_state, conflict_name, reward1, reward2, reward3)
+    
+    if is_valid:
+        if save_json_file(GAME_STATE_FILE, game_state):
+            flash(message, "success")
+        else:
+            flash("CRITICAL ERROR: Cannot save game state after setting conflict.", "error")
+    else:
+        flash(f"Failed to set conflict: {message}", "error")
+        
     return redirect(url_for('index'))
 
 @app.route('/play_intrigue', methods=['POST'])
@@ -236,6 +265,9 @@ def reveal_phase():
                 "id": card_id,
                 "name": card_data.get("name", card_id)
             })
+            
+    # NOWOŚĆ: Pobierz dane konfliktu
+    current_conflict = game_state.get("current_conflict_card", {"name": "N/A", "rewards": []})
 
     return render_template('reveal.html',
         current_round=game_state.get("round", 1),
@@ -244,8 +276,34 @@ def reveal_phase():
         player_names=get_player_names(game_state),
         ai_player_name=AI_PLAYER_NAME,
         round_history=game_state.get("round_history", []),
-        all_buyable_cards=all_buyable_cards
+        all_buyable_cards=all_buyable_cards,
+        current_conflict=current_conflict # <--- Przekaż do szablonu
     )
+
+# --- NOWA TRASA: ROZSTRZYGNIJ KONFLIKT ---
+@app.route('/resolve_conflict', methods=['POST'])
+def resolve_conflict():
+    game_state, _, _, _ = load_game_data()
+
+    if game_state.get("current_phase") != "REVEAL":
+        flash("Cannot resolve conflict: Not in REVEAL phase.", "error")
+        return redirect(url_for('reveal_phase'))
+
+    first_place = request.form.get('first_place')
+    second_place = request.form.get('second_place')
+    third_place = request.form.get('third_place')
+    
+    is_valid, message = process_conflict_resolve(game_state, first_place, second_place, third_place)
+    
+    if is_valid:
+        if save_json_file(GAME_STATE_FILE, game_state):
+            flash(message, "success")
+        else:
+            flash("CRITICAL ERROR: Cannot save game state after resolving conflict.", "error")
+    else:
+        flash(f"Failed to resolve conflict: {message}", "error")
+        
+    return redirect(url_for('reveal_phase'))
 
 @app.route('/buy_card', methods=['POST'])
 def buy_card():
@@ -334,7 +392,6 @@ def reset_board():
     """Resetuje planszę na kolejną rundę."""
     game_state, _, _, _ = load_game_data()
     if game_state:
-        # ZMIANA: Ta funkcja teraz automatycznie dobiera karty
         new_game_state = perform_cleanup_and_new_round(game_state)
 
         if save_json_file(GAME_STATE_FILE, new_game_state):
@@ -344,7 +401,6 @@ def reset_board():
     
     return redirect(url_for('index'))
 
-# --- NOWA TRASA DO ZARZĄDZANIA RĘKĄ AI ---
 @app.route('/manage_ai_hand', methods=['GET', 'POST'])
 def manage_ai_hand():
     """Wyświetla stronę do ręcznego ustawiania ręki gracza AI."""
@@ -355,9 +411,8 @@ def manage_ai_hand():
         return render_template('error.html'), 500
 
     if request.method == 'POST':
-        # Ustawiamy rękę tylko dla AI
         player_name = AI_PLAYER_NAME
-        card_ids = request.form.getlist('card_ids') # Pobiera listę zaznaczonych kart
+        card_ids = request.form.getlist('card_ids')
         
         is_valid, message = set_player_hand(game_state, player_name, card_ids, cards_db)
         
@@ -371,7 +426,6 @@ def manage_ai_hand():
         
         return redirect(url_for('manage_ai_hand'))
 
-    # --- Logika GET ---
     player_data = game_state.get("players", {}).get(AI_PLAYER_NAME, {})
     deck_pool_ids = player_data.get("deck_pool", [])
     current_hand_ids = player_data.get("hand", [])
@@ -389,7 +443,6 @@ def manage_ai_hand():
         deck_cards=sorted(deck_pool_details, key=lambda x: x['name']),
         current_hand=current_hand_ids
     )
-# --- KONIEC NOWEJ TRASY ---
 
 
 if __name__ == '__main__':

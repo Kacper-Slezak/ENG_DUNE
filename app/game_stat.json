@@ -1,16 +1,29 @@
 {
-  "round": 1,
-  "currentPlayer": "Peter",
+  "round": 5,
+  "currentPlayer": "Helen",
   "current_phase": "AGENT_TURN",
   "round_history": [],
   "destroyed_pile": [],
-  "imperium_row": [],
+  "imperium_row": [
+    "scout",
+    "spice_smugglers",
+    "gurney_halleck",
+    "liet_kynes",
+    "firm_grip",
+    "sardaukar_infantry",
+    "sietch_reverend_mother",
+    "imperial_spy"
+  ],
+  "current_conflict_card": {
+    "name": "N/A",
+    "rewards": []
+  },
   "players": {
     "Peter": {
       "resources": {
         "solari": 0,
         "water": 1,
-        "Spice": 0,
+        "Spice": 2,
         "troops": 0
       },
       "influence": {
@@ -27,30 +40,31 @@
         "convincing_argument"
       ],
       "hand": [
-        "dagger",
-        "dagger",
+        "convincing_argument",
         "dune_the_desert_planet",
         "reconnaissance",
-        "convincing_argument"
+        "dagger",
+        "dagger"
       ],
       "discard_pile": [],
       "draw_deck": [],
       "agents_total": 2,
       "agents_placed": 0,
-      "intrigue_hand": [],
+      "intrigue_hand": [
+        "plot_twist",
+        "diplomacy"
+      ],
       "has_passed": false,
       "reveal_stats": {
         "total_persuasion": 0,
-        "total_swords": 0,
-        "cards_in_hand": [],
-        "cards_played": []
+        "total_swords": 0
       }
     },
     "Helen": {
       "resources": {
-        "solari": 0,
-        "water": 1,
-        "Spice": 0,
+        "solari": 5,
+        "water": 0,
+        "Spice": 1,
         "troops": 0
       },
       "influence": {
@@ -68,29 +82,29 @@
       ],
       "hand": [
         "dagger",
+        "convincing_argument",
         "dagger",
         "dune_the_desert_planet",
-        "reconnaissance",
-        "convincing_argument"
+        "reconnaissance"
       ],
       "discard_pile": [],
       "draw_deck": [],
-      "agents_total": 2,
+      "agents_total": 3,
       "agents_placed": 0,
-      "intrigue_hand": [],
+      "intrigue_hand": [
+        "ambush"
+      ],
       "has_passed": false,
       "reveal_stats": {
         "total_persuasion": 0,
-        "total_swords": 0,
-        "cards_in_hand": [],
-        "cards_played": []
+        "total_swords": 0
       }
     },
     "Paul": {
       "resources": {
-        "solari": 0,
-        "water": 1,
-        "Spice": 0,
+        "solari": 2,
+        "water": 0,
+        "Spice": 4,
         "troops": 0
       },
       "influence": {
@@ -108,10 +122,10 @@
       ],
       "hand": [
         "dagger",
-        "dagger",
+        "convincing_argument",
         "dune_the_desert_planet",
-        "reconnaissance",
-        "convincing_argument"
+        "dagger",
+        "reconnaissance"
       ],
       "discard_pile": [],
       "draw_deck": [],
@@ -121,9 +135,7 @@
       "has_passed": false,
       "reveal_stats": {
         "total_persuasion": 0,
-        "total_swords": 0,
-        "cards_in_hand": [],
-        "cards_played": []
+        "total_swords": 0
       }
     }
   },

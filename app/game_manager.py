@@ -3,14 +3,11 @@ import json
 import os
 import random 
 
-# import copy # Nie jest już potrzebny, jeśli nie ma AI_PLAYER_NAME
-# from build_ai_prompt import AI_PLAYER_NAME # <--- USUNIĘTE
-
 LOCATIONS_DB_FILE = 'locations.json'
 CARDS_DB_FILE = 'cards.json'
 GAME_STATE_FILE = 'game_stat.json'
 GAME_STATE_DEFAULT_FILE = 'game_stat.DEFAULT.json' 
-AI_PLAYER_NAME = 'Peter' # <--- DODANE
+AI_PLAYER_NAME = 'Peter' 
 
 def load_json_file(filename):
     """Wczytuje plik JSON i zwraca jego zawartość."""
@@ -43,14 +40,20 @@ def load_game_data():
     if not all([game_state, locations_db, cards_db]):
         return None, None, None, None 
     
-    # Naprawiamy locations_state jeśli jest niekompletne
     if game_state and locations_db:
-        if "locations_state" not in game_state or len(game_state["locations_state"]) < len(locations_db) - 4: # -4 dla ścieżek wpływu
+        if "locations_state" not in game_state or len(game_state["locations_state"]) < len(locations_db) - 4: 
             print("WARNING: locations_state in game_stat.json is missing or incomplete. Rebuilding...")
             game_state["locations_state"] = {}
             for loc_id in locations_db.keys():
                  if not loc_id.endswith("_influence_path"):
                     game_state["locations_state"][loc_id] = {"occupied_by": None}
+    
+    # --- NOWOŚĆ: Upewnij się, że pole konfliktu istnieje ---
+    if game_state and "current_conflict_card" not in game_state:
+        game_state["current_conflict_card"] = {
+            "name": "N/A",
+            "rewards": []
+        }
     
     return game_state, locations_db, cards_db, None 
 
@@ -101,7 +104,6 @@ def is_move_valid(game_state, locations_db, cards_db, player_name, card_id, loca
     if location_state.get("occupied_by") is not None:
         return False, f"Location is already occupied by player {location_state['occupied_by']}."
 
-    # --- ZMIENIONA LOGIKA WALIDACJI RĘKI ---
     if player_name == AI_PLAYER_NAME:
         player_hand = player_state.get("hand", [])
         if card_id not in player_hand:
@@ -110,7 +112,6 @@ def is_move_valid(game_state, locations_db, cards_db, player_name, card_id, loca
         player_deck_pool = player_state.get("deck_pool", [])
         if card_id not in player_deck_pool:
             return False, f"Player {player_name} (Human) does not have the card '{card_data.get('name', card_id)}' in their DECK."
-    # --- KONIEC ZMIENIONEJ LOGIKI ---
             
     required_symbol = location_data.get("symbol_required")
     card_symbols = card_data.get("agent_symbols", [])
@@ -149,7 +150,6 @@ def process_move(game_state, locations_db, cards_db, player_name, card_id, locat
     player_state = game_state.get("players", {}).get(player_name, {})
     player_resources = player_state.get("resources", {})
     
-    # Koszt lokacji
     location_cost = location_data.get("cost", [])
     for cost_item in location_cost:
         if cost_item.get("type") == "resource":
@@ -161,7 +161,6 @@ def process_move(game_state, locations_db, cards_db, player_name, card_id, locat
     
     move_summary = f"{player_name} played '{card_name}' on '{location_name}'."
     
-    # --- Przetwarzanie efektów LOKACJI ---
     location_actions_list = location_data.get("actions", [])
     
     for action_object in location_actions_list:
@@ -200,7 +199,6 @@ def process_move(game_state, locations_db, cards_db, player_name, card_id, locat
                 elif gain_data.get("type") == "extra gain":
                     move_summary += f" (NEEDS MANUAL ACTION: {gain_data.get('description')})"
     
-    # Efekty karty agenta
     agent_effect = card_data.get("agent_effect", {})
     agent_gain_list = agent_effect.get("actions", [])
     
@@ -230,8 +228,6 @@ def process_move(game_state, locations_db, cards_db, player_name, card_id, locat
                 player_state["discard_pile"] = []
              player_state["discard_pile"].append(card_id)
 
-
-    # Logika prostych efektów agenta (gain/pay)
     for gain_item in agent_gain_list:
         item_type = gain_item.get("type")
         resource_name = gain_item.get("resource")
@@ -542,6 +538,9 @@ def perform_cleanup_and_new_round(game_state):
         game_state["current_phase"] = "AGENT_TURN" 
         game_state["round"] = game_state.get("round", 0) + 1
         
+        # --- NOWOŚĆ: Resetuj kartę konfliktu ---
+        game_state["current_conflict_card"] = { "name": "N/A", "rewards": [] }
+        
         player_names = sorted(list(game_state.get("players", {}).keys()))
         game_state["currentPlayer"] = player_names[0] 
 
@@ -599,10 +598,57 @@ def set_player_hand(game_state, player_name, card_ids_list, cards_db):
     draw_deck_list = list(deck_pool) 
     for card in card_ids_list:
         if card in draw_deck_list:
-            draw_deck_list.remove(card)
+            draw_deck_list.remove(card) # Usuwa pierwsze wystąpienie (dobre dla duplikatów)
             
     player_state["draw_deck"] = draw_deck_list
     
     player_state["discard_pile"] = []
     
     return True, f"Success! Set 5 cards for {player_name}. All other cards moved to draw deck."
+
+# --- NOWE FUNKCJE KONFLIKTU ---
+
+def process_conflict_set(game_state, conflict_name, reward1, reward2, reward3):
+    """Ustawia nową kartę konfliktu na tę rundę."""
+    
+    if not conflict_name:
+        conflict_name = "N/A"
+        
+    rewards_list = []
+    if reward1: rewards_list.append(f"1st: {reward1}")
+    if reward2: rewards_list.append(f"2nd: {reward2}")
+    if reward3: rewards_list.append(f"3rd: {reward3}")
+    
+    game_state["current_conflict_card"] = {
+        "name": conflict_name,
+        "rewards": rewards_list
+    }
+    
+    summary = f"Conflict set: {conflict_name} | Rewards: {', '.join(rewards_list)}"
+    
+    if "round_history" not in game_state:
+        game_state["round_history"] = []
+    game_state["round_history"].append({"summary": summary})
+    
+    return True, f"Conflict set: {conflict_name}"
+
+def process_conflict_resolve(game_state, first_place, second_place, third_place):
+    """Zapisuje wyniki konfliktu do historii."""
+    
+    conflict_name = game_state.get("current_conflict_card", {}).get("name", "Conflict")
+    
+    summaries = []
+    if first_place: summaries.append(f"1st Place: {first_place}")
+    if second_place: summaries.append(f"2nd Place: {second_place}")
+    if third_place: summaries.append(f"3rd Place: {third_place}")
+    
+    if not summaries:
+        return False, "No winners entered."
+        
+    full_summary = f"Conflict Resolved ({conflict_name}): {', '.join(summaries)}"
+
+    if "round_history" not in game_state:
+        game_state["round_history"] = []
+    game_state["round_history"].append({"summary": full_summary})
+
+    return True, "Conflict results saved to history."

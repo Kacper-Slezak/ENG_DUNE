@@ -5,6 +5,10 @@
   "round_history": [],
   "destroyed_pile": [],
   "imperium_row": [],
+  "current_conflict_card": {
+    "name": "N/A",
+    "rewards": []
+  },
   "players": {
     "Peter": {
       "resources": {

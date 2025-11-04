@@ -2,9 +2,7 @@
 import json
 import copy # Needed for deep copy
 
-# NOWY IMPORT:
-from game_manager import get_card_persuasion_cost, AI_PLAYER_NAME
-
+from game_manager import get_card_persuasion_cost, AI_PLAYER_NAME 
 
 def generate_ai_prompt(game_state_data, cards_db):
     """
@@ -30,6 +28,20 @@ def generate_ai_prompt(game_state_data, cards_db):
     prompt_lines = []
     prompt_lines.append(f"You are player {AI_PLAYER_NAME}. Analyze the game state and make your decision.")
     prompt_lines.append(f"Current round: {game_state.get('round', 1)}, Phase: {current_phase}.")
+
+    # --- NOWA SEKCJA: KONFLIKT ---
+    prompt_lines.append("\n### Current Conflict Rewards ###")
+    conflict_card = game_state.get("current_conflict_card", {})
+    conflict_name = conflict_card.get("name", "N/A")
+    conflict_rewards = conflict_card.get("rewards", [])
+    
+    prompt_lines.append(f"Card: **{conflict_name}**")
+    if conflict_rewards:
+        for reward in conflict_rewards:
+            prompt_lines.append(f"- {reward}")
+    else:
+        prompt_lines.append("(No conflict rewards set for this round)")
+    # --- KONIEC NOWEJ SEKCJI ---
 
     prompt_lines.append("\n### Move History (This Round) ###")
     history_to_display = game_state.pop("round_history", []) 
@@ -58,16 +70,20 @@ def generate_ai_prompt(game_state_data, cards_db):
                             opponent_persuasion += reveal_effect.get("persuasion", 0)
                             opponent_swords += reveal_effect.get("swords", 0)
                             
-                            # TODO: This logic doesn't yet account for "possible actions"
-                            # for opponents, as it's calculated globally at the
-                            # end of the phase. This is sufficient for now.
-
-                    hand_size = len(player_data.get("hand", [])) 
+                    agents_left = player_data.get("agents_total", 2) - player_data.get("agents_placed", 0)
+                    has_passed = player_data.get("has_passed", False)
+                    
+                    if has_passed:
+                         hand_size_desc = "PASSED"
+                    elif agents_left > 0:
+                         hand_size_desc = f"({agents_left} agents left to play)"
+                    else:
+                         hand_size_desc = "(No agents left)"
                     
                     prompt_lines.append(
                         f"- **{player_name}**: "
                         f"PLAYED: {opponent_persuasion} Persuasion, {opponent_swords} Swords. "
-                        f"(Has {hand_size} cards left in hand)."
+                        f"{hand_size_desc}"
                     )
         
         prompt_lines.append(f"\n### Current Game State (Source of Truth) ###")
@@ -77,7 +93,6 @@ def generate_ai_prompt(game_state_data, cards_db):
     elif current_phase == "REVEAL":
         prompt_lines.append("\n### Reveal Phase (Buying Cards) ###")
         
-        # --- NEW LOGIC: Show stats for all players ---
         prompt_lines.append("\n### Reveal Stats (All Players) ###")
         prompt_lines.append("This is public information, crucial for making buying decisions.")
         
@@ -97,7 +112,6 @@ def generate_ai_prompt(game_state_data, cards_db):
                 prompt_lines.append(f"- **{player_name} (You)**: {stats_str}")
             else:
                 prompt_lines.append(f"- {player_name}: {stats_str}")
-        # --- END NEW LOGIC ---
         
         prompt_lines.append(f"\nYou have: {ai_persuasion} Persuasion (for buying).")
 
@@ -107,7 +121,6 @@ def generate_ai_prompt(game_state_data, cards_db):
             for card_id in market_ids:
                 card_data = cards_db.get(card_id, {})
                 
-                # --- CHANGE: Use the new function to get cost ---
                 card_cost = get_card_persuasion_cost(card_data)
                 cost_display = f"Cost: {card_cost}" if card_cost != 999 else "Cost: N/A"
                 
@@ -122,10 +135,8 @@ def generate_ai_prompt(game_state_data, cards_db):
     if "players" in game_state:
         for player_name, player_data in game_state["players"].items():
             if player_name == AI_PLAYER_NAME:
-                # Keep 'reveal_stats' for the AI
                 player_data.pop("draw_deck", None)
             else:
-                # For opponents, hide everything BUT show 'reveal_stats'
                 player_data.pop("hand", None)
                 player_data.pop("deck_pool", None)
                 player_data.pop("draw_deck", None)
