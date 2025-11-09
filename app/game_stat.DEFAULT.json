@@ -5,17 +5,19 @@
   "round_history": [],
   "destroyed_pile": [],
   "imperium_row": [],
+  "conflict_deck": [],
   "current_conflict_card": {
     "name": "N/A",
-    "rewards": []
+    "rewards_text": []
   },
   "players": {
     "Peter": {
+      "victory_points": 0,
       "resources": {
         "solari": 0,
         "water": 1,
         "Spice": 0,
-        "troops": 0
+        "troops_garrison": 0
       },
       "influence": {
         "emperor": 0,
@@ -51,11 +53,12 @@
       }
     },
     "Helen": {
+      "victory_points": 0,
       "resources": {
         "solari": 0,
         "water": 1,
         "Spice": 0,
-        "troops": 0
+        "troops_garrison": 0
       },
       "influence": {
         "emperor": 0,
@@ -91,11 +94,12 @@
       }
     },
     "Paul": {
+      "victory_points": 0,
       "resources": {
         "solari": 0,
         "water": 1,
         "Spice": 0,
-        "troops": 0
+        "troops_garrison": 0
       },
       "influence": {
         "emperor": 0,

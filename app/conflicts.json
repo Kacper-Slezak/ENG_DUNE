@@ -1,0 +1,92 @@
+{
+  "conflict_01": {
+    "name": "Battle for Arrakeen",
+    "tier": 1,
+    "rewards": {
+      "1": [
+        { "type": "vp", "amount": 1 },
+        { "type": "resource", "resource": "Spice", "amount": 3 }
+      ],
+      "2": [
+        { "type": "resource", "resource": "Spice", "amount": 2 }
+      ],
+      "3": [
+        { "type": "resource", "resource": "Spice", "amount": 1 }
+      ]
+    }
+  },
+  "conflict_02": {
+    "name": "Struggle for Carthag",
+    "tier": 1,
+    "rewards": {
+      "1": [
+        { "type": "vp", "amount": 1 },
+        { "type": "intrigue", "amount": 1 }
+      ],
+      "2": [
+        { "type": "resource", "resource": "solari", "amount": 4 }
+      ],
+      "3": []
+    }
+  },
+  "conflict_03": {
+    "name": "Imperial Support",
+    "tier": 1,
+    "rewards": {
+      "1": [
+        { "type": "vp", "amount": 1 },
+        { "type": "resource", "resource": "solari", "amount": 2 }
+      ],
+      "2": [
+        { "type": "resource", "resource": "solari", "amount": 3 }
+      ]
+    }
+  },
+  "conflict_10": {
+    "name": "The Great Spice-Off",
+    "tier": 2,
+    "rewards": {
+      "1": [
+        { "type": "vp", "amount": 2 }
+      ],
+      "2": [
+        { "type": "resource", "resource": "Spice", "amount": 5 }
+      ],
+      "3": [
+        { "type": "resource", "resource": "solari", "amount": 2 }
+      ]
+    }
+  },
+  "conflict_11": {
+    "name": "Control the Spice",
+    "tier": 2,
+    "rewards": {
+      "1": [
+        { "type": "vp", "amount": 1 },
+        { "type": "resource", "resource": "Spice", "amount": 5 }
+      ],
+      "2": [
+        { "type": "vp", "amount": 1 }
+      ],
+      "3": [
+        { "type": "resource", "resource": "Spice", "amount": 2 }
+      ]
+    }
+  },
+  "conflict_20": {
+    "name": "War for the Throne",
+    "tier": 3,
+    "rewards": {
+      "1": [
+        { "type": "vp", "amount": 3 }
+      ],
+      "2": [
+        { "type": "vp", "amount": 1 },
+        { "type": "resource", "resource": "solari", "amount": 4 }
+      ],
+      "3": [
+        { "type": "resource", "resource": "Spice", "amount": 4 }
+      ]
+    }
+  }
+}

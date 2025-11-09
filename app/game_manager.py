@@ -5,6 +5,8 @@ import random
 
 LOCATIONS_DB_FILE = 'locations.json'
 CARDS_DB_FILE = 'cards.json'
+INTRIGUES_DB_FILE = 'intrigues.json'
+CONFLICTS_DB_FILE = 'conflicts.json' # <-- NOWOŚĆ
 GAME_STATE_FILE = 'game_stat.json'
 GAME_STATE_DEFAULT_FILE = 'game_stat.DEFAULT.json' 
 AI_PLAYER_NAME = 'Peter' 
@@ -36,9 +38,12 @@ def load_game_data():
     game_state = load_json_file(GAME_STATE_FILE)
     locations_db = load_json_file(LOCATIONS_DB_FILE)
     cards_db = load_json_file(CARDS_DB_FILE)
+    intrigues_db = load_json_file(INTRIGUES_DB_FILE)
+    conflicts_db = load_json_file(CONFLICTS_DB_FILE) # <-- NOWOŚĆ
     
-    if not all([game_state, locations_db, cards_db]):
-        return None, None, None, None 
+    # ZAKTUALIZOWANE SPRAWDZENIE
+    if not all([game_state, locations_db, cards_db, intrigues_db, conflicts_db]): 
+        return None, None, None, None, None # <-- ZAKTUALIZOWANE
     
     if game_state and locations_db:
         if "locations_state" not in game_state or len(game_state["locations_state"]) < len(locations_db) - 4: 
@@ -48,31 +53,41 @@ def load_game_data():
                  if not loc_id.endswith("_influence_path"):
                     game_state["locations_state"][loc_id] = {"occupied_by": None}
     
-    # --- NOWOŚĆ: Upewnij się, że pole konfliktu istnieje ---
     if game_state and "current_conflict_card" not in game_state:
         game_state["current_conflict_card"] = {
             "name": "N/A",
-            "rewards": []
+            "rewards": {},
+            "rewards_text": []
         }
     
-    return game_state, locations_db, cards_db, None 
+    if game_state and "conflict_deck" not in game_state:
+         game_state["conflict_deck"] = []
+    
+    if game_state and "players" in game_state:
+        for player_name, player_data in game_state["players"].items():
+            if "victory_points" not in player_data:
+                player_data["victory_points"] = 0
+            if "resources" in player_data:
+                if "troops" in player_data["resources"] and "troops_garrison" not in player_data["resources"]:
+                    player_data["resources"]["troops_garrison"] = player_data["resources"].pop("troops")
+                elif "troops_garrison" not in player_data["resources"]:
+                    player_data["resources"]["troops_garrison"] = 0
+    
+    return game_state, locations_db, cards_db, intrigues_db, conflicts_db # <-- ZAKTUALIZOWANE
 
 
 def get_card_persuasion_cost(card_data):
     """Pobiera koszt perswazji karty z nowej struktury buy_cost."""
     if not card_data:
         return 999
-        
     buy_cost_list = card_data.get("buy_cost", [])
     if not buy_cost_list:
         return 999
-
     for cost_item in buy_cost_list:
         if cost_item.get("type") == "none":
             return 999 
         if cost_item.get("type") == "pay" and cost_item.get("resource") == "persuasion":
             return cost_item.get("amount", 999)
-            
     return 999 
 
 
@@ -177,14 +192,18 @@ def process_move(game_state, locations_db, cards_db, player_name, card_id, locat
                         player_resources[resource_name] = current_amount + resource_amount
                     
                     elif resource_name == "troops":
-                        current_amount = player_resources.get("troops", 0)
-                        player_resources["troops"] = current_amount + resource_amount
+                        current_amount = player_resources.get("troops_garrison", 0)
+                        player_resources["troops_garrison"] = current_amount + resource_amount
+                        move_summary += f" (gained {resource_amount} troops to garrison)"
                         
                     elif resource_name == "intrigue card":
                         if "intrigue_hand" not in player_state:
                             player_state["intrigue_hand"] = []
                         player_state["intrigue_hand"].append(f"Intrigue_Card_{random.randint(100,999)}")
                         move_summary += f" (gained 1 intrigue from location)"
+                    
+                    elif resource_name == "card from unused pile":
+                        move_summary += f" (NEEDS MANUAL ACTION: Draw {resource_amount} card(s))"
                     
                     elif "influence point" in str(resource_name):
                         faction = resource_name.split(" ")[0] 
@@ -239,8 +258,8 @@ def process_move(game_state, locations_db, cards_db, player_name, card_id, locat
                 player_resources[resource_name] = current_amount + resource_amount
             
             elif resource_name == "troops":
-                current_amount = player_resources.get("troops", 0)
-                player_resources["troops"] = current_amount + resource_amount
+                current_amount = player_resources.get("troops_garrison", 0)
+                player_resources["troops_garrison"] = current_amount + resource_amount
                 
             elif resource_name == "intrigue":
                 if "intrigue_hand" not in player_state:
@@ -333,16 +352,42 @@ def check_and_advance_phase(game_state, cards_db):
         
     return game_state
 
-
-def process_intrigue(game_state, player_name, intrigue_text):
-    """Po prostu zapisuje ręcznie wpisany tekst intrygi do historii."""
+# --- ZAKTUALIZOWANA FUNKCJA INTRYGI ---
+def process_intrigue(game_state, intrigues_db, player_name, intrigue_id):
+    """Przetwarza zagranie intrygi z ręki i automatyzuje proste efekty."""
     player_state = game_state.get("players", {}).get(player_name)
     if not player_state:
         return False, "Player not found."
-    if not intrigue_text:
-        return False, "Intrigue text cannot be empty."
+        
+    if not intrigue_id:
+        return False, "No intrigue card selected."
+        
+    if intrigue_id not in player_state.get("intrigue_hand", []):
+        return False, "Player does not have this intrigue card in hand."
+        
+    intrigue_data = intrigues_db.get(intrigue_id)
+    if not intrigue_data:
+        intrigue_data = {"name": intrigue_id, "description": "No description found."}
+
+    # Usuń intrygę z ręki
+    player_state["intrigue_hand"].remove(intrigue_id)
     
-    summary = f"Player {player_name} played intrigue: '{intrigue_text}'."
+    summary = f"Player {player_name} played intrigue: '{intrigue_data.get('name')}'."
+    
+    # --- AUTOMATYZACJA EFEKTÓW ---
+    if intrigue_id == 'plot_twist':
+        player_resources = player_state.get("resources", {})
+        player_resources["solari"] = player_resources.get("solari", 0) + 1
+        player_resources["Spice"] = player_resources.get("Spice", 0) + 1
+        summary += " (Auto-gained 1 Solari and 1 Spice)"
+    elif intrigue_id == 'diplomacy':
+        summary += " (EFFECT: Can place agent on occupied space) - APPLY MANUALLY."
+    elif intrigue_id == 'ambush':
+        summary += " (EFFECT: +5 Strength in combat) - APPLY MANUALLY IN CONFLICT."
+    else:
+        summary += f" (EFFECT: {intrigue_data.get('description')}) - APPLY MANUALLY."
+
+    
     if "round_history" not in game_state:
         game_state["round_history"] = []
     game_state["round_history"].append({"summary": summary})
@@ -358,19 +403,24 @@ def calculate_and_store_reveal_stats(game_state, cards_db):
     return game_state
 
 
+# --- CAŁKOWICIE PRZEBUDOWANA FUNKCJA (REQ 1) ---
 def calculate_reveal_stats(player_state, cards_db):
     """
     Oblicza sumę Perswazji i Siły dla gracza.
+    Perswazja = tylko karty z ręki.
+    Siła = karty z ręki + karty zagrane + wojska z garnizonu.
     """
     total_persuasion = 0
     total_swords = 0
     
-    cards_to_reveal_ids = player_state.get("hand", []) + player_state.get("discard_pile", [])
+    cards_in_hand_ids = player_state.get("hand", [])
+    cards_played_ids = player_state.get("discard_pile", [])
     
     cards_in_hand_details = []
     cards_played_details = [] 
 
-    for card_id in cards_to_reveal_ids:
+    # Krok 1: Przetwórz karty W RĘCE (dają Perswazję i Siłę)
+    for card_id in cards_in_hand_ids:
         card_data = cards_db.get(card_id)
         if card_data:
             reveal_effect = card_data.get("reveal_effect", {})
@@ -380,35 +430,45 @@ def calculate_reveal_stats(player_state, cards_db):
             total_persuasion += persuasion
             total_swords += swords
             
-            card_detail = {
+            cards_in_hand_details.append({
                 "name": card_data.get("name", card_id),
                 "persuasion": persuasion,
                 "swords": swords
-            }
+            })
+
+    # Krok 2: Przetwórz karty ZAGRANE (dają TYLKO Siłę)
+    for card_id in cards_played_ids:
+        card_data = cards_db.get(card_id)
+        if card_data:
+            reveal_effect = card_data.get("reveal_effect", {})
+            # Perswazja z zagranych kart się nie liczy
+            swords = reveal_effect.get("swords", 0)
             
-            if card_id in player_state.get("hand", []):
-                cards_in_hand_details.append(card_detail)
-            else:
-                cards_played_details.append(card_detail)
+            total_swords += swords
+            
+            cards_played_details.append({
+                "name": card_data.get("name", card_id),
+                "persuasion": 0, # Nie liczy się
+                "swords": swords
+            })
     
-    
+    # Krok 3: Efekty specjalne (na razie uproszczone, bazują na wszystkich kartach)
+    # TODO: Ta logika powinna być bardziej złożona (np. "if you have emperor token" wpływa na perswazję z ręki)
+    all_revealed_cards = cards_in_hand_ids + cards_played_ids
     has_emperor_token = player_state.get("influence", {}).get("emperor", 0) > 0
-    
-    has_fremen_card_in_play = False
-    for card_id in player_state.get("discard_pile", []):
+    has_fremen_card_in_play = False # Uproszczenie: czy zagrano kartę fremen
+    for card_id in cards_played_ids:
         card_data = cards_db.get(card_id)
         if card_data and "fremen" in card_data.get("agent_symbols", []):
             has_fremen_card_in_play = True
             break
 
-    for card_id in cards_to_reveal_ids:
+    for card_id in cards_in_hand_ids: # Sprawdzamy tylko karty w ręce pod kątem bonusów
         card_data = cards_db.get(card_id)
-        if not card_data:
-            continue
+        if not card_data: continue
             
         reveal_effect = card_data.get("reveal_effect", {})
-        possible_actions = reveal_effect.get("possible actions", {})
-        description = possible_actions.get("description", "")
+        description = reveal_effect.get("possible actions", {}).get("description", "")
         
         if "if you have emperor token you gain 4 persuasion" in description:
             if has_emperor_token:
@@ -417,6 +477,10 @@ def calculate_reveal_stats(player_state, cards_db):
         elif "if you already have a fremen card in play, you gain 3 persuasion and 1 spice" in description:
             if has_fremen_card_in_play:
                 total_persuasion += 3
+    
+    # Krok 4: Dodaj wojska z garnizonu do Siły
+    garrison_troops = player_state.get("resources", {}).get("troops_garrison", 0)
+    total_swords += garrison_troops
     
     return {
         "total_persuasion": total_persuasion,
@@ -427,9 +491,7 @@ def calculate_reveal_stats(player_state, cards_db):
 
 
 def process_buy_card(game_state, player_name, card_id, cards_db):
-    """
-    Przetwarza zakup karty ORAZ implementuje proste efekty zakupu.
-    """
+    """Przetwarza zakup karty ORAZ implementuje proste efekty zakupu."""
     player_state = game_state.get("players", {}).get(player_name)
     if not player_state:
         return False, f"Player {player_name} not found."
@@ -473,15 +535,18 @@ def process_buy_card(game_state, player_name, card_id, cards_db):
             
             if "influence" in str(resource):
                 faction = resource.split(" ")[0] 
-                
                 if "influence" not in player_state:
                      player_state["influence"] = {}
                 if faction not in player_state["influence"]:
                      player_state["influence"][faction] = 0
-                
                 player_state["influence"][faction] += amount
                 summary += f" (and gained {amount} {faction} influence)"
-    
+            
+            if resource == "victory point":
+                if "victory_points" not in player_state:
+                    player_state["victory_points"] = 0
+                player_state["victory_points"] += amount
+                summary += f" (and gained {amount} VICTORY POINT!)"
     
     if "round_history" not in game_state:
         game_state["round_history"] = []
@@ -492,38 +557,26 @@ def process_buy_card(game_state, player_name, card_id, cards_db):
 
 def add_card_to_market(game_state, card_id, cards_db):
     """Ręcznie dodaje kartę do rynku (Imperium Row)."""
-    
     if card_id not in cards_db:
         return False, f"Card ID '{card_id}' not found in database."
-        
     card_data = cards_db[card_id]
     cost = get_card_persuasion_cost(card_data)
-    
     if cost == 999:
-        return False, f"Card '{card_data.get('name')}' is not a buyable card (it's a starting card or has no cost)."
-
+        return False, f"Card '{card_data.get('name')}' is not a buyable card."
     if "imperium_row" not in game_state:
         game_state["imperium_row"] = []
-        
     game_state["imperium_row"].append(card_id)
-    
     return True, f"Card '{card_data.get('name')}' has been added to the Imperium Row."
 
 
 def perform_full_game_reset():
-    """
-    Kasuje game_stat.json i zastępuje go zawartością z game_stat.DEFAULT.json.
-    """
+    """Kasuje game_stat.json i zastępuje go zawartością z game_stat.DEFAULT.json."""
     default_state = load_json_file(GAME_STATE_DEFAULT_FILE)
-    
     if default_state is None:
-        print(f"CRITICAL: Could not load default state from {GAME_STATE_DEFAULT_FILE}")
-        return False, f"Error: Default state file '{GAME_STATE_DEFAULT_FILE}' not found. Please create this file."
-        
+        return False, f"Error: Default state file '{GAME_STATE_DEFAULT_FILE}' not found."
     if save_json_file(GAME_STATE_FILE, default_state):
         return True, "Success! The game has been fully reset to Round 1."
     else:
-        print(f"CRITICAL: Could not save default state to {GAME_STATE_FILE}")
         return False, "Error: Could not write to game_stat.json."
 
 
@@ -538,8 +591,8 @@ def perform_cleanup_and_new_round(game_state):
         game_state["current_phase"] = "AGENT_TURN" 
         game_state["round"] = game_state.get("round", 0) + 1
         
-        # --- NOWOŚĆ: Resetuj kartę konfliktu ---
-        game_state["current_conflict_card"] = { "name": "N/A", "rewards": [] }
+        # Resetuj kartę konfliktu (zostanie ustawiona ręcznie)
+        game_state["current_conflict_card"] = { "name": "N/A", "rewards": {}, "rewards_text": [] }
         
         player_names = sorted(list(game_state.get("players", {}).keys()))
         game_state["currentPlayer"] = player_names[0] 
@@ -571,79 +624,143 @@ def perform_cleanup_and_new_round(game_state):
 
 
 def set_player_hand(game_state, player_name, card_ids_list, cards_db):
-    """
-    Ręcznie ustawia rękę gracza (np. AI), przenosząc resztę kart do draw_deck.
-    """
+    """Ręcznie ustawia rękę gracza (np. AI)."""
     if not player_name:
         return False, "Player name not provided."
-        
     player_state = game_state.get("players", {}).get(player_name)
     if not player_state:
         return False, f"Player {player_name} not found."
-        
     if len(card_ids_list) != 5:
         return False, f"Invalid selection. You must select exactly 5 cards. You selected {len(card_ids_list)}."
-
     deck_pool = player_state.get("deck_pool", [])
-    
     for card_id in card_ids_list:
         if card_id not in cards_db:
             return False, f"Invalid Card ID: {card_id} not found in database."
         if card_id not in deck_pool:
             card_name = cards_db.get(card_id, {}).get("name", card_id)
             return False, f"Invalid card: '{card_name}' is not in player {player_name}'s deck pool."
-            
     player_state["hand"] = list(card_ids_list)
-    
     draw_deck_list = list(deck_pool) 
     for card in card_ids_list:
         if card in draw_deck_list:
-            draw_deck_list.remove(card) # Usuwa pierwsze wystąpienie (dobre dla duplikatów)
-            
+            draw_deck_list.remove(card)
     player_state["draw_deck"] = draw_deck_list
-    
     player_state["discard_pile"] = []
-    
     return True, f"Success! Set 5 cards for {player_name}. All other cards moved to draw deck."
 
-# --- NOWE FUNKCJE KONFLIKTU ---
 
-def process_conflict_set(game_state, conflict_name, reward1, reward2, reward3):
-    """Ustawia nową kartę konfliktu na tę rundę."""
+# --- ZAKTUALIZOWANA FUNKCJA (REQ 3) ---
+def process_conflict_set(game_state, conflicts_db, conflict_id):
+    """Ustawia nową kartę konfliktu na tę rundę z bazy danych."""
     
-    if not conflict_name:
-        conflict_name = "N/A"
+    if not conflict_id:
+        return False, "No conflict ID provided."
         
-    rewards_list = []
-    if reward1: rewards_list.append(f"1st: {reward1}")
-    if reward2: rewards_list.append(f"2nd: {reward2}")
-    if reward3: rewards_list.append(f"3rd: {reward3}")
+    if conflict_id not in conflicts_db:
+        return False, f"Conflict ID '{conflict_id}' not found in database."
+        
+    conflict_data = conflicts_db[conflict_id]
+    
+    # Buduj tekstowe nagrody dla UI
+    rewards_text_list = []
+    rewards_map = conflict_data.get("rewards", {})
+    for place in ["1", "2", "3"]:
+        if place in rewards_map and rewards_map[place]:
+            reward_str_parts = []
+            for reward in rewards_map[place]:
+                if reward["type"] == "vp":
+                    reward_str_parts.append(f"{reward['amount']} VP")
+                elif reward["type"] == "resource":
+                    reward_str_parts.append(f"{reward['amount']} {reward['resource']}")
+                elif reward["type"] == "intrigue":
+                    reward_str_parts.append(f"{reward['amount']} Intrigue Card")
+            rewards_text_list.append(f"{place}st: {', '.join(reward_str_parts)}")
+
     
     game_state["current_conflict_card"] = {
-        "name": conflict_name,
-        "rewards": rewards_list
+        "name": conflict_data.get("name", "Unknown Conflict"),
+        "rewards": conflict_data.get("rewards", {}),
+        "rewards_text": rewards_text_list # Przechowuj tekst dla UI
     }
     
-    summary = f"Conflict set: {conflict_name} | Rewards: {', '.join(rewards_list)}"
+    summary = f"Conflict set: {conflict_data.get('name')}"
     
     if "round_history" not in game_state:
         game_state["round_history"] = []
     game_state["round_history"].append({"summary": summary})
     
-    return True, f"Conflict set: {conflict_name}"
+    return True, f"Conflict set: {conflict_data.get('name')}"
 
-def process_conflict_resolve(game_state, first_place, second_place, third_place):
-    """Zapisuje wyniki konfliktu do historii."""
+
+# --- NOWA FUNKCJA POMOCNICZA (REQ 4) ---
+def apply_rewards(game_state, player_name, rewards_list):
+    """Stosuje listę nagród dla danego gracza."""
+    player_state = game_state.get("players", {}).get(player_name)
+    if not player_state:
+        return f"(Player {player_name} not found)"
+        
+    player_resources = player_state.get("resources", {})
+    summary_parts = []
     
-    conflict_name = game_state.get("current_conflict_card", {}).get("name", "Conflict")
+    for reward in rewards_list:
+        try:
+            r_type = reward.get("type")
+            r_amount = reward.get("amount", 0)
+            
+            if r_type == "vp":
+                player_state["victory_points"] = player_state.get("victory_points", 0) + r_amount
+                summary_parts.append(f"gained {r_amount} VP")
+                
+            elif r_type == "resource":
+                r_resource = reward.get("resource")
+                if r_resource in player_resources:
+                     player_resources[r_resource] = player_resources.get(r_resource, 0) + r_amount
+                     summary_parts.append(f"gained {r_amount} {r_resource}")
+                elif r_resource == "troops_garrison": # Na wszelki wypadek
+                     player_resources["troops_garrison"] = player_resources.get("troops_garrison", 0) + r_amount
+                     summary_parts.append(f"gained {r_amount} troops")
+                
+            elif r_type == "intrigue":
+                if "intrigue_hand" not in player_state:
+                    player_state["intrigue_hand"] = []
+                for _ in range(r_amount):
+                    player_state["intrigue_hand"].append(f"Intrigue_Card_{random.randint(100,999)}")
+                summary_parts.append(f"gained {r_amount} Intrigue Card(s)")
+                
+        except Exception as e:
+            print(f"Error applying reward: {e}")
+            summary_parts.append(f"(Error applying reward: {reward})")
+            
+    return ", ".join(summary_parts)
+
+
+# --- ZAKTUALIZOWANA FUNKCJA (REQ 4) ---
+def process_conflict_resolve(game_state, first_place, second_place, third_place):
+    """Zapisuje wyniki konfliktu i AUTOMATYCZNIE przyznaje nagrody."""
+    
+    conflict_card = game_state.get("current_conflict_card", {})
+    conflict_name = conflict_card.get("name", "Conflict")
+    rewards_map = conflict_card.get("rewards", {})
     
     summaries = []
-    if first_place: summaries.append(f"1st Place: {first_place}")
-    if second_place: summaries.append(f"2nd Place: {second_place}")
-    if third_place: summaries.append(f"3rd Place: {third_place}")
+    
+    if first_place and "1" in rewards_map:
+        reward_details = apply_rewards(game_state, first_place, rewards_map["1"])
+        summaries.append(f"1st: {first_place} ({reward_details})")
+        
+    if second_place and "2" in rewards_map:
+        reward_details = apply_rewards(game_state, second_place, rewards_map["2"])
+        summaries.append(f"2nd: {second_place} ({reward_details})")
+
+    if third_place and "3" in rewards_map:
+        reward_details = apply_rewards(game_state, third_place, rewards_map["3"])
+        summaries.append(f"3rd: {third_place} ({reward_details})")
     
     if not summaries:
-        return False, "No winners entered."
+        if not any([first_place, second_place, third_place]):
+            return False, "No winners entered."
+        # Ktoś wygrał, ale nie było nagród
+        summaries = [f"1st: {first_place}", f"2nd: {second_place}", f"3rd: {third_place}"]
         
     full_summary = f"Conflict Resolved ({conflict_name}): {', '.join(summaries)}"
 
@@ -651,4 +768,27 @@ def process_conflict_resolve(game_state, first_place, second_place, third_place)
         game_state["round_history"] = []
     game_state["round_history"].append({"summary": full_summary})
 
-    return True, "Conflict results saved to history."
+    return True, "Conflict results saved and rewards applied."
+
+def save_json_file_from_text(text_data):
+    """
+    Paruje tekst na JSON i zapisuje go do GAME_STATE_FILE.
+    Zwraca (True, "Success") lub (False, "Error Message").
+    """
+    try:
+        # Krok 1: Spróbuj sparsować tekst, aby sprawdzić, czy jest poprawnym JSONem
+        data = json.loads(text_data)
+        
+        # Krok 2: Jeśli się udało, użyj istniejącej funkcji do zapisu
+        if save_json_file(GAME_STATE_FILE, data):
+            return True, "Zapisano pomyślnie."
+        else:
+            return False, "Wystąpił błąd wejścia/wyjścia (I/O) podczas zapisu pliku."
+            
+    except json.JSONDecodeError as e:
+        # Krok 3: Jeśli parsowanie się nie powiodło, zwróć błąd
+        print(f"JSON DECODE ERROR: {e}")
+        return False, f"Błąd parsowania JSON. Sprawdź składnię. (Błąd: {e})"
+    except Exception as e:
+        print(f"UNKNOWN SAVE ERROR: {e}")
+        return False, f"Wystąpił nieznany błąd: {e}"

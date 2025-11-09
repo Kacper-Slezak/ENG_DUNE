@@ -14,8 +14,8 @@ from game_manager import (
     add_card_to_market,
     set_player_hand,
     AI_PLAYER_NAME,
-    process_conflict_set, # <--- NOWY IMPORT
-    process_conflict_resolve # <--- NOWY IMPORT
+    process_conflict_set,
+    process_conflict_resolve
 )
 
 from build_ai_prompt import generate_ai_prompt
@@ -32,23 +32,16 @@ def get_player_names(game_state):
 def get_available_locations(locations_db, game_state):
     """Returns a list of available (free) locations."""
     available_locations = []
-    
     if "locations_state" not in game_state:
          game_state["locations_state"] = {}
-         
     if not locations_db:
         return []
-
     for loc_id, loc_data in locations_db.items():
         if loc_id.endswith("_influence_path"):
             continue
-            
         location_state = game_state.get("locations_state", {}).get(loc_id, {})
-        
         if not location_state:
-            print(f"Warning: Location ID {loc_id} missing from locations_state. Re-adding.")
             game_state["locations_state"][loc_id] = {"occupied_by": None}
-            
         if location_state.get("occupied_by") is None:
              available_locations.append({
                 "id": loc_id,
@@ -58,9 +51,9 @@ def get_available_locations(locations_db, game_state):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    game_state, locations_db, cards_db, _ = load_game_data()
+    game_state, locations_db, cards_db, intrigues_db, conflicts_db = load_game_data()
 
-    if game_state is None or locations_db is None or cards_db is None:
+    if not all([game_state, locations_db, cards_db, intrigues_db, conflicts_db]):
         flash("CRITICAL ERROR: Cannot load core game data. Check JSON files.", "error")
         return render_template('error.html'), 500
 
@@ -95,19 +88,19 @@ def index():
     player_names = get_player_names(game_state)
     available_locations = get_available_locations(locations_db, game_state)
     
-    # NOWOŚĆ: Pobierz dane konfliktu
-    current_conflict = game_state.get("current_conflict_card", {"name": "N/A", "rewards": []})
+    current_conflict = game_state.get("current_conflict_card", {"name": "N/A", "rewards_text": []})
     
     player_card_map = {}
+    player_agent_map = {}
+    player_intrigue_map = {}
+    
     player_states = game_state.get("players", {})
     
     for player_name, player_data in player_states.items():
-        
         if player_name == AI_PLAYER_NAME:
             card_ids_list = player_data.get("hand", []) 
         else:
             card_ids_list = player_data.get("deck_pool", [])
-            
         player_card_list = []
         for card_id in card_ids_list:
             if card_id in cards_db:
@@ -115,19 +108,24 @@ def index():
                     "id": card_id,
                     "name": cards_db[card_id].get("name", card_id)
                 })
-            else:
-                 print(f"Warning: Card ID '{card_id}' not found in cards_db for player {player_name}")
-                 
         player_card_map[player_name] = sorted(player_card_list, key=lambda x: x['name'])
     
-    player_agent_map = {}
-    
-    for player_name, player_data in player_states.items():
         player_agent_map[player_name] = {
             "placed": player_data.get("agents_placed", 0),
             "total": player_data.get("agents_total", 2),
-            "has_passed": player_data.get("has_passed", False) 
+            "has_passed": player_data.get("has_passed", False),
+            "draw_deck_count": len(player_data.get("draw_deck", []))
         }
+        
+        intrigue_list = []
+        for intrigue_id in player_data.get("intrigue_hand", []):
+            intrigue_data = intrigues_db.get(intrigue_id, {})
+            intrigue_list.append({
+                "id": intrigue_id,
+                "name": intrigue_data.get("name", intrigue_id)
+            })
+        player_intrigue_map[player_name] = sorted(intrigue_list, key=lambda x: x['name'])
+
         
     return render_template('index.html', 
         current_player=current_player, 
@@ -137,14 +135,15 @@ def index():
         player_names=player_names,
         player_card_map=player_card_map,
         player_agent_map=player_agent_map, 
+        player_intrigue_map=player_intrigue_map,
         locations=available_locations,
         ai_player_name=AI_PLAYER_NAME,
-        current_conflict=current_conflict # <--- Przekaż do szablonu
+        current_conflict=current_conflict,
+        all_conflicts=conflicts_db
     )
 
 @app.route('/full_reset')
 def full_reset():
-    """Kasuje całą grę i przywraca stan z game_stat.DEFAULT.json"""
     success, message = perform_full_game_reset()
     if success:
         flash(message, "success")
@@ -152,21 +151,17 @@ def full_reset():
         flash(message, "error")
     return redirect(url_for('index'))
 
-# --- NOWA TRASA: USTAW KARTĘ KONFLIKTU ---
 @app.route('/set_conflict', methods=['POST'])
 def set_conflict():
-    game_state, _, _, _ = load_game_data()
+    game_state, _, _, _, conflicts_db = load_game_data()
 
     if game_state.get("current_phase") != "AGENT_TURN":
         flash("Cannot set conflict: Not in AGENT_TURN phase.", "error")
         return redirect(url_for('index'))
 
-    conflict_name = request.form.get('conflict_name')
-    reward1 = request.form.get('reward1')
-    reward2 = request.form.get('reward2')
-    reward3 = request.form.get('reward3')
+    conflict_id = request.form.get('conflict_id')
     
-    is_valid, message = process_conflict_set(game_state, conflict_name, reward1, reward2, reward3)
+    is_valid, message = process_conflict_set(game_state, conflicts_db, conflict_id)
     
     if is_valid:
         if save_json_file(GAME_STATE_FILE, game_state):
@@ -180,16 +175,16 @@ def set_conflict():
 
 @app.route('/play_intrigue', methods=['POST'])
 def play_intrigue():
-    game_state, _, _, _ = load_game_data()
+    game_state, _, _, intrigues_db, _ = load_game_data()
 
     if game_state.get("current_phase") != "AGENT_TURN":
         flash("Cannot play intrigue: Not in AGENT_TURN phase.", "error")
         return redirect(url_for('index'))
 
     player_name_input = request.form.get('player_name')
-    intrigue_text_input = request.form.get('intrigue_text')
+    intrigue_id_input = request.form.get('intrigue_id')
     
-    is_valid, message = process_intrigue(game_state, player_name_input, intrigue_text_input)
+    is_valid, message = process_intrigue(game_state, intrigues_db, player_name_input, intrigue_id_input)
     
     if is_valid:
         if save_json_file(GAME_STATE_FILE, game_state):
@@ -204,7 +199,7 @@ def play_intrigue():
 
 @app.route('/pass_turn', methods=['POST'])
 def pass_turn():
-    game_state, _, cards_db, _ = load_game_data()
+    game_state, _, cards_db, _, _ = load_game_data()
     
     if game_state.get("current_phase") != "AGENT_TURN":
         flash("Cannot pass: Not in AGENT_TURN phase.", "error")
@@ -229,8 +224,7 @@ def pass_turn():
 
 @app.route('/reveal')
 def reveal_phase():
-    """Wyświetla stronę Fazy Odkrycia (Reveal Phase)."""
-    game_state, _, cards_db, _ = load_game_data()
+    game_state, _, cards_db, _, _ = load_game_data()
     
     current_phase = game_state.get("current_phase", "Unknown Phase")
     if current_phase != "REVEAL":
@@ -243,6 +237,7 @@ def reveal_phase():
         stats = player_data.get("reveal_stats", {}) 
         stats["name"] = player_name
         stats["influence"] = player_data.get("influence", {}) 
+        stats["vp"] = player_data.get("victory_points", 0)
         all_player_stats.append(stats)
 
     market_cards_details = []
@@ -266,8 +261,7 @@ def reveal_phase():
                 "name": card_data.get("name", card_id)
             })
             
-    # NOWOŚĆ: Pobierz dane konfliktu
-    current_conflict = game_state.get("current_conflict_card", {"name": "N/A", "rewards": []})
+    current_conflict = game_state.get("current_conflict_card", {"name": "N/A", "rewards_text": []})
 
     return render_template('reveal.html',
         current_round=game_state.get("round", 1),
@@ -277,13 +271,12 @@ def reveal_phase():
         ai_player_name=AI_PLAYER_NAME,
         round_history=game_state.get("round_history", []),
         all_buyable_cards=all_buyable_cards,
-        current_conflict=current_conflict # <--- Przekaż do szablonu
+        current_conflict=current_conflict
     )
 
-# --- NOWA TRASA: ROZSTRZYGNIJ KONFLIKT ---
 @app.route('/resolve_conflict', methods=['POST'])
 def resolve_conflict():
-    game_state, _, _, _ = load_game_data()
+    game_state, _, _, _, _ = load_game_data()
 
     if game_state.get("current_phase") != "REVEAL":
         flash("Cannot resolve conflict: Not in REVEAL phase.", "error")
@@ -307,21 +300,16 @@ def resolve_conflict():
 
 @app.route('/buy_card', methods=['POST'])
 def buy_card():
-    game_state, _, cards_db, _ = load_game_data()
-
+    game_state, _, cards_db, _, _ = load_game_data()
     if game_state.get("current_phase") != "REVEAL":
         flash("Cannot buy cards: Not in REVEAL phase.", "error")
         return redirect(url_for('reveal_phase'))
-        
     player_name = request.form.get('player_name')
     card_id = request.form.get('card_id')
-    
     if not player_name or not card_id:
         flash("Invalid purchase: Player or Card missing.", "error")
         return redirect(url_for('reveal_phase'))
-
     is_valid, message = process_buy_card(game_state, player_name, card_id, cards_db)
-    
     if is_valid:
         if save_json_file(GAME_STATE_FILE, game_state):
             flash(message, "success")
@@ -329,23 +317,18 @@ def buy_card():
             flash("CRITICAL ERROR: Cannot save game state after buying card.", "error")
     else:
         flash(f"Invalid purchase: {message}", "error")
-        
     return redirect(url_for('reveal_phase'))
 
 @app.route('/add_to_market', methods=['POST'])
 def add_to_market():
-    """Ręcznie dodaje kartę do rynku (Imperium Row)."""
-    game_state, _, cards_db, _ = load_game_data()
-    
+    game_state, _, cards_db, _, _ = load_game_data()
     if game_state.get("current_phase") != "REVEAL":
         flash("Cannot modify market: Not in REVEAL phase.", "error")
         return redirect(url_for('reveal_phase'))
-        
     card_id_input = request.form.get('card_id_typed') 
     if not card_id_input:
         flash("Invalid input: No card ID or name provided.", "error")
         return redirect(url_for('reveal_phase'))
-        
     card_id_to_add = None
     if card_id_input in cards_db:
         card_id_to_add = card_id_input
@@ -354,13 +337,10 @@ def add_to_market():
             if c_data.get("name", "").lower() == card_id_input.lower():
                 card_id_to_add = c_id
                 break
-                
     if not card_id_to_add:
         flash(f"Invalid card: '{card_id_input}' not found as ID or Name.", "error")
         return redirect(url_for('reveal_phase'))
-
     is_valid, message = add_card_to_market(game_state, card_id_to_add, cards_db)
-
     if is_valid:
         if save_json_file(GAME_STATE_FILE, game_state):
             flash(message, "success")
@@ -368,20 +348,22 @@ def add_to_market():
             flash("CRITICAL ERROR: Cannot save game state after modifying market.", "error")
     else:
         flash(f"Failed to add card: {message}", "error")
-        
     return redirect(url_for('reveal_phase'))
 
 
+# --- ZAKTUALIZOWANA TRASA /ai_prompt ---
 @app.route('/ai_prompt')
 def ai_prompt():
-    game_state, _, cards_db, _ = load_game_data()
+    game_state, _, cards_db, _, _ = load_game_data()
     
     if game_state is None or cards_db is None:
         flash("CRITICAL ERROR: Cannot load game data or cards data.", "error")
         return render_template('error.html'), 500
         
+    # ZMIANA: Odbierz tylko jedną wartość
     prompt_text = generate_ai_prompt(game_state, cards_db) 
     
+    # ZMIANA: Przekaż tylko jedną wartość
     return render_template('ai_prompt.html', 
         prompt_text=prompt_text,
         ai_player_name=AI_PLAYER_NAME
@@ -389,33 +371,25 @@ def ai_prompt():
     
 @app.route('/reset_board')
 def reset_board():
-    """Resetuje planszę na kolejną rundę."""
-    game_state, _, _, _ = load_game_data()
+    game_state, _, _, _, _ = load_game_data()
     if game_state:
         new_game_state = perform_cleanup_and_new_round(game_state)
-
         if save_json_file(GAME_STATE_FILE, new_game_state):
             flash("Board has been reset, new round started! Cards shuffled and drawn.", "success")
         else:
             flash("ERROR: Failed to save game state changes.", "error")
-    
     return redirect(url_for('index'))
 
 @app.route('/manage_ai_hand', methods=['GET', 'POST'])
 def manage_ai_hand():
-    """Wyświetla stronę do ręcznego ustawiania ręki gracza AI."""
-    game_state, _, cards_db, _ = load_game_data()
-
+    game_state, _, cards_db, _, _ = load_game_data()
     if game_state is None or cards_db is None:
         flash("CRITICAL ERROR: Cannot load core game data. Check JSON files.", "error")
         return render_template('error.html'), 500
-
     if request.method == 'POST':
         player_name = AI_PLAYER_NAME
         card_ids = request.form.getlist('card_ids')
-        
         is_valid, message = set_player_hand(game_state, player_name, card_ids, cards_db)
-        
         if is_valid:
             if save_json_file(GAME_STATE_FILE, game_state):
                 flash(message, "success")
@@ -423,13 +397,10 @@ def manage_ai_hand():
                 flash("CRITICAL ERROR: Cannot save game state after setting hand.", "error")
         else:
             flash(f"Invalid hand: {message}", "error")
-        
         return redirect(url_for('manage_ai_hand'))
-
     player_data = game_state.get("players", {}).get(AI_PLAYER_NAME, {})
     deck_pool_ids = player_data.get("deck_pool", [])
     current_hand_ids = player_data.get("hand", [])
-    
     deck_pool_details = []
     for card_id in deck_pool_ids:
         card_data = cards_db.get(card_id, {})
@@ -437,12 +408,20 @@ def manage_ai_hand():
             "id": card_id,
             "name": card_data.get("name", card_id)
         })
-    
     return render_template('manage_ai_hand.html',
         ai_player_name=AI_PLAYER_NAME,
         deck_cards=sorted(deck_pool_details, key=lambda x: x['name']),
         current_hand=current_hand_ids
     )
+
+@app.route('/debug_json')
+def debug_json():
+    game_state, _, _, _, _ = load_game_data()
+    if game_state is None:
+        flash("CRITICAL ERROR: Cannot load game_stat.json.", "error")
+        return render_template('error.html'), 500
+    json_text = json.dumps(game_state, indent=2, ensure_ascii=False)
+    return render_template('debug_json.html', json_text=json_text)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Debug Game State</title>
+    <style>
+        body { font-family: sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; }
+        h1 { color: #3f51b5; }
+        textarea { 
+            width: 98%; 
+            height: 70vh; 
+            font-family: monospace; 
+            font-size: 0.9em;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button { 
+            padding: 12px 20px; 
+            font-size: 1.1em; 
+            cursor: pointer; 
+            color: white;
+            border: none;
+            border-radius: 4px;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+        .copy-button { background-color: #0288d1; }
+        .copy-button:hover { background-color: #0277bd; }
+        .edit-button { background-color: #f57c00; }
+        .edit-button:hover { background-color: #e65100; }
+        .save-button { background-color: #d32f2f; }
+        .save-button:hover { background-color: #b71c1c; }
+        
+        a { text-decoration: none; }
+        
+        /* === NOWY STYL dla ukrytego obszaru === */
+        #editArea {
+            display: none; /* Domyślnie ukryte */
+            margin-top: 20px;
+            border: 2px dashed #d32f2f;
+            padding: 15px;
+            background: #fff8f8;
+        }
+    </style>
+</head>
+<body>
+    <h1>Current Game State (game_stat.json)</h1>
+    <p><a href="{{ url_for('index') }}">&larr; Wróć do gry</a></p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% if category == 'error' %}
+                    <p style="color: red; font-weight: bold;">{{ message }}</p>
+                {% else %}
+                    <p style="color: green; font-weight: bold;">{{ message }}</p>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <button id="copyButton" class="copy-button">Kopiuj do schowka</button>
+    <button id="editButton" class="edit-button">Edytuj JSON (Niebezpieczne!)</button>
+
+    <div id="editArea">
+        <h2>Edytor JSON</h2>
+        <p><b>OSTRZEŻENIE:</b> Jakikolwiek błąd składni (np. brakujący przecinek lub cudzysłów) może zepsuć aplikację. Używaj ostrożnie!</p>
+        <form method="POST" action="{{ url_for('save_debug_json') }}" onsubmit="return confirm('Czy na pewno chcesz nadpisać stan gry? Może to bezpowrotnie zepsuć zapis, jeśli JSON jest niepoprawny.');">
+            <textarea id="json-display" name="json_text">{{ json_text }}</textarea>
+            <br>
+            <button type="submit" class="save-button">Zapisz Zmiany</button>
+        </form>
+    </div>
+
+    <script>
+        const copyButton = document.getElementById('copyButton');
+        const editButton = document.getElementById('editButton');
+        const editArea = document.getElementById('editArea');
+        const textArea = document.getElementById('json-display');
+
+        // Funkcja pokazywania edycji
+        editButton.addEventListener('click', function() {
+            editArea.style.display = 'block'; // Pokaż obszar edycji
+            editButton.style.display = 'none'; // Ukryj przycisk "Edytuj"
+            textArea.focus(); // Ustaw fokus na polu tekstowym
+        });
+
+        // Funkcja kopiowania
+        copyButton.addEventListener('click', function() {
+            textArea.select();
+            
+            try {
+                navigator.clipboard.writeText(textArea.value).then(function() {
+                    copyButton.textContent = 'Skopiowano!';
+                    setTimeout(() => { copyButton.textContent = 'Kopiuj do schowka'; }, 2000);
+                }, function(err) {
+                    document.execCommand('copy');
+                    copyButton.textContent = 'Skopiowano (Fallback)!';
+                    setTimeout(() => { copyButton.textContent = 'Kopiuj do schowka'; }, 2000);
+                });
+            } catch (err) {
+                try {
+                    document.execCommand('copy');
+                    copyButton.textContent = 'Skopiowano (Fallback)!';
+                    setTimeout(() => { copyButton.textContent = 'Kopiuj do schowka'; }, 2000);
+                } catch (e) {
+                     alert('Błąd kopiowania. Zaznacz i skopiuj ręcznie (Ctrl+C).');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

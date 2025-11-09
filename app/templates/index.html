@@ -35,7 +35,7 @@
         <div class="conflict-display">
             <strong>Current Conflict:</strong> {{ current_conflict.name }}
             <ul>
-                {% for reward in current_conflict.rewards %}
+                {% for reward in current_conflict.rewards_text %}
                     <li>{{ reward }}</li>
                 {% else %}
                     <li>(No conflict set for this round)</li>
@@ -56,34 +56,36 @@
         <form method="POST" action="/set_conflict" id="conflictForm">
             <fieldset style="border-color: #0288d1;">
                 <legend style="color: #0288d1;">1. Set Conflict (Start of Round)</legend>
-                <p><label for="conflict_name">Conflict Card Name</label>
-                    <input type="text" id="conflict_name" name="conflict_name" 
-                           placeholder="e.g., Battle for Arrakeen" value="{{ current_conflict.name if current_conflict.name != 'N/A' }}">
+                <p>
+                    <label for="conflict_id">Select Conflict Card (from conflicts.json)</label>
+                    <select id="conflict_id" name="conflict_id" required>
+                        <option value="">-- Select Conflict --</option>
+                        {% for conflict_id, conflict_data in all_conflicts.items() %}
+                            <option value="{{ conflict_id }}" 
+                                    {% if conflict_data.name == current_conflict.name %}selected{% endif %}>
+                                [Tier {{ conflict_data.tier }}] {{ conflict_data.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
                 </p>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" name="reward1" placeholder="1st Place Reward (e.g., 3 Spice, 1 VP)" 
-                           value="{{ current_conflict.rewards[0] | replace('1st: ', '') if current_conflict.rewards[0] }}">
-                    <input type="text" name="reward2" placeholder="2nd Place Reward"
-                           value="{{ current_conflict.rewards[1] | replace('2nd: ', '') if current_conflict.rewards[1] }}">
-                    <input type="text" name="reward3" placeholder="3rd Place Reward"
-                           value="{{ current_conflict.rewards[2] | replace('3rd: ', '') if current_conflict.rewards[2] }}">
-                </div>
-                <button type="submit" style="background-color: #0288d1; margin-top: 10px;">Set/Update Conflict</button>
+                <button type="submit" style="background-color: #0288d1; margin-top: 10px;">Set Conflict Card</button>
             </fieldset>
         </form>
 
         <form method="POST" action="/play_intrigue" id="intrigueForm">
             <fieldset>
-                <legend>2. Play Intrigue Card (Manual)</legend>
+                <legend>2. Play Intrigue Card</legend>
                 <input type="hidden" id="intrigue_player_name" name="player_name" value="">
                 
-                <p><label for="intrigue_text">Intrigue Card Name / Effect</label>
-                    <input type="text" id="intrigue_text" name="intrigue_text" 
-                           placeholder="Wpisz nazwę karty i/lub jej efekt..." required>
+                <p><label for="intrigue_id">Select Intrigue Card (from Player's Hand)</label>
+                    <select id="intrigue_id" name="intrigue_id" required>
+                        <option value="">-- First select a player --</option>
+                    </select>
                 </p>
-                <button type="submit" id="intrigueButton" disabled>Play Manual Intrigue</button>
+                <button type="submit" id="intrigueButton" disabled>Play Intrigue</button>
             </fieldset>
         </form>
+        
         <form method="POST" action="/" id="agentForm">
             <fieldset>
                 <legend>3. Agent Movement</legend>
@@ -94,7 +96,7 @@
                         {% for name in player_names %}
                             {% set agent_info = player_agent_map.get(name) %}
                             <option value="{{ name }}" {% if name == current_player %}selected{% endif %}>
-                                {{ name }} (Agents: {{ agent_info.placed }}/{{ agent_info.total }})
+                                {{ name }} (Agents: {{ agent_info.placed }}/{{ agent_info.total }}) (Deck: {{ agent_info.draw_deck_count }})
                                 {% if agent_info.has_passed %} (PASSED) {% endif %}
                             </option>
                         {% endfor %}
@@ -157,6 +159,12 @@
                 </a></p>
             </fieldset>
             </div>
+            
+        <fieldset style="flex: 1;">
+            <legend>Debug</legend>
+            <p>View and copy the current `game_stat.json` data.</p>
+            <p><a href="{{ url_for('debug_json') }}" target="_blank"><button style="background-color: #757575;">Show Game State JSON</button></a></p>
+        </fieldset>
 
     </div>
     
@@ -180,6 +188,7 @@
     
     <script>
         const playerCardMap = {{ player_card_map | tojson }};
+        const playerIntrigueMap = {{ player_intrigue_map | tojson }};
         const playerAgentMap = {{ player_agent_map | tojson }};
         const currentPhase = {{ current_phase | tojson }};
         const currentPlayer = {{ current_player | tojson }};
@@ -191,6 +200,7 @@
         const agentMoveButton = document.getElementById('agentMoveButton');
         
         const intriguePlayerInput = document.getElementById('intrigue_player_name');
+        const intrigueDropdown = document.getElementById('intrigue_id');
         const intrigueButton = document.getElementById('intrigueButton');
         
         const passTurnButton = document.getElementById('passTurnButton');
@@ -229,6 +239,32 @@
             });
         }
         
+        function updateIntrigueOptions() {
+            const selectedPlayer = playerDropdown.value;
+            const intriguesForPlayer = playerIntrigueMap[selectedPlayer] || [];
+            
+            intrigueDropdown.innerHTML = '';
+            let defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            
+            if (selectedPlayer === "") {
+                defaultOption.textContent = "-- First select a player --";
+            } else if (intriguesForPlayer.length === 0) {
+                defaultOption.textContent = "-- No intrigue cards in hand --";
+            } else {
+                defaultOption.textContent = "-- Select Intrigue Card --";
+            }
+            
+            intrigueDropdown.appendChild(defaultOption);
+            
+            intriguesForPlayer.forEach(function(intrigue) {
+                let option = document.createElement('option');
+                option.value = intrigue.id;
+                option.textContent = intrigue.name;
+                intrigueDropdown.appendChild(option);
+            });
+        }
+        
         function checkGameState() {
             const selectedPlayer = playerDropdown.value; 
             const agentInfo = playerAgentMap[selectedPlayer]; 
@@ -253,7 +289,9 @@
                     canPass = true;
                 }
 
-                canPlayIntrigue = true;
+                if (hasNotPassed) {
+                    canPlayIntrigue = true;
+                }
             }
             
             agentMoveButton.disabled = !canPlayAgent;
@@ -263,13 +301,15 @@
             passTurnButton.textContent = `Pass Turn (for ${selectedPlayer || '...'})`;
 
             intrigueButton.disabled = !canPlayIntrigue;
-            intrigueButton.textContent = `Play Manual Intrigue (for ${selectedPlayer || '...'})`;
+            intrigueButton.textContent = `Play Intrigue (for ${selectedPlayer || '...'})`;
 
             if (agentInfo && !hasAgentsLeft) {
                 agentMoveButton.textContent = 'No Agents Left';
             } else if (agentInfo && !hasNotPassed) {
                 agentMoveButton.textContent = 'Player Has Passed';
                 passTurnButton.textContent = 'Player Has Passed';
+                intrigueButton.textContent = 'Player Has Passed';
+                intrigueButton.disabled = true;
             }
             
             if (currentPhase !== 'AGENT_TURN') {
@@ -284,11 +324,13 @@
 
         playerDropdown.addEventListener('change', () => {
             updateCardOptions(); 
+            updateIntrigueOptions();
             checkGameState();    
         });
     
         function initializePage() {
             updateCardOptions();
+            updateIntrigueOptions();
             checkGameState();      
         }
         

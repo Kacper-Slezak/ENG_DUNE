@@ -29,11 +29,11 @@ def generate_ai_prompt(game_state_data, cards_db):
     prompt_lines.append(f"You are player {AI_PLAYER_NAME}. Analyze the game state and make your decision.")
     prompt_lines.append(f"Current round: {game_state.get('round', 1)}, Phase: {current_phase}.")
 
-    # --- NOWA SEKCJA: KONFLIKT ---
     prompt_lines.append("\n### Current Conflict Rewards ###")
     conflict_card = game_state.get("current_conflict_card", {})
+    
     conflict_name = conflict_card.get("name", "N/A")
-    conflict_rewards = conflict_card.get("rewards", [])
+    conflict_rewards = conflict_card.get("rewards_text", []) # Używamy rewards_text
     
     prompt_lines.append(f"Card: **{conflict_name}**")
     if conflict_rewards:
@@ -41,7 +41,6 @@ def generate_ai_prompt(game_state_data, cards_db):
             prompt_lines.append(f"- {reward}")
     else:
         prompt_lines.append("(No conflict rewards set for this round)")
-    # --- KONIEC NOWEJ SEKCJI ---
 
     prompt_lines.append("\n### Move History (This Round) ###")
     history_to_display = game_state.pop("round_history", []) 
@@ -67,7 +66,7 @@ def generate_ai_prompt(game_state_data, cards_db):
                         card_data = cards_db.get(card_id)
                         if card_data:
                             reveal_effect = card_data.get("reveal_effect", {})
-                            opponent_persuasion += reveal_effect.get("persuasion", 0)
+                            opponent_persuasion += 0 # Zagrane karty nie dają perswazji
                             opponent_swords += reveal_effect.get("swords", 0)
                             
                     agents_left = player_data.get("agents_total", 2) - player_data.get("agents_placed", 0)
@@ -144,6 +143,8 @@ def generate_ai_prompt(game_state_data, cards_db):
                 
     game_state_json_string = json.dumps(game_state, indent=2, ensure_ascii=False)
     
+    # === ZJEDNOCZENIE PROMPTU ===
+    # Łączymy instrukcje i JSON z powrotem w jeden ciąg
     final_prompt = "\n".join(prompt_lines)
     final_prompt += f"\n```json\n{game_state_json_string}\n```"
     

@@ -4,39 +4,80 @@
     <meta charset="UTF-8">
     <title>Dune: Imperium - Move Assistant</title>
     <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .message-success { color: green; font-weight: bold; }
-        .message-error { color: red; font-weight: bold; }
+        body { 
+            font-family: sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            padding-top: 70px; /* Dodatkowy padding, aby treść nie chowała się pod przyciskiem */
+        }
         fieldset { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; }
         legend { font-size: 1.2em; font-weight: bold; padding: 0 10px; }
-        select, button { padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
-        button { background-color: #4CAF50; color: white; cursor: pointer; }
-        button:hover { background-color: #45a049; }
-        ul { list-style: none; padding-left: 10px; }
         
-        /* Dodane style dla promptu AI */
-        pre {
-            background-color: #f4f4f4;
-            border: 1px solid #ddd;
+        /* === PRZYCISK W PRAWYM GÓRNYM ROGU === */
+        #copyButton {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            font-size: 1.0em;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        #copyButton:hover {
+            background-color: #0056b3;
+        }
+        
+        /* === STYL DLA EDYTOWALNEGO PROMPTU (textarea) === */
+        textarea {
+            width: 100%;
+            min-height: 70vh; /* Wyższe pole */
+            box-sizing: border-box; 
+            border: 1px solid #ccc;
             border-radius: 4px;
             padding: 15px;
-            white-space: pre-wrap; /* Zawijaj wiersze */
-            word-wrap: break-word; /* Łam długie słowa */
             font-family: monospace;
             font-size: 0.95em;
             line-height: 1.4;
+            background-color: #fdfdfd;
         }
     </style>
 </head>
 <body>
     <h1>Move Assistant - AI Prompt for {{ ai_player_name }}</h1>
-
-    <p>Poniżej znajduje się wygenerowany prompt dla AI. Skopiuj go i wklej do swojego modelu językowego.</p>
+    <p>Poniżej znajduje się pełny, edytowalny prompt dla AI. Możesz wprowadzić zmiany, a następnie skopiować całość.</p>
 
     <fieldset>
-        <legend>Generated AI Prompt</legend>
-        <pre>{{ prompt_text }}</pre>
+        <legend>Generated AI Prompt (Editable)</legend>
+         <button id="copyButton">Kopiuj i Zamknij</button>
+        <textarea id="prompt-text-area">{{ prompt_text }}</textarea>
+
     </fieldset>
 
-    </body>
-</html> 
+    <script>
+        document.getElementById('copyButton').addEventListener('click', function() {
+            // 1. Znajdź edytowalne pole tekstowe
+            const textArea = document.getElementById('prompt-text-area');
+            
+            // 2. Pobierz jego aktualną (potencjalnie edytowaną) zawartość
+            const textToCopy = textArea.value;
+            
+            // 3. Skopiuj do schowka
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(textToCopy).then(function() {
+                    console.log('Prompt skopiowany!');
+                    // 4. Zamknij okno
+                    window.close();
+                }).catch(function(err) {
+                    console.error('Błąd kopiowania: ', err);
+                    alert('Nie udało się skopiować. Spróbuj ręcznie.');
+                });
+            } else {
+                alert('Funkcja kopiowania nie jest dostępna. Skopiuj ręcznie.');
+            }
+        });
+    </script>
+    
+</body>
+</html>
