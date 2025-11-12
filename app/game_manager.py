@@ -458,6 +458,28 @@ def process_intrigue(game_state, intrigues_db, player_name, intrigue_id):
         except NameError:
              summary += " | (ERROR: apply_effects function not found in game_manager.py)"
              
+    elif "set_flag" in actions_object:
+        flag_data = actions_object["set_flag"]
+        flag_name = flag_data.get("name")
+        
+        if not flag_name:
+            summary += f" | (NEEDS MANUAL ACTION: {intrigue_data.get('description')})"
+        else:
+            if "active_effects" not in player_state:
+                player_state["active_effects"] = {}
+
+            if "value_add" in flag_data:
+                # To jest flaga numeryczna (np. +4 miecze z Ambush)
+                current_value = player_state["active_effects"].get(flag_name, 0)
+                added_value = flag_data.get("value_add", 0)
+                player_state["active_effects"][flag_name] = current_value + added_value
+                summary += f" | Effect: Gained bonus +{added_value} {flag_name}."
+            
+            else:
+                 # To jest flaga typu True/False (np. Infiltration)
+                 value_to_set = flag_data.get("value", True) 
+                 player_state["active_effects"][flag_name] = value_to_set
+                 summary += f" | Effect: Gained temporary ability '{flag_name}'."
     # 2. Obsługa złożonych akcji (np. "infiltration", "trick")
     elif "action" in actions_object:
          summary += f" | (NEEDS MANUAL ACTION: {intrigue_data.get('description')})"
@@ -495,11 +517,11 @@ def calculate_and_store_reveal_stats(game_state, cards_db):
 
 def calculate_reveal_stats(player_state, cards_db):
     """
-    Oblicza sumę Perswazji i Siły dla gracza.
-    NOWOŚĆ: Obsługuje bonusy warunkowe w sposób ustrukturyzowany.
+    Oblicza sumę Perswazji i BAZOWEJ Siły dla gracza.
+    Celowo ignoruje bonusy z intryg (active_effects) oraz stare bonusy tekstowe.
     """
     total_persuasion = 0
-    total_swords = 0
+    base_swords = 0  # <--- Używamy siły bazowej
     
     cards_in_hand_ids = player_state.get("hand", [])
     cards_played_ids = player_state.get("discard_pile", [])
@@ -517,7 +539,7 @@ def calculate_reveal_stats(player_state, cards_db):
         swords = reveal_effect.get("swords", 0)
         
         total_persuasion += persuasion
-        total_swords += swords
+        base_swords += swords
         
         cards_in_hand_details.append({
             "id": card_id,
@@ -534,84 +556,31 @@ def calculate_reveal_stats(player_state, cards_db):
 
         reveal_effect = card_data.get("reveal_effect", {})
         swords = reveal_effect.get("swords", 0)
-        total_swords += swords
+        base_swords += swords
         
         cards_played_details.append({
             "name": card_data.get("name", card_id),
-            "persuasion": 0, # Nie liczy się
+            "persuasion": 0,
             "swords": swords
         })
     
-    # --- Krok 3: Sprawdź warunki dla bonusów ---
-    # Zakładamy, że 2 punkty wpływu to sojusz (token)
-    has_emperor_token = player_state.get("influence", {}).get("emperor", 0) >= 2
-    has_fremen_token = player_state.get("influence", {}).get("fremen", 0) >= 2
-    # has_guild_token = player_state.get("influence", {}).get("guild", 0) >= 2
-    # has_bg_token = player_state.get("influence", {}).get("bene_gesserit", 0) >= 2
-
-    has_fremen_card_in_play = False
-    for card_id in cards_played_ids:
-        card_data = cards_db.get(card_id)
-        if card_data and "fremen" in card_data.get("agent_symbols", []):
-            has_fremen_card_in_play = True
-            break
-
-    # --- Krok 4: Zastosuj bonusy z kart (na razie tylko te z RĘKI) ---
-    # Ta pętla iteruje po `cards_in_hand_details`, aby zmodyfikować statystyki
+    # --- Krok 3: (Opcjonalnie) Zastosuj bonusy warunkowe z KART ---
+    # (Ta sekcja jest teraz uproszczona, usuwamy zawodne bonusy tekstowe)
     
     for card_detail in cards_in_hand_details:
-        card_data = cards_db.get(card_detail["id"])
-        if not card_data: continue
-
-        bonuses = card_data.get("reveal_effect", {}).get("conditional_bonuses", [])
-        for bonus in bonuses:
-            if bonus.get("type") == "requirement":
-                req = bonus.get("requires", {})
-                req_type = req.get("type")
-                
-                requirement_met = False
-                if req_type == "alliance" and req.get("faction") == "emperor":
-                    if has_emperor_token: requirement_met = True
-                
-                elif req_type == "card_in_play" and req.get("faction") == "fremen":
-                    if has_fremen_card_in_play: requirement_met = True
-                
-                elif req_type == "influence":
-                    faction = req.get("faction")
-                    amount = req.get("amount")
-                    if player_state.get("influence", {}).get(faction, 0) >= amount:
-                        requirement_met = True
-                
-                # (Można tu dodać więcej warunków 'elif' dla innych typów wymagań)
-
-                if requirement_met:
-                    # Zastosuj nagrody (tylko te wpływające na statystyki)
-                    for gain_item in bonus.get("gain", []):
-                        resource = gain_item.get("resource")
-                        amount = gain_item.get("amount", 0)
-
-                        if resource == "persuasion":
-                            total_persuasion += amount
-                            card_detail["persuasion"] += amount
-                        elif resource == "swords" or resource == "troops":
-                            total_swords += amount
-                            card_detail["swords"] += amount
-                        
-                        # UWAGA: Jak wspomniano, ta funkcja nie może dodawać
-                        # zasobów (np. Przyprawy). To ograniczenie architektury.
-                        
         description = card_detail["description"]
         if "You may pay" in description or " or " in description.lower():
             card_detail["description"] = f"[MANUAL ACTION NEEDED] {description}"
 
-    # --- Krok 5: Dodaj wojska z garnizonu do Siły ---
+    # --- Krok 4: Dodaj wojska z garnizonu do Siły ---
     garrison_troops = player_state.get("resources", {}).get("troops_garrison", 0)
-    total_swords += garrison_troops
+    base_swords += garrison_troops
     
+    # --- Krok 5: Zwróć siłę BAZOWĄ ---
     return {
         "total_persuasion": total_persuasion,
-        "total_swords": total_swords,
-        "cards_in_hand": cards_in_hand_details, # Teraz zawiera opisy
+        "base_swords": base_swords,  # <--- Zwracamy siłę bazową
+        "cards_in_hand": cards_in_hand_details,
         "cards_played": cards_played_details
     }
 

@@ -482,11 +482,11 @@
     "name": "Ambush",
     "type": "fight",
     "actions": {
-      "action": [
-        {"gain": 
-          { "type": "resource", "resource": "fight points", "amount": 4 }
-        }
-      ]
+      "set_flag": {
+        "name": "fight_bonus_swords",
+        "value_add": 4,
+        "duration": "end_of_round"
+      }
     },
     "description": "Gain 4 fight points."
   },

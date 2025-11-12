@@ -51,7 +51,11 @@
                 <div class="stats">
                     <span class="vp">Victory Points: {{ player_stats.vp }}</span><br>
                     <span class="persuasion">Total Persuasion (from hand): {{ player_stats.total_persuasion }}</span><br>
-                    <span class="swords">Total Swords (Cards + Troops): {{ player_stats.total_swords }}</span>
+                    <span class="swords">Base Swords (Cards + Troops): {{ player_stats.base_swords }}</span><br>
+                    <span class="swords" style="color: #c00000;">+ Bonus Swords (Intrigue): {{ player_stats.bonus_swords }}</span><br>
+                    <span class="swords" style="font-weight: bold; border-top: 1px solid #d81b60;">
+                        Total Swords: {{ player_stats.base_swords + player_stats.bonus_swords }}
+                    </span>
                 </div>
                 
                 <div class="influence">
@@ -114,6 +118,32 @@
                     <button type="submit" style="background-color: #00897b;">Buy Card</button>
                 </form>
             </fieldset>
+            </fieldset>
+    </div>
+
+    <fieldset style="border-color: #3f51b5;">
+        <legend style="color: #3f51b5; font-weight: bold;">1.5 Play Battle Intrigue</legend>
+        <form method="POST" action="{{ url_for('play_intrigue') }}" id="intrigueForm">
+
+            <p><label for="intrigue_player_name">Select Player</label>
+                <select id="intrigue_player_name" name="player_name" required>
+                    <option value="">-- Select Player --</option>
+                    {% for name in player_names %}
+                        <option value="{{ name }}">{{ name }}</option>
+                    {% endfor %}
+                </select>
+            </p>
+
+            <p><label for="intrigue_id">Select 'Fight' Intrigue Card (from Player's Hand)</label>
+                <select id="intrigue_id" name="intrigue_id" required>
+                    <option value="">-- First select a player --</option>
+                </select>
+            </p>
+            <button type="submit" id="intrigueButton" style="background-color: #3f51b5;" disabled>Play Intrigue</button>
+        </form>
+    </fieldset>
+    <div style="display: flex; gap: 20px; margin-top: 20px;">
+        <fieldset style="flex: 1; border-color: #d81b60;">
             
             <fieldset style="flex: 1;">
                 <legend>Replenish Market (Manual)</legend>
@@ -202,5 +232,48 @@
         {% endif %}
     </div>
 
+<script>
+    // Ten skrypt jest potrzebny do dynamicznej aktualizacji formularza intryg
+    const playerIntrigueMap = {{ player_intrigue_map | tojson }};
+    const aiPlayerName = {{ ai_player_name | tojson }}; 
+
+    const playerDropdown = document.getElementById('intrigue_player_name');
+    const intrigueDropdown = document.getElementById('intrigue_id');
+    const intrigueButton = document.getElementById('intrigueButton');
+
+    function updateIntrigueOptions() {
+        const selectedPlayer = playerDropdown.value;
+        const intriguesForPlayer = playerIntrigueMap[selectedPlayer] || [];
+
+        intrigueDropdown.innerHTML = '';
+        let defaultOption = document.createElement('option');
+        defaultOption.value = "";
+
+        if (selectedPlayer === "") {
+            defaultOption.textContent = "-- First select a player --";
+        } else if (intriguesForPlayer.length === 0) {
+            defaultOption.textContent = "-- No 'Fight' intrigues in hand --";
+        } else {
+            defaultOption.textContent = "-- Select Intrigue Card --";
+        }
+
+        intrigueDropdown.appendChild(defaultOption);
+
+        intriguesForPlayer.forEach(function(intrigue) {
+            let option = document.createElement('option');
+            option.value = intrigue.id;
+            option.textContent = intrigue.name;
+            intrigueDropdown.appendChild(option);
+        });
+
+        intrigueButton.disabled = (selectedPlayer === "" || intriguesForPlayer.length === 0);
+        intrigueButton.textContent = `Play Intrigue (for ${selectedPlayer || '...'})`;
+    }
+
+    if (playerDropdown) {
+        playerDropdown.addEventListener('change', updateIntrigueOptions);
+        updateIntrigueOptions(); // Wywołaj przy ładowaniu strony
+    }
+</script>
 </body>
 </html>

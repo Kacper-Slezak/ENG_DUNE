@@ -154,10 +154,15 @@ def full_reset():
 
 @app.route('/set_conflict', methods=['POST'])
 def set_conflict():
-    game_state, _, _, _, conflicts_db = load_game_data()
+    game_state, _, _, _, conflicts_db, _ = load_game_data()
 
     if game_state.get("current_phase") != "AGENT_TURN":
         flash("Cannot set conflict: Not in AGENT_TURN phase.", "error")
+        return redirect(url_for('index'))
+
+    has_moves = any("player" in entry for entry in game_state.get("round_history", []))
+    if has_moves:
+        flash("Cannot change conflict: Moves have already been made this round.", "error")
         return redirect(url_for('index'))
 
     conflict_id = request.form.get('conflict_id')
@@ -176,10 +181,13 @@ def set_conflict():
 
 @app.route('/play_intrigue', methods=['POST'])
 def play_intrigue():
-    game_state, _, _, intrigues_db, _ = load_game_data()
+    game_state, _, _, intrigues_db, _, _ = load_game_data()
 
-    if game_state.get("current_phase") != "AGENT_TURN":
-        flash("Cannot play intrigue: Not in AGENT_TURN phase.", "error")
+    if game_state.get("current_phase") not in ["AGENT_TURN", "REVEAL"]:
+        flash(f"Cannot play intrigue: Not in AGENT_TURN or REVEAL phase.", "error")
+        
+        if game_state.get("current_phase") == "REVEAL":
+            return redirect(url_for('reveal_phase'))
         return redirect(url_for('index'))
 
     player_name_input = request.form.get('player_name')
@@ -195,12 +203,15 @@ def play_intrigue():
     else:
         flash(f"Invalid intrigue play: {message}", "error")
         
-    return redirect(url_for('index'))
+    if game_state.get("current_phase") == "REVEAL":
+        return redirect(url_for('reveal_phase'))
+    else:
+        return redirect(url_for('index'))
 
 
 @app.route('/pass_turn', methods=['POST'])
 def pass_turn():
-    game_state, _, cards_db, _, _ = load_game_data()
+    game_state, _, cards_db, _, _, _ = load_game_data()
     
     if game_state.get("current_phase") != "AGENT_TURN":
         flash("Cannot pass: Not in AGENT_TURN phase.", "error")
@@ -225,7 +236,7 @@ def pass_turn():
 
 @app.route('/reveal')
 def reveal_phase():
-    game_state, _, cards_db, _, _ = load_game_data()
+    game_state, _, cards_db, _, _, _ = load_game_data()
     
     current_phase = game_state.get("current_phase", "Unknown Phase")
     if current_phase != "REVEAL":
@@ -233,12 +244,25 @@ def reveal_phase():
         
     all_player_stats = []
     player_states = game_state.get("players", {})
-    
+    player_intrigue_map = {}
+    for player_name, player_data in player_states.items():
+        intrigue_list = []
+        for intrigue_id in player_data.get("intrigue_hand", []):
+            intrigue_data = intrigues_db.get(intrigue_id, {})
+            # Filtrujemy - pokazujemy tylko intrygi bitewne
+            if intrigue_data.get("type") == "fight":
+                intrigue_list.append({
+                    "id": intrigue_id,
+                    "name": intrigue_data.get("name", intrigue_id)
+                })
+    player_intrigue_map[player_name] = sorted(intrigue_list, key=lambda x: x['name'])
     for player_name, player_data in player_states.items():
         stats = player_data.get("reveal_stats", {}) 
         stats["name"] = player_name
         stats["influence"] = player_data.get("influence", {}) 
         stats["vp"] = player_data.get("victory_points", 0)
+        stats["base_swords"] = stats.get("base_swords", 0) 
+        stats["bonus_swords"] = player_data.get("active_effects", {}).get("fight_bonus_swords", 0)
         all_player_stats.append(stats)
 
     market_cards_details = []
@@ -272,28 +296,42 @@ def reveal_phase():
         ai_player_name=AI_PLAYER_NAME,
         round_history=game_state.get("round_history", []),
         all_buyable_cards=all_buyable_cards,
+        player_intrigue_map=player_intrigue_map,
         current_conflict=current_conflict
     )
 
 @app.route('/resolve_conflict_auto', methods=['POST'])
 def resolve_conflict_auto():
-    game_state, _, _, _, _ = load_game_data()
+    game_state, _, _, _, _, _ = load_game_data()
 
     if game_state.get("current_phase") != "REVEAL":
         flash("Cannot resolve conflict: Not in REVEAL phase.", "error")
         return redirect(url_for('reveal_phase'))
 
+    # --- NOWA LOGIKA: SUMOWANIE SIŁY I OBSŁUGA REMISÓW ---
+    
+    # 1. Zbierz statystyki graczy i OBLICZ FINALNĄ SIŁĘ
     player_stats = []
     for player_name, player_data in game_state.get("players", {}).items():
         stats = player_data.get("reveal_stats", {})
+        
+        # Pobierz siłę bazową (z kart i wojsk)
+        base_swords = stats.get("base_swords", 0)
+        
+        # Pobierz siłę bonusową (z intryg)
+        bonus_swords = player_data.get("active_effects", {}).get("fight_bonus_swords", 0)
+        
+        final_swords = base_swords + bonus_swords
+        
         player_stats.append({
             "name": player_name,
-            "swords": stats.get("total_swords", 0)
+            "swords": final_swords # Użyj finalnej siły
         })
     
+    # 2. Posortuj graczy malejąco wg siły
     player_stats.sort(key=lambda x: x['swords'], reverse=True)
     
-
+    # 3. Odfiltruj graczy z 0 siły
     contenders = [p for p in player_stats if p['swords'] > 0]
     c_len = len(contenders)
 
@@ -303,39 +341,43 @@ def resolve_conflict_auto():
         save_json_file(GAME_STATE_FILE, game_state)
         return redirect(url_for('reveal_phase'))
 
+    # 4. Zainicjuj zwycięzców
     first_place = None
     second_place = None
     third_place = None
 
+    # 5. Sprawdź 1. miejsce
     if c_len == 1:
         first_place = contenders[0]['name']
     
     elif contenders[0]['swords'] > contenders[1]['swords']:
+        # Brak remisu o 1. miejsce
         first_place = contenders[0]['name']
         
+        # 6. Sprawdź 2. miejsce
         if c_len == 2:
             second_place = contenders[1]['name']
-        
         elif contenders[1]['swords'] > contenders[2]['swords']:
+            # Brak remisu o 2. miejsce
             second_place = contenders[1]['name']
             
+            # 7. Sprawdź 3. miejsce
             if c_len == 3:
                 third_place = contenders[2]['name']
-            
-            elif contenders[2]['swords'] > contenders[3]['swords']:
+            elif c_len > 3 and contenders[2]['swords'] > contenders[3]['swords']:
+                # Brak remisu o 3. miejsce
                 third_place = contenders[2]['name']
-            
+            # else: Remis o 3. miejsce, third_place=None
         
         else:
-
+            # Remis o 2. miejsce
             second_place = None
-            
             second_place_score = contenders[1]['swords']
             third_place_candidate = None
             for p in contenders:
                 if p['swords'] < second_place_score:
                     third_place_candidate = p
-                    break # Znaleziono pierwszego kandydata
+                    break
             
             if third_place_candidate:
                 third_place_score = third_place_candidate['swords']
@@ -344,23 +386,22 @@ def resolve_conflict_auto():
                     third_place = third_place_candidate['name']
 
     else:
-
+        # Remis o 1. miejsce
         first_place = None
         second_place = None
-        
         first_place_score = contenders[0]['swords']
         third_place_candidate = None
         for p in contenders:
             if p['swords'] < first_place_score:
                 third_place_candidate = p
-                break 
+                break
         
         if third_place_candidate:
             third_place_score = third_place_candidate['swords']
             num_at_third_score = len([p for p in contenders if p['swords'] == third_place_score])
             if num_at_third_score == 1:
                 third_place = third_place_candidate['name']
-
+    
 
     is_valid, message = process_conflict_resolve(game_state, first_place, second_place, third_place)
     
@@ -376,7 +417,7 @@ def resolve_conflict_auto():
 
 @app.route('/buy_card', methods=['POST'])
 def buy_card():
-    game_state, _, cards_db, _, _ = load_game_data()
+    game_state, _, cards_db, _, _, _ = load_game_data()
     if game_state.get("current_phase") != "REVEAL":
         flash("Cannot buy cards: Not in REVEAL phase.", "error")
         return redirect(url_for('reveal_phase'))
@@ -397,7 +438,7 @@ def buy_card():
 
 @app.route('/add_to_market', methods=['POST'])
 def add_to_market():
-    game_state, _, cards_db, _, _ = load_game_data()
+    game_state, _, cards_db, _, _, _ = load_game_data()
     if game_state.get("current_phase") != "REVEAL":
         flash("Cannot modify market: Not in REVEAL phase.", "error")
         return redirect(url_for('reveal_phase'))
@@ -430,7 +471,7 @@ def add_to_market():
 # --- ZAKTUALIZOWANA TRASA /ai_prompt ---
 @app.route('/ai_prompt')
 def ai_prompt():
-    game_state, _, cards_db, _, _ = load_game_data()
+    game_state, _, cards_db, _, _, _ = load_game_data()
     
     if game_state is None or cards_db is None:
         flash("CRITICAL ERROR: Cannot load game data or cards data.", "error")
@@ -447,7 +488,7 @@ def ai_prompt():
     
 @app.route('/reset_board')
 def reset_board():
-    game_state, _, _, _, _ = load_game_data()
+    game_state, _, _, _, _, _ = load_game_data()
     if game_state:
         new_game_state = perform_cleanup_and_new_round(game_state)
         if save_json_file(GAME_STATE_FILE, new_game_state):
@@ -458,7 +499,7 @@ def reset_board():
 
 @app.route('/manage_ai_hand', methods=['GET', 'POST'])
 def manage_ai_hand():
-    game_state, _, cards_db, _, _ = load_game_data()
+    game_state, _, cards_db, _, _, _ = load_game_data()
     if game_state is None or cards_db is None:
         flash("CRITICAL ERROR: Cannot load core game data. Check JSON files.", "error")
         return render_template('error.html'), 500
@@ -492,7 +533,7 @@ def manage_ai_hand():
 
 @app.route('/debug_json')
 def debug_json():
-    game_state, _, _, _, _ = load_game_data()
+    game_state, _, _, _, _, _ = load_game_data()
     if game_state is None:
         flash("CRITICAL ERROR: Cannot load game_stat.json.", "error")
         return render_template('error.html'), 500
