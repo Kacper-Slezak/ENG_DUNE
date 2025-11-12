@@ -493,11 +493,10 @@ def calculate_and_store_reveal_stats(game_state, cards_db):
     return game_state
 
 
-# --- CAŁKOWICIE PRZEBUDOWANA FUNKCJA (REQ 1) ---
 def calculate_reveal_stats(player_state, cards_db):
     """
     Oblicza sumę Perswazji i Siły dla gracza.
-    NOWOŚĆ: Obsługuje proste bonusy warunkowe z Fazy Odkrycia.
+    NOWOŚĆ: Obsługuje bonusy warunkowe w sposób ustrukturyzowany.
     """
     total_persuasion = 0
     total_swords = 0
@@ -547,8 +546,8 @@ def calculate_reveal_stats(player_state, cards_db):
     # Zakładamy, że 2 punkty wpływu to sojusz (token)
     has_emperor_token = player_state.get("influence", {}).get("emperor", 0) >= 2
     has_fremen_token = player_state.get("influence", {}).get("fremen", 0) >= 2
-    has_guild_token = player_state.get("influence", {}).get("guild", 0) >= 2
-    has_bg_token = player_state.get("influence", {}).get("bene_gesserit", 0) >= 2
+    # has_guild_token = player_state.get("influence", {}).get("guild", 0) >= 2
+    # has_bg_token = player_state.get("influence", {}).get("bene_gesserit", 0) >= 2
 
     has_fremen_card_in_play = False
     for card_id in cards_played_ids:
@@ -558,34 +557,55 @@ def calculate_reveal_stats(player_state, cards_db):
             break
 
     # --- Krok 4: Zastosuj bonusy z kart (na razie tylko te z RĘKI) ---
-    # Ta pętla iteruje tylko po `cards_in_hand_details`, aby zmodyfikować statystyki
+    # Ta pętla iteruje po `cards_in_hand_details`, aby zmodyfikować statystyki
     
     for card_detail in cards_in_hand_details:
-        description = card_detail["description"]
+        card_data = cards_db.get(card_detail["id"])
+        if not card_data: continue
 
-        # Proste dopasowanie tekstu (wciąż kruche, ale lepsze niż nic)
-        if "if you have emperor token you gain 4 persuasion" in description: # Np. Firm Grip
-            if has_emperor_token:
-                total_persuasion += 4
-                card_detail["persuasion"] += 4 # Aktualizuj też w podsumowaniu
-        
-        elif "if you already have a fremen card in play, you gain 3 persuasion" in description: # Np. Sietch Reverend Mother
-            if has_fremen_card_in_play:
-                total_persuasion += 3
-                card_detail["persuasion"] += 3
-                # TODO: Ta karta daje też 1 spice. To musi być obsłużone (wymaga apply_effects).
-        
-        elif "if you have 2 fremen influence points you gain 4 troops" in description: # Np. Worm Riders
-            if player_state.get("influence", {}).get("fremen", 0) >= 2:
-                 # Traktujemy wojsko jak miecze na potrzeby konfliktu
-                 total_swords += 4
-                 card_detail["swords"] += 4
+        # --- NOWY, NIEZAWODNY BLOK OBSŁUGI BONUSÓW ---
+        bonuses = card_data.get("reveal_effect", {}).get("conditional_bonuses", [])
+        for bonus in bonuses:
+            if bonus.get("type") == "requirement":
+                req = bonus.get("requires", {})
+                req_type = req.get("type")
+                
+                requirement_met = False
+                if req_type == "alliance" and req.get("faction") == "emperor":
+                    if has_emperor_token: requirement_met = True
+                
+                elif req_type == "card_in_play" and req.get("faction") == "fremen":
+                    if has_fremen_card_in_play: requirement_met = True
+                
+                elif req_type == "influence":
+                    faction = req.get("faction")
+                    amount = req.get("amount")
+                    if player_state.get("influence", {}).get(faction, 0) >= amount:
+                        requirement_met = True
+                
+                # (Można tu dodać więcej warunków 'elif' dla innych typów wymagań)
+
+                if requirement_met:
+                    # Zastosuj nagrody (tylko te wpływające na statystyki)
+                    for gain_item in bonus.get("gain", []):
+                        resource = gain_item.get("resource")
+                        amount = gain_item.get("amount", 0)
+
+                        if resource == "persuasion":
+                            total_persuasion += amount
+                            card_detail["persuasion"] += amount
+                        elif resource == "swords" or resource == "troops":
+                            total_swords += amount
+                            card_detail["swords"] += amount
+                        
+                        # UWAGA: Jak wspomniano, ta funkcja nie może dodawać
+                        # zasobów (np. Przyprawy). To ograniczenie architektury.
+                        
+        # --- KONIEC NOWEGO BLOKU ---
 
         # --- BLOKERY AUTOMATYZACJI (nadal wymagają ręcznej interwencji) ---
-        if "You may pay" in description: # Np. Gurney Halleck
-            card_detail["description"] = f"[MANUAL ACTION NEEDED] {description}"
-        
-        if " or " in description.lower(): # Np. Bene Gesserit Sister
+        description = card_detail["description"]
+        if "You may pay" in description or " or " in description.lower():
             card_detail["description"] = f"[MANUAL ACTION NEEDED] {description}"
 
     # --- Krok 5: Dodaj wojska z garnizonu do Siły ---

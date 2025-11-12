@@ -227,9 +227,7 @@
       { "type": "pay", "resource": "persuasion", "amount": 4 }
     ],
     "buy_effect": {
-      "gain": [
-        { "type": "none" }
-      ],
+      "gain": [],
       "description": "no buy effect."
     },
     "agent_effect": {
@@ -250,6 +248,15 @@
     "reveal_effect": {
       "persuasion": 0,
       "swords": 0,
+      "conditional_bonuses": [
+        {
+          "type": "requirement",
+          "requires": { "type": "alliance", "faction": "emperor" },
+          "gain": [
+            { "type": "resource", "resource": "persuasion", "amount": 4 }
+          ]
+        }
+      ],
       "possible actions": {
         "description": "if you have emperor token you gain 4 persuasion."
       }
@@ -290,9 +297,7 @@
       { "type": "pay", "resource": "persuasion", "amount": 4 }
     ],
     "buy_effect": {
-      "gain": [
-        { "type": "none" }
-      ],
+      "gain": [],
       "description": "no buy effect."
     },
     "agent_effect": {
@@ -304,6 +309,16 @@
     "reveal_effect": {
       "persuasion": 0,
       "swords": 0,
+      "conditional_bonuses": [
+        {
+          "type": "requirement",
+          "requires": { "type": "card_in_play", "faction": "fremen" },
+          "gain": [
+            { "type": "resource", "resource": "persuasion", "amount": 3 },
+            { "type": "resource", "resource": "spice", "amount": 1 }
+          ]
+        }
+      ],
       "possible actions": {
         "action": { "resource": "persuasion", "amount": 3 },
         "action2": { "resource": "spice", "amount": 1 },
@@ -590,9 +605,7 @@
       { "type": "pay", "resource": "persuasion", "amount": 6}
     ],
     "buy_effect": {
-      "gain": [
-        { "type": "none" }
-      ],
+      "gain": [],
       "description": "no buy effect."
     },
     "agent_effect": {
@@ -604,6 +617,15 @@
     "reveal_effect": {
       "persuasion": 0,
       "swords": 4,
+      "conditional_bonuses": [
+        {
+          "type": "requirement",
+          "requires": { "type": "influence", "faction": "fremen", "amount": 2 },
+          "gain": [
+            { "type": "resource", "resource": "troops", "amount": 4 }
+          ]
+        }
+      ],
       "possible actions": {
         "action": { "type": "gain", "resource": "troops", "amount": 4 },
         "action2": { "type": "gain", "resource": "troops", "amount": 6 },
