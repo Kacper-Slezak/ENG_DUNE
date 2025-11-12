@@ -129,31 +129,31 @@
                     
                     <button type="submit" style="background-color: #757575; margin-top: 10px;">Add to Market</button>
                 </form>
-            </fieldset>
-        </div>
-        
-        <div style="display: flex; gap: 20px; margin-top: 20px;">
-             <fieldset style="flex: 1; border-color: #d81b60;">
-                <legend style="color: #d81b60; font-weight: bold;">1. Resolve Conflict (Auto-Rewards)</legend>
-                
-                <div class="conflict-display">
-                    <strong>Conflict: {{ current_conflict.name }}</strong>
-                    <ul>
-                        {% for reward in current_conflict.rewards_text %}
-                            <li>{{ reward }}</li>
-                        {% else %}
-                            <li>(No conflict rewards set)</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                <p>Based on the <strong>Total Swords</strong>, enter the winners. Rewards will be applied automatically.</p>
-                <form method="POST" action="{{ url_for('resolve_conflict') }}">
-                    <input type="text" name="first_place" placeholder="1st Place Winner (e.g., Peter)">
-                    <input type="text" name="second_place" placeholder="2nd Place Winner (e.g., Helen)">
-                    <input type="text" name="third_place" placeholder="3rd Place Winner (e.g., Paul)">
-                    <button type="submit" style="background-color: #d81b60; margin-top: 10px;">Save Conflict Results</button>
-                </form>
-            </fieldset>
+                            </fieldset>
+                        </div>
+                        
+                        <div style="display: flex; gap: 20px; margin-top: 20px;">
+                            <fieldset style="flex: 1; border-color: #d81b60;">
+                    <legend style="color: #d81b60; font-weight: bold;">1. Resolve Conflict (Auto-Rewards)</legend>
+                    
+                    <div class="conflict-display">
+                        <strong>Conflict: {{ current_conflict.name }}</strong>
+                        <ul>
+                            {% for reward in current_conflict.rewards_text %}
+                                <li>{{ reward }}</li>
+                            {% else %}
+                                <li>(No conflict rewards set)</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('resolve_conflict_auto') }}">
+                        <p>Naciśnij przycisk, aby automatycznie obliczyć wyniki konfliktu na podstawie <strong>Total Swords</strong> i przyznać nagrody.</p>
+                        <button type="submit" style="background-color: #d81b60; margin-top: 10px;">
+                            Automatycznie Rozstrzygnij Konflikt
+                        </button>
+                    </form>
+                </fieldset>
 
             <fieldset style="flex: 1; border-color: #f44336;">
                 <legend style="color: #f44336; font-weight: bold;">2. End Round</legend>

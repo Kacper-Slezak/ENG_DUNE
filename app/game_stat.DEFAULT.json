@@ -12,6 +12,7 @@
   },
   "players": {
     "Peter": {
+      "leader": "paul_atreides", 
       "victory_points": 0,
       "resources": {
         "solari": 0,
@@ -53,6 +54,7 @@
       }
     },
     "Helen": {
+     "leader": "paul_atreides", 
       "victory_points": 0,
       "resources": {
         "solari": 0,
@@ -94,6 +96,7 @@
       }
     },
     "Paul": {
+"leader": "paul_atreides", 
       "victory_points": 0,
       "resources": {
         "solari": 0,
