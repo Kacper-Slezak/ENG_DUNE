@@ -138,11 +138,23 @@
         
         <h2>Game Management</h2>
         <div style="display: flex; gap: 10px;">
-            <fieldset style="flex: 1;">
-                <legend>AI Assistant for **{{ ai_player_name }}**</legend>
-                <p><a href="{{ url_for('ai_prompt') }}" target="_blank"><button style="background-color: #3f51b5;">Generate AI Prompt</button></a></p>
-                <p style="font-size: 0.9em; margin-bottom: 5px;">If AI's hand is wrong, set it manually (after live draw):</p>
-                <p><a href="{{ url_for('manage_ai_hand') }}"><button style="background-color: #ff9800; margin-top: 0;">Manage AI Hand (Draw 5)</button></a></p>
+           <fieldset style="flex: 1;">
+                <legend>Zarządzanie Graczami</legend>
+                <p>Ustaw rękę dla dowolnego gracza (np. po dociągnięciu na początku rundy lub po efekcie).</p>
+                
+                {% for name in player_names %}
+                    <p style="margin-bottom: 10px;">
+                        <a href="{{ url_for('manage_hand', player_name=name) }}">
+                            <button style="background-color: #ff9800; width: 60%;">Zarządzaj ręką: {{ name }}</button>
+                        </a>
+                        
+                        {% if name == ai_player_name %}
+                            <a href="{{ url_for('ai_prompt') }}" target="_blank">
+                                <button style="background-color: #3f51b5; width: 35%;">AI Prompt</button>
+                            </a>
+                        {% endif %}
+                    </p>
+                {% endfor %}
             </fieldset>
             
             <fieldset style="flex: 1;">

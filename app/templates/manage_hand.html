@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dune: Imperium - Manage AI Hand</title>
+    <title>Dune: Imperium - Manage Hand</title>
     <style>
         body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
         .message-success { color: green; font-weight: bold; }
         .message-error { color: red; font-weight: bold; }
         fieldset { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; background: #f9f9f9; }
         legend { font-size: 1.2em; font-weight: bold; padding: 0 10px; }
-        button { background-color: #ff9800; color: white; cursor: pointer; padding: 10px 15px; font-size: 1.1em; border: none; border-radius: 5px; width: 100%; }
-        button:hover { background-color: #f57c00; }
+        button { background-color: #4CAF50; color: white; cursor: pointer; padding: 10px 15px; font-size: 1.1em; border: none; border-radius: 5px; width: 100%; }
+        button:hover { background-color: #45a049; }
         a { text-decoration: none; }
         
         .card-grid {
@@ -39,7 +39,7 @@
     </style>
 </head>
 <body>
-    <h1>Manage Hand for AI Player: {{ ai_player_name }}</h1>
+    <h1>Zarządzaj Ręką dla: {{ player_name }}</h1>
     <p><a href="{{ url_for('index') }}">&larr; Back to Main Game</a></p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -50,10 +50,10 @@
         {% endif %}
     {% endwith %}
 
-    <form method="POST" action="{{ url_for('manage_ai_hand') }}" id="handForm">
+    <form method="POST" action="{{ url_for('manage_hand', player_name=player_name) }}" id="handForm">
         <fieldset>
-            <legend>Select 5 Cards for AI's Hand</legend>
-            <p>Select exactly 5 cards from the AI's total deck below. These will become the AI's hand for the prompt. All other cards will be moved to the draw deck.</p>
+            <legend>Wybierz karty na ręce</legend>
+            <p>Zaznacz karty, które ten gracz ma aktualnie na ręce (np. po dociągnięciu 5 na początku rundy lub po efekcie "dobierz kartę").</p>
             
             <div class="card-grid">
                 {% for card in deck_cards %}
@@ -67,40 +67,9 @@
             </div>
             
             <hr>
-            <p id="selection_count" style="font-weight: bold; text-align: center; font-size: 1.2em;">
-                Selected: 0 / 5
-            </p>
-            <button type="submit" id="submitButton">Set Hand (5 Cards)</button>
+            <button type="submit" id="submitButton">Zapisz Rękę</button>
         </fieldset>
     </form>
     
-    <script>
-        const checkboxes = document.querySelectorAll('input[name="card_ids"]');
-        const countLabel = document.getElementById('selection_count');
-        const submitButton = document.getElementById('submitButton');
-
-        function updateCount() {
-            const count = document.querySelectorAll('input[name="card_ids"]:checked').length;
-            countLabel.textContent = `Selected: ${count} / 5`;
-            
-            if (count === 5) {
-                countLabel.style.color = "green";
-                submitButton.disabled = false;
-                submitButton.style.backgroundColor = "#4CAF50";
-            } else {
-                countLabel.style.color = "red";
-                submitButton.disabled = true;
-                submitButton.style.backgroundColor = "#ccc";
-            }
-        }
-        
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', updateCount);
-        });
-        
-        // Initial count on page load
-        updateCount();
-    </script>
-
-</body>
+    </body>
 </html>

@@ -673,73 +673,44 @@ def perform_full_game_reset():
         return False, "Error: Could not write to game_stat.json."
 
 
-def perform_cleanup_and_new_round(game_state):
-    """Resetuje planszę na kolejną rundę. (Automatyczne dobieranie)"""
-    if game_state:
-        if "locations_state" in game_state:
-            for loc_id in game_state["locations_state"]:
-                game_state["locations_state"][loc_id]["occupied_by"] = None
-        
-        game_state["round_history"] = []
-        game_state["current_phase"] = "AGENT_TURN" 
-        game_state["round"] = game_state.get("round", 0) + 1
-        
-        # Resetuj kartę konfliktu (zostanie ustawiona ręcznie)
-        game_state["current_conflict_card"] = { "name": "N/A", "rewards": {}, "rewards_text": [] }
-        
-        player_names = sorted(list(game_state.get("players", {}).keys()))
-        game_state["currentPlayer"] = player_names[0] 
-
-        for player_name, player_data in game_state.get("players", {}).items():
-            player_data["agents_placed"] = 0
-            player_data["has_passed"] = False 
-            player_data["reveal_stats"] = {"total_persuasion": 0, "total_swords": 0}
-            
-            if player_data.get("agents_total", 2) != 3:
-                player_data["agents_total"] = 2 
-            
-            player_data["draw_deck"] = player_data.get("draw_deck", []) + \
-                                     player_data.get("hand", []) + \
-                                     player_data.get("discard_pile", [])
-            player_data["hand"] = []
-            player_data["discard_pile"] = []
-            
-            player_data["draw_deck"] = list(player_data.get("deck_pool", []))
-            
-            random.shuffle(player_data["draw_deck"])
-            
-            for _ in range(5):
-                if len(player_data["draw_deck"]) > 0:
-                    card = player_data["draw_deck"].pop(0)
-                    player_data["hand"].append(card)
-            
-    return game_state
-
-
 def set_player_hand(game_state, player_name, card_ids_list, cards_db):
-    """Ręcznie ustawia rękę gracza (np. AI)."""
+    """
+    Ręcznie ustawia rękę gracza (np. AI).
+    NIE MA LIMITU KART - pozwala to na dodawanie kart w trakcie tury (np. z efektu).
+    """
     if not player_name:
         return False, "Player name not provided."
     player_state = game_state.get("players", {}).get(player_name)
     if not player_state:
         return False, f"Player {player_name} not found."
-    if len(card_ids_list) != 5:
-        return False, f"Invalid selection. You must select exactly 5 cards. You selected {len(card_ids_list)}."
+    
+    # USUNIĘTO WALIDACJĘ 5 KART
+    # if len(card_ids_list) != 5:
+    #     return False, f"Invalid selection. You must select exactly 5 cards. You selected {len(card_ids_list)}."
+        
     deck_pool = player_state.get("deck_pool", [])
+    
+    # Sprawdzamy, czy wszystkie podane karty istnieją w ogólnej puli gracza
     for card_id in card_ids_list:
         if card_id not in cards_db:
             return False, f"Invalid Card ID: {card_id} not found in database."
         if card_id not in deck_pool:
             card_name = cards_db.get(card_id, {}).get("name", card_id)
             return False, f"Invalid card: '{card_name}' is not in player {player_name}'s deck pool."
+            
     player_state["hand"] = list(card_ids_list)
+    
+    # Logika pomocnicza: ustawia resztę kart jako 'draw_deck' dla jasności
     draw_deck_list = list(deck_pool) 
     for card in card_ids_list:
         if card in draw_deck_list:
             draw_deck_list.remove(card)
+            
     player_state["draw_deck"] = draw_deck_list
-    player_state["discard_pile"] = []
-    return True, f"Success! Set 5 cards for {player_name}. All other cards moved to draw deck."
+    player_state["discard_pile"] = [] # Czyścimy też discard dla porządku
+    
+    # Zmieniona wiadomość sukcesu
+    return True, f"Success! Set {len(card_ids_list)} card(s) for {player_name}."
 
 
 # --- ZAKTUALIZOWANA FUNKCJA (REQ 3) ---

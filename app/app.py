@@ -494,16 +494,21 @@ def reset_board():
             flash("ERROR: Failed to save game state changes.", "error")
     return redirect(url_for('index'))
 
-@app.route('/manage_ai_hand', methods=['GET', 'POST'])
-def manage_ai_hand():
+@app.route('/manage_hand/<string:player_name>', methods=['GET', 'POST'])
+def manage_hand(player_name):
+    """
+    Dynamiczna strona do zarządzania ręką DOWOLNEGO gracza.
+    """
     game_state, _, cards_db, _, _, _ = load_game_data()
     if game_state is None or cards_db is None:
         flash("CRITICAL ERROR: Cannot load core game data. Check JSON files.", "error")
         return render_template('error.html'), 500
+
     if request.method == 'POST':
-        player_name = AI_PLAYER_NAME
+        # player_name jest teraz brany z URL, a nie hardkodowany
         card_ids = request.form.getlist('card_ids')
         is_valid, message = set_player_hand(game_state, player_name, card_ids, cards_db)
+        
         if is_valid:
             if save_json_file(GAME_STATE_FILE, game_state):
                 flash(message, "success")
@@ -511,19 +516,29 @@ def manage_ai_hand():
                 flash("CRITICAL ERROR: Cannot save game state after setting hand.", "error")
         else:
             flash(f"Invalid hand: {message}", "error")
-        return redirect(url_for('manage_ai_hand'))
-    player_data = game_state.get("players", {}).get(AI_PLAYER_NAME, {})
+        
+        # Przekieruj z powrotem do tej samej strony
+        return redirect(url_for('manage_hand', player_name=player_name))
+
+    # Logika GET
+    player_data = game_state.get("players", {}).get(player_name, {})
+    if not player_data:
+        flash(f"Player {player_name} not found!", "error")
+        return redirect(url_for('index'))
+        
     deck_pool_ids = player_data.get("deck_pool", [])
     current_hand_ids = player_data.get("hand", [])
     deck_pool_details = []
+    
     for card_id in deck_pool_ids:
         card_data = cards_db.get(card_id, {})
         deck_pool_details.append({
             "id": card_id,
             "name": card_data.get("name", card_id)
         })
-    return render_template('manage_ai_hand.html',
-        ai_player_name=AI_PLAYER_NAME,
+        
+    return render_template('manage_hand.html', # Użyjemy nowego szablonu
+        player_name=player_name,
         deck_cards=sorted(deck_pool_details, key=lambda x: x['name']),
         current_hand=current_hand_ids
     )
