@@ -98,10 +98,7 @@ def index():
     player_states = game_state.get("players", {})
     
     for player_name, player_data in player_states.items():
-        if player_name == AI_PLAYER_NAME:
-            card_ids_list = player_data.get("hand", []) 
-        else:
-            card_ids_list = player_data.get("deck_pool", [])
+        card_ids_list = player_data.get("hand", [])
         player_card_list = []
         for card_id in card_ids_list:
             if card_id in cards_db:

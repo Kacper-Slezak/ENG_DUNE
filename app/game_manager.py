@@ -118,14 +118,12 @@ def is_move_valid(game_state, locations_db, cards_db, player_name, card_id, loca
     if location_state.get("occupied_by") is not None:
         return False, f"Location is already occupied by player {location_state['occupied_by']}."
 
-    if player_name == AI_PLAYER_NAME:
-        player_hand = player_state.get("hand", [])
-        if card_id not in player_hand:
-            return False, f"Player {player_name} (AI) does not have the card '{card_data.get('name', card_id)}' in their strict HAND."
-    else:
-        player_deck_pool = player_state.get("deck_pool", [])
-        if card_id not in player_deck_pool:
-            return False, f"Player {player_name} (Human) does not have the card '{card_data.get('name', card_id)}' in their DECK."
+    # --- ZUNIFIKOWANA KONTROLA RĘKI (WSZYSCY GRACZE) ---
+    player_hand = player_state.get("hand", [])
+    if card_id not in player_hand:
+        card_name = card_data.get('name', card_id)
+        return False, f"Player {player_name} does not have the card '{card_name}' in their hand."
+    # --- Koniec zmiany ---
             
     required_symbol = location_data.get("symbol_required")
     card_symbols = card_data.get("agent_symbols", [])

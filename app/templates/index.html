@@ -223,11 +223,7 @@
                 defaultOption.textContent = "-- Select Card --";
             }
             
-            if (selectedPlayer === aiPlayerName) {
-                 cardDropdownLabel.textContent = `Which card to use? (From AI's Hand [${cardsForPlayer.length}])`;
-            } else {
-                 cardDropdownLabel.textContent = `Which card to use? (From Player's Deck [${cardsForPlayer.length}])`;
-            }
+            cardDropdownLabel.textContent = `Which card to use? (From Player's Hand [${cardsForPlayer.length}])`;
             
             cardDropdown.appendChild(defaultOption);
             
