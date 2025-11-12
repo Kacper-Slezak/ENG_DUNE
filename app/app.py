@@ -15,7 +15,8 @@ from game_manager import (
     set_player_hand,
     AI_PLAYER_NAME,
     process_conflict_set,
-    process_conflict_resolve
+    process_conflict_resolve,
+    save_json_file_from_text
 )
 
 from build_ai_prompt import generate_ai_prompt
@@ -282,7 +283,6 @@ def resolve_conflict_auto():
         flash("Cannot resolve conflict: Not in REVEAL phase.", "error")
         return redirect(url_for('reveal_phase'))
 
-    # 1. Zbierz statystyki graczy
     player_stats = []
     for player_name, player_data in game_state.get("players", {}).items():
         stats = player_data.get("reveal_stats", {})
@@ -291,18 +291,76 @@ def resolve_conflict_auto():
             "swords": stats.get("total_swords", 0)
         })
     
-    # 2. Posortuj graczy malejąco wg siły
     player_stats.sort(key=lambda x: x['swords'], reverse=True)
     
-    # 3. Wybierz zwycięzców
-    # Prosta logika (jeszcze bez obsługi remisów - zakłada, że > 0 mieczy)
-    first_place = player_stats[0]['name'] if len(player_stats) > 0 and player_stats[0]['swords'] > 0 else None
-    second_place = player_stats[1]['name'] if len(player_stats) > 1 and player_stats[1]['swords'] > 0 else None
-    third_place = player_stats[2]['name'] if len(player_stats) > 2 and player_stats[2]['swords'] > 0 else None
 
-    if not first_place:
-         flash("Conflict resolved automatically: No one had any swords.", "success")
-         return redirect(url_for('reveal_phase'))
+    contenders = [p for p in player_stats if p['swords'] > 0]
+    c_len = len(contenders)
+
+    if c_len == 0:
+        flash("Conflict resolved automatically: No one had any swords.", "success")
+        process_conflict_resolve(game_state, None, None, None)
+        save_json_file(GAME_STATE_FILE, game_state)
+        return redirect(url_for('reveal_phase'))
+
+    first_place = None
+    second_place = None
+    third_place = None
+
+    if c_len == 1:
+        first_place = contenders[0]['name']
+    
+    elif contenders[0]['swords'] > contenders[1]['swords']:
+        first_place = contenders[0]['name']
+        
+        if c_len == 2:
+            second_place = contenders[1]['name']
+        
+        elif contenders[1]['swords'] > contenders[2]['swords']:
+            second_place = contenders[1]['name']
+            
+            if c_len == 3:
+                third_place = contenders[2]['name']
+            
+            elif contenders[2]['swords'] > contenders[3]['swords']:
+                third_place = contenders[2]['name']
+            
+        
+        else:
+
+            second_place = None
+            
+            second_place_score = contenders[1]['swords']
+            third_place_candidate = None
+            for p in contenders:
+                if p['swords'] < second_place_score:
+                    third_place_candidate = p
+                    break # Znaleziono pierwszego kandydata
+            
+            if third_place_candidate:
+                third_place_score = third_place_candidate['swords']
+                num_at_third_score = len([p for p in contenders if p['swords'] == third_place_score])
+                if num_at_third_score == 1:
+                    third_place = third_place_candidate['name']
+
+    else:
+
+        first_place = None
+        second_place = None
+        
+        first_place_score = contenders[0]['swords']
+        third_place_candidate = None
+        for p in contenders:
+            if p['swords'] < first_place_score:
+                third_place_candidate = p
+                break 
+        
+        if third_place_candidate:
+            third_place_score = third_place_candidate['swords']
+            num_at_third_score = len([p for p in contenders if p['swords'] == third_place_score])
+            if num_at_third_score == 1:
+                third_place = third_place_candidate['name']
+
 
     is_valid, message = process_conflict_resolve(game_state, first_place, second_place, third_place)
     
@@ -440,6 +498,28 @@ def debug_json():
         return render_template('error.html'), 500
     json_text = json.dumps(game_state, indent=2, ensure_ascii=False)
     return render_template('debug_json.html', json_text=json_text)
+
+
+@app.route('/save_debug_json', methods=['POST'])
+def save_debug_json():
+    """
+    Zapisuje stan gry z edytora debugowania JSON.
+    """
+    text_data = request.form.get('json_text')
+    if not text_data:
+        flash("Błąd: Nie otrzymano żadnych danych do zapisu.", "error")
+        return redirect(url_for('debug_json'))
+
+    # Użyj funkcji z game_manager do walidacji i zapisu
+    is_valid, message = save_json_file_from_text(text_data)
+    
+    if is_valid:
+        flash(message, "success")
+    else:
+        # Błąd parsowania JSON lub zapisu jest już w 'message'
+        flash(f"Błąd zapisu: {message}", "error")
+        
+    return redirect(url_for('debug_json'))
 
 
 if __name__ == '__main__':

@@ -145,6 +145,16 @@ def is_move_valid(game_state, locations_db, cards_db, player_name, card_id, loca
             if player_has < required_amount:
                 return False, f"Player {player_name} does not have enough resources. Required: {required_amount} {resource_name}, Has: {player_has}."
 
+    extra_req = location_data.get("extra_requirement")
+    
+    if extra_req and extra_req != "none":
+        
+        
+        if extra_req == "2 fremen influence points":
+            player_fremen_influence = player_state.get("influence", {}).get("fremen", 0)
+            if player_fremen_influence < 2:
+                return False, f"Wymaganie lokacji: '{extra_req}'. Gracz {player_name} ma tylko {player_fremen_influence}."
+        
     return True, "Move is valid."
 
 
