@@ -305,102 +305,93 @@ def resolve_conflict_auto():
         flash("Cannot resolve conflict: Not in REVEAL phase.", "error")
         return redirect(url_for('reveal_phase'))
 
-    # --- NOWA LOGIKA: SUMOWANIE SIŁY I OBSŁUGA REMISÓW ---
+    # --- NOWA LOGIKA REMISÓW (WG ZALECEŃ UŻYTKOWNIKA) ---
     
     # 1. Zbierz statystyki graczy i OBLICZ FINALNĄ SIŁĘ
     player_stats = []
     for player_name, player_data in game_state.get("players", {}).items():
         stats = player_data.get("reveal_stats", {})
-        
-        # Pobierz siłę bazową (z kart i wojsk)
         base_swords = stats.get("base_swords", 0)
-        
-        # Pobierz siłę bonusową (z intryg)
         bonus_swords = player_data.get("active_effects", {}).get("fight_bonus_swords", 0)
-        
         final_swords = base_swords + bonus_swords
         
         player_stats.append({
             "name": player_name,
-            "swords": final_swords # Użyj finalnej siły
+            "swords": final_swords
         })
     
-    # 2. Posortuj graczy malejąco wg siły
-    player_stats.sort(key=lambda x: x['swords'], reverse=True)
-    
-    # 3. Odfiltruj graczy z 0 siły
+    # 2. Posortuj graczy i odfiltruj tych z 0 siły
     contenders = [p for p in player_stats if p['swords'] > 0]
+    contenders.sort(key=lambda x: x['swords'], reverse=True)
+    
     c_len = len(contenders)
 
     if c_len == 0:
         flash("Conflict resolved automatically: No one had any swords.", "success")
-        process_conflict_resolve(game_state, None, None, None)
+        # Wywołujemy z pustymi listami, aby tylko zapisać historię
+        is_valid, message = process_conflict_resolve(game_state, [], [], []) 
         save_json_file(GAME_STATE_FILE, game_state)
         return redirect(url_for('reveal_phase'))
 
-    # 4. Zainicjuj zwycięzców
-    first_place = None
-    second_place = None
-    third_place = None
+    # 3. Zainicjuj listy zwycięzców
+    first_place_winners = []
+    second_place_winners = []
+    third_place_winners = []
 
-    # 5. Sprawdź 1. miejsce
-    if c_len == 1:
-        first_place = contenders[0]['name']
-    
-    elif contenders[0]['swords'] > contenders[1]['swords']:
-        # Brak remisu o 1. miejsce
-        first_place = contenders[0]['name']
+    # 4. Znajdź graczy na 1. miejscu
+    top_score = contenders[0]['swords']
+    first_place_contenders = [p['name'] for p in contenders if p['swords'] == top_score]
+    remaining_contenders = [p for p in contenders if p['swords'] < top_score]
+
+    # 5. Zastosuj logikę
+    if len(first_place_contenders) == 1:
+        # PRZYPADEK A: Czysty zwycięzca 1. miejsca
+        first_place_winners = first_place_contenders
         
-        # 6. Sprawdź 2. miejsce
-        if c_len == 2:
-            second_place = contenders[1]['name']
-        elif contenders[1]['swords'] > contenders[2]['swords']:
-            # Brak remisu o 2. miejsce
-            second_place = contenders[1]['name']
+        if remaining_contenders:
+            # Szukaj 2. miejsca
+            second_score = remaining_contenders[0]['swords']
+            second_place_contenders = [p['name'] for p in remaining_contenders if p['swords'] == second_score]
+            third_contenders = [p for p in remaining_contenders if p['swords'] < second_score]
+
+            if len(second_place_contenders) == 1:
+                # PRZYPADEK A1: Czysty zwycięzca 2. miejsca
+                second_place_winners = second_place_contenders
+                
+                if third_contenders:
+                    # Szukaj 3. miejsca
+                    third_score = third_contenders[0]['swords']
+                    third_place_contenders = [p['name'] for p in third_contenders if p['swords'] == third_score]
+
+                    if len(third_place_contenders) == 1:
+                        # PRZYPADEK A1a: Czysty zwycięzca 3. miejsca
+                        third_place_winners = third_place_contenders
+                    # else: Remis o 3. miejsce, nikt nie dostaje (zgodnie z logiką usera)
             
-            # 7. Sprawdź 3. miejsce
-            if c_len == 3:
-                third_place = contenders[2]['name']
-            elif c_len > 3 and contenders[2]['swords'] > contenders[3]['swords']:
-                # Brak remisu o 3. miejsce
-                third_place = contenders[2]['name']
-            # else: Remis o 3. miejsce, third_place=None
-        
-        else:
-            # Remis o 2. miejsce
-            second_place = None
-            second_place_score = contenders[1]['swords']
-            third_place_candidate = None
-            for p in contenders:
-                if p['swords'] < second_place_score:
-                    third_place_candidate = p
-                    break
-            
-            if third_place_candidate:
-                third_place_score = third_place_candidate['swords']
-                num_at_third_score = len([p for p in contenders if p['swords'] == third_place_score])
-                if num_at_third_score == 1:
-                    third_place = third_place_candidate['name']
-
-    else:
-        # Remis o 1. miejsce
-        first_place = None
-        second_place = None
-        first_place_score = contenders[0]['swords']
-        third_place_candidate = None
-        for p in contenders:
-            if p['swords'] < first_place_score:
-                third_place_candidate = p
-                break
-        
-        if third_place_candidate:
-            third_place_score = third_place_candidate['swords']
-            num_at_third_score = len([p for p in contenders if p['swords'] == third_place_score])
-            if num_at_third_score == 1:
-                third_place = third_place_candidate['name']
+            elif len(second_place_contenders) > 1:
+                # PRZYPADEK A2: Remis o 2. miejsce
+                # Nikt nie dostaje nagrody za 2., wszyscy remisujący dostają nagrodę za 3.
+                third_place_winners = second_place_contenders
     
+    elif len(first_place_contenders) > 1:
+        # PRZYPADEK B: Remis o 1. miejsce
+        # Nikt nie dostaje nagrody za 1., wszyscy remisujący dostają nagrodę za 2.
+        second_place_winners = first_place_contenders
+        
+        if remaining_contenders:
+            # Szukaj 3. miejsca (gracz "na drugim" miejscu dostaje nagrodę za 3.)
+            third_score = remaining_contenders[0]['swords']
+            third_place_contenders = [p['name'] for p in remaining_contenders if p['swords'] == third_score]
 
-    is_valid, message = process_conflict_resolve(game_state, first_place, second_place, third_place)
+            if len(third_place_contenders) == 1:
+                # PRZYPADEK B1: Czysty zwycięzca 3. miejsca
+                third_place_winners = third_place_contenders
+            # else: Remis o 3. miejsce, nikt nie dostaje
+
+    # --- KONIEC NOWEJ LOGIKI ---
+    
+    # Przekaż listy zwycięzców do process_conflict_resolve
+    is_valid, message = process_conflict_resolve(game_state, first_place_winners, second_place_winners, third_place_winners)
     
     if is_valid:
         if save_json_file(GAME_STATE_FILE, game_state):

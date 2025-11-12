@@ -845,8 +845,9 @@ def apply_rewards(game_state, player_name, rewards_list):
 
 
 # --- ZAKTUALIZOWANA FUNKCJA (REQ 4) ---
-def process_conflict_resolve(game_state, first_place, second_place, third_place):
-    """Zapisuje wyniki konfliktu i AUTOMATYCZNIE przyznaje nagrody."""
+def process_conflict_resolve(game_state, first_place_list, second_place_list, third_place_list):
+    """Zapisuje wyniki konfliktu i AUTOMATYCZNIE przyznaje nagrody.
+    Akceptuje listy graczy dla każdego miejsca."""
     
     conflict_card = game_state.get("current_conflict_card", {})
     conflict_name = conflict_card.get("name", "Conflict")
@@ -854,25 +855,33 @@ def process_conflict_resolve(game_state, first_place, second_place, third_place)
     
     summaries = []
     
-    if first_place and "1" in rewards_map:
-        reward_details = apply_rewards(game_state, first_place, rewards_map["1"])
-        summaries.append(f"1st: {first_place} ({reward_details})")
+    # Ważne: Sprawdzamy czy lista zwycięzców nie jest pusta ORAZ czy nagroda dla tego miejsca istnieje
+    if first_place_list and "1" in rewards_map:
+        for player_name in first_place_list:
+            reward_details = apply_rewards(game_state, player_name, rewards_map["1"])
+            summaries.append(f"1st: {player_name} ({reward_details})")
         
-    if second_place and "2" in rewards_map:
-        reward_details = apply_rewards(game_state, second_place, rewards_map["2"])
-        summaries.append(f"2nd: {second_place} ({reward_details})")
+    if second_place_list and "2" in rewards_map:
+        for player_name in second_place_list:
+            reward_details = apply_rewards(game_state, player_name, rewards_map["2"])
+            summaries.append(f"2nd: {player_name} ({reward_details})")
 
-    if third_place and "3" in rewards_map:
-        reward_details = apply_rewards(game_state, third_place, rewards_map["3"])
-        summaries.append(f"3rd: {third_place} ({reward_details})")
+    if third_place_list and "3" in rewards_map:
+        for player_name in third_place_list:
+            reward_details = apply_rewards(game_state, player_name, rewards_map["3"])
+            summaries.append(f"3rd: {player_name} ({reward_details})")
     
     if not summaries:
-        if not any([first_place, second_place, third_place]):
-            return False, "No winners entered."
-        # Ktoś wygrał, ale nie było nagród
-        summaries = [f"1st: {first_place}", f"2nd: {second_place}", f"3rd: {third_place}"]
-        
-    full_summary = f"Conflict Resolved ({conflict_name}): {', '.join(summaries)}"
+        if not any([first_place_list, second_place_list, third_place_list]):
+            full_summary = f"Conflict Resolved ({conflict_name}): No winners."
+        else:
+            # Ktoś wygrał, ale nie było nagród dla przyznanych miejsc
+            f_winners = ', '.join(first_place_list) if first_place_list else 'None'
+            s_winners = ', '.join(second_place_list) if second_place_list else 'None'
+            t_winners = ', '.join(third_place_list) if third_place_list else 'None'
+            full_summary = f"Conflict Resolved ({conflict_name}): 1st: {f_winners}, 2nd: {s_winners}, 3rd: {t_winners} (No applicable rewards found for these tiers)."
+    else:
+        full_summary = f"Conflict Resolved ({conflict_name}): {', '.join(summaries)}"
 
     if "round_history" not in game_state:
         game_state["round_history"] = []
