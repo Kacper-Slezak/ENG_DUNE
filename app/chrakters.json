@@ -1,0 +1,180 @@
+{
+  "paul_atreides": {
+    "name": "Paul Atreides",
+    "house": "House Atreides",
+    "type": "leader",
+    "ability_passive": {
+      "name": "Foresight",
+      "description": "At any time, you may look at the top card of your deck."
+    },
+    "ability_signet": {
+      "name": "Discipline",
+      "action": [
+        {"gain": 
+          { "type": "resource", "resource": "card from unplayed pile", "amount": 1 }
+        }
+      ],
+      "description": "Gain 1 card from unplayed pile."
+    }
+  },
+
+  "helena_richese": {
+    "name": "Helena Richese",
+    "house": "House Richese",
+    "type": "leader",
+    "ability_passive": {
+      "name": "Knows Everything",
+      "description": "You may send your agents to occupied spaces in fraction 'populated ares' and 'landsraad'."
+    },
+    "ability_signet": {
+      "name": "Manipulation",
+      "action": [
+        { "type": "action", "description": "Trash a card from the Imperium row and replace it. During your reveal turn this round, you may acquire the trashed card for 1 Solari less." }
+      ],
+      "description": "Trash a card from the Imperium row and replace it. During your reveal turn this round, you may acquire the trashed card for 1 Solari less."
+    }
+  },
+
+  "earl_memnon_thorvald": {
+    "name": "Earl Memnon Thorvald",
+    "house": "House Thorvald",
+    "type": "leader",
+    "ability_passive": {
+      "name": "Connections",
+      "description": "When you take a High Council seat: Gain 1 Intrigue card."
+    },
+    "ability_signet": {
+      "name": "Spice Supply",
+      "action": [
+        {"gain": 
+          { "type": "resource", "resource": "Spice", "amount": 1 }
+        }
+      ],
+      "description": "Gain 1 Spice."
+    }
+  },
+
+  "baron_vladimir_harkonnen": {
+    "name": "Baron Vladimir Harkonnen",
+    "house": "House Harkonnen",
+    "type": "leader",
+    "ability_passive": {
+      "name": "Masterful Move",
+      "description": "At the start of the game, secretly choose 2 factions. When you deploy 4+ troops to the conflict in a turn, reveal your choices and gain 1 influence in each."
+    },
+    "ability_signet": {
+      "name": "Scheming",
+      "action": [
+        {"exchange": [
+            {"pay":
+                {
+                    "type": "resource", "resource": "solari", "amount": 1 
+                }
+            },
+            {"gain":
+                {
+                     "type": "resource", "resource": "intrigue", "amount": 1 
+                }
+            }
+        ]}
+        
+      ],
+      "description": "Gain 1 Solari and 1 Intrigue card."
+    }
+  },
+
+  "count_ilban_richese": {
+    "name": "Count Ilban Richese",
+    "house": "House Richese",
+    "type": "leader",
+    "ability_passive": {
+      "name": "Ruthless Negotiator",
+      "description": "When you pay Solari for a board space cost: Gain 1 card from unplayed pile."
+    },
+    "ability_signet": {
+      "name": "Production",
+      "action": [
+        {"gain": 
+          { "type": "resource", "resource": "solari", "amount": 1 }
+        }
+      ],
+      "description": "Gain 1 Solari."
+    }
+  },
+
+  "duke_leto_atreides": {
+    "name": "Duke Leto Atreides",
+    "house": "House Atreides",
+    "type": "leader",
+    "ability_passive": {
+      "name": "Popularity in Landsraad",
+      "description": "Sending an agent to a Landsraad space costs you 1 Solari less."
+    },
+    "ability_signet": {
+      "name": "Careful Diplomacy",
+      "action": [
+        {"exchange":
+          [
+            {"pay":
+              { "type": "resource", "resource": "Spice", "amount": 1 }
+            },
+            {"gain":
+              { "type": "action", "description": "Gain 1 influence point with a faction where an opponent has more influence than you." }
+            }
+          ]
+        }
+      ],
+      "description": "Pay 1 Spice to gain 1 influence with a faction where an opponent has more influence than you."
+    }
+  },
+
+  "glossu_beast_rabban": {
+    "name": "Glossu \"Beast\" Rabban",
+    "house": "House Harkonnen",
+    "type": "leader",
+    "starting_bonus": {
+      "description": "You start the game with additional resources: 1 Solari and 1 Water.",
+      "gain": [
+        { "type": "resource", "resource": "solari", "amount": 1 },
+        { "type": "resource", "resource": "water", "amount": 1 }
+      ]
+    },
+    "ability_passive": {
+      "name": "Fief of Arrakis",
+      "description": "You start the game with additional resources: 1 Solari and 1 Water."
+    },
+    "ability_signet": {
+      "name": "Brutality",
+      "action": [
+        {"type": "choice","choice": [
+          {"gain": 
+            { "type": "resource", "resource": "troops", "amount": 1 }
+          },
+          {"action": 
+            { "type": "action", "description": "Gain 2 troops, if you have at least 1 faction token ( alliance.)" }
+          }
+        ],"choose": 1}
+      ],
+      "description": "Gain 1 troops —OR— Gain 2 troops, if you have at least 1 faction alliance."
+    }
+  },
+
+  "countess_ariana_thorvald": {
+    "name": "Countess Ariana Thorvald",
+    "house": "House Thorvald",
+    "type": "leader",
+    "ability_passive": {
+      "name": "Spice Addiction",
+      "description": "When you gather spice, you get 1 Spice less and draw a card from unplayed pile."
+    },
+    "ability_signet": {
+      "name": "Hidden Reservoir",
+      "action": [
+        {"gain": 
+          { "type": "resource", "resource": "water", "amount": 1 }
+        }
+      ],
+      "description": "Gain 1 Water."
+    }
+  }
+}
