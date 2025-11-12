@@ -1,11 +1,199 @@
 {
   "conflict_01": {
-    "name": "Battle for Arrakeen",
+    "name": "Skirmish1",
     "tier": 1,
     "rewards": {
       "1": [
-        { "type": "vp", "amount": 1 },
+        { "type": "resource", "resource": "influence point", "amount": 1 },
         { "type": "resource", "resource": "Spice", "amount": 3 }
+      ],
+      "2": [
+        { "type": "resource", "resource": "solari", "amount": 3 }
+      ],
+      "3": [
+        { "type": "resource", "resource": "solari", "amount": 2 }
+      ]
+    }
+  },
+  "conflict_02": {
+    "name": "Skirmish2",
+    "tier": 1,
+    "rewards": {
+      "1": [
+        { "type": "vp", "amount": 1 }
+      ],
+      "2": [
+        { "type": "resource", "resource": "water", "amount": 1 }
+      ],
+      "3": [
+        { "type": "resource", "resource": "Spice", "amount": 1 }
+      ]
+    }
+  },
+  "conflict_03": {
+    "name": "Skirmish3",
+    "tier": 1,
+    "rewards": {
+      "1": [
+        { "type": "vp", "amount": 1 }
+      ],
+      "2": [
+        { "type": "resource", "resource": "solari", "amount": 2 },
+        { "type": "resource", "resource": "intrigue", "amount": 1 }
+
+      ],
+      "3": [
+        { "type": "resource", "resource": "solari", "amount": 2 }
+      ]
+
+    }
+  },
+  "conflict_04": {
+    "name": "Skirmish4",
+    "tier": 1,
+    "rewards": {
+      "1": [
+        { "type": "resource", "resource": "influence point", "amount": 1 },
+        { "type": "resource", "resource": "Spice", "amount": 1 }
+      ],
+      "2": [
+        { "type": "resource", "resource": "Spice", "amount": 2 }
+
+      ],
+      "3": [
+        { "type": "resource", "resource": "Spice", "amount": 1 }
+      ]
+
+    }
+  },
+  "conflict_05": {
+    "name": "Siege of Cartagh",
+    "tier": 2,
+    "rewards": {
+      "1": [
+        { "type": "vp", "amount": 1 },
+        { "type": "control", "control": "Cartagh" }
+      ],
+      "2": [
+        { "type": "resource", "resource": "Spice", "amount": 1 },
+        { "type": "resource", "resource": "intrigue", "amount": 1 }
+      ],
+      "3": [
+        { "type": "resource", "resource": "Spice", "amount": 1 }
+      ]
+    }
+  },
+  "conflict_06": {
+    "name": "power of the desert",
+    "tier": 2,
+    "rewards": {
+      "1": [
+        { "type": "vp", "amount": 1 },
+        { "type": "resource", "resource": "water", "amount": 1 }
+      ],
+      "2": [
+        { "type": "resource", "resource": "water", "amount": 1 },
+        { "type": "resource", "resource": "Spice", "amount": 1 }
+      ],
+      "3": [
+        { "type": "resource", "resource": "Spice", "amount": 1 }
+      ]
+    }
+  },
+  "conflict_07": {
+    "name": "organize the chaos",
+    "tier": 2,
+    "rewards": {
+      "1": [
+        { "type": "resource", "resource": "mentat", "amount": 1 },
+        { "type": "resource", "resource": "intrigue", "amount": 1 },
+        { "type": "resource", "resource": "solari", "amount": 2 }
+      ],
+      "2": [
+        { "type": "resource", "resource": "intrigue", "amount": 1 },
+        { "type": "resource", "resource": "solari", "amount": 2 }
+      ],
+      "3": [
+        { "type": "resource", "resource": "solari", "amount": 2 }
+      ]
+    }
+  },
+  "conflict_08": {
+    "name": "coat and dagger",
+    "tier": 2,
+    "rewards": {
+      "1": [
+        { "type": "resource", "resource": "influence point", "amount": 1 },
+        { "type": "resource", "resource": "intrigue", "amount": 2 }
+      ],
+      "2": [
+        { "type": "resource", "resource": "intrigue", "amount": 1 },
+        { "type": "resource", "resource": "Spice", "amount": 1 }
+      ],
+      "3": [
+        {"type":"choice","choice": [
+            { "type": "resource", "resource": "intrigue", "amount": 1 },
+            { "type": "resource", "resource": "Spice", "amount": 1 }
+          ],
+          "choose": 1}  
+      ]
+    }
+  },
+  "conflict_09": {
+    "name": "Siege of Arrakeen",
+    "tier": 2,
+    "rewards": {
+      "1": [
+        { "type": "vp", "amount": 1 },
+        { "type": "control", "control": "Arrakeen" }
+      ],
+      "2": [
+        { "type": "resource", "resource": "solari", "amount": 4 }
+      ],
+      "3": [
+        { "type": "resource", "resource": "solari", "amount": 2 }
+      ]
+    }
+  },
+  "conflict_10": {
+    "name": "terrible destiny",
+    "tier": 2,
+    "rewards": {
+      "1": [
+        { "type": "vp", "amount": 1 },
+        { "type": "destroy", "resource": "card from hand or from discard pile" }
+      ],
+      "2": [
+        { "type": "resource", "resource": "Spice", "amount": 1 },
+        { "type": "resource", "resource": "water", "amount": 1 }
+      ],
+      "3": [
+        { "type": "resource", "resource": "Spice", "amount": 1 }
+      ]
+    }
+  },
+  "conflict_11": {
+    "name": "guild bank raid",
+    "tier": 2,
+    "rewards": {
+      "1": [
+        { "type": "resource", "resource": "solari", "amount": 6 }
+      ],
+      "2": [
+        { "type": "resource", "resource": "solari", "amount": 4 }
+      ],
+      "3": [
+        { "type": "resource", "resource": "solari", "amount": 2 }
+      ]
+    }
+  },
+  "conflict_12": {
+    "name": "rock rally",
+    "tier": 2,
+    "rewards": {
+      "1": [
+        { "type": "resource", "resource": "Spice", "amount": 3 },
+        { "type": "resource", "resource": "intrigue", "amount": 1 }
       ],
       "2": [
         { "type": "resource", "resource": "Spice", "amount": 2 }
@@ -15,77 +203,111 @@
       ]
     }
   },
-  "conflict_02": {
-    "name": "Struggle for Carthag",
-    "tier": 1,
-    "rewards": {
-      "1": [
-        { "type": "vp", "amount": 1 },
-        { "type": "intrigue", "amount": 1 }
-      ],
-      "2": [
-        { "type": "resource", "resource": "solari", "amount": 4 }
-      ],
-      "3": []
-    }
-  },
-  "conflict_03": {
-    "name": "Imperial Support",
-    "tier": 1,
-    "rewards": {
-      "1": [
-        { "type": "vp", "amount": 1 },
-        { "type": "resource", "resource": "solari", "amount": 2 }
-      ],
-      "2": [
-        { "type": "resource", "resource": "solari", "amount": 3 }
-      ]
-    }
-  },
-  "conflict_10": {
-    "name": "The Great Spice-Off",
-    "tier": 2,
-    "rewards": {
-      "1": [
-        { "type": "vp", "amount": 2 }
-      ],
-      "2": [
-        { "type": "resource", "resource": "Spice", "amount": 5 }
-      ],
-      "3": [
-        { "type": "resource", "resource": "solari", "amount": 2 }
-      ]
-    }
-  },
-  "conflict_11": {
-    "name": "Control the Spice",
+  "conflict_13": {
+    "name": "protection of imperial basin",
     "tier": 2,
     "rewards": {
       "1": [
         { "type": "vp", "amount": 1 },
-        { "type": "resource", "resource": "Spice", "amount": 5 }
+        { "type": "control", "control": "Imperial basin" }
       ],
       "2": [
-        { "type": "vp", "amount": 1 }
+        { "type": "resource", "resource": "water", "amount": 2 }
       ],
       "3": [
-        { "type": "resource", "resource": "Spice", "amount": 2 }
+        { "type": "resource", "resource": "water", "amount": 1 }
       ]
     }
   },
-  "conflict_20": {
-    "name": "War for the Throne",
+  "conflict_14": {
+    "name": "machination",
+    "tier": 2,
+    "rewards": {
+      "1": [
+        { "type": "choice", "choice": [
+            { "type":"resource", "resource": "emperor influence point", "amount": 1 },
+            { "type":"resource", "resource": "guild influence point", "amount": 1 },
+            { "type":"resource", "resource": "bene gesserit influence point", "amount": 1 },
+            { "type":"resource", "resource": "fremen influence point", "amount": 1 }
+        ],"choose": 2 }
+      ],
+      "2": [
+        { "type": "resource", "resource": "water", "amount": 1 },
+        { "type": "resource", "resource": "solari", "amount": 2}
+      ],
+      "3": [
+        { "type": "resource", "resource": "water", "amount": 1 }
+      ]
+    }
+  },
+  "conflict_15": {
+    "name": "battle for Arrakeen",
     "tier": 3,
     "rewards": {
       "1": [
-        { "type": "vp", "amount": 3 }
+        { "type": "vp","amount": 2 },
+        { "type": "control", "control": "Arrakeen" }
       ],
       "2": [
-        { "type": "vp", "amount": 1 },
-        { "type": "resource", "resource": "solari", "amount": 4 }
+        { "type": "choice", "choice": [
+            { "type": "resource", "resource": "Spice", "amount": 2 },
+            { "type": "resource", "resource": "solari", "amount": 3},
+            { "type": "resource", "resource": "intrigue", "amount": 1 }
+        ], "choose": 2 }
       ],
       "3": [
-        { "type": "resource", "resource": "Spice", "amount": 4 }
+        { "type": "resource", "resource": "solari", "amount": 2},
+        { "type": "resource", "resource": "intrigue", "amount":1 } 
+      ]
+    }
+  },
+  "conflict_16": {
+    "name": "battle for Imperial Basin",
+    "tier": 3,
+    "rewards": {
+      "1": [
+        { "type": "vp","amount": 2 },
+        { "type": "control", "control": "Imperial Basin" }
+      ],
+      "2": [
+        { "type": "resource", "resource": "Spice", "amount": 5}
+      ],
+      "3": [
+        { "type": "resource", "resource": "Spice", "amount": 3} 
+      ]
+    }
+  },
+  "conflict_17": {
+    "name": "greatt vision",
+    "tier": 3,
+    "rewards": {
+      "1": [
+        { "type": "resource","resource": "influence point", "amount": 2 },
+        { "type": "resource", "resource": "intrigue", "amount": 1 }
+      ],
+      "2": [
+        { "type": "resource", "resource": "Spice", "amount": 3},
+        { "type": "resource", "resource": "intrigue", "amount": 1 }  
+      ],
+      "3": [
+        { "type": "resource", "resource": "Spice", "amount": 3} 
+      ]
+    }
+  },
+  "conflict_18": {
+    "name": "battle for Cartagh",
+    "tier": 3,
+    "rewards": {
+      "1": [
+        { "type": "vp","amount": 2 },
+        { "type": "control", "control": "Cartagh" }
+      ],
+      "2": [
+        { "type": "resource", "resource": "Spice", "amount": 3},
+        { "type": "resource", "resource": "intrigue", "amount": 1 }  
+      ],
+      "3": [
+        { "type": "resource", "resource": "Spice", "amount": 3} 
       ]
     }
   }
