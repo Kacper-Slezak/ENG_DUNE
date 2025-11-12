@@ -104,8 +104,8 @@
       "description": "if you have at least 2 'The Spice Must Flow' cards, gain 1 VP, if you are the person with the highest number of this cards, gain 1 VP"
     
     },
-    "demand_for_an_alliance": {
-    "name": "demand for an alliance",
+    "demand_for_a_respect": {
+    "name": "demand for an respect",
     "type": "fight",
     "actions": {
       "action": [
@@ -115,7 +115,7 @@
         },
 
         {"type": "choice","choice": [
-            {"gain": { "type": "resource", "resource": "VP", "amount": 1 } },
+            {"gain": { "type": "resource", "resource": "influence point", "amount": 1 } },
             {"exchange":
               [
                 {"pay":
@@ -166,7 +166,7 @@
         }
       ]
          },
-    "description": "if you win the conflict you may gain one influence point or exchange 2 Spice for 2 influence points"
+    "description": "if you win the conflict you may gain 3 Spice"
   },
 
   "dispatching_an_envoy": {
@@ -233,7 +233,7 @@
         }
         ]
     },
-    "description": " player you choose lose 1 troops from conflict ( if he has any) and you send to conflict 1 troop from your garnison"
+    "description": " pay 1 solari to: player you choose lose 1 troops from conflict ( if he has any) and you send to conflict 1 troop from your garnison"
   },
   "sleeping_must_wake_up": {
     "name": "sleeping must wake up",
@@ -311,7 +311,7 @@
         }
         ]
     },
-    "description": " exchange 3 solari for 3 troops and if you use this card during reaveal phase , you may send any of your troops to conflict immediatelly after playing this card"
+    "description": " echange 1 Spice and 1 water to get 3 card from your unplayed pile "
   },
 
    "agreement_from_high_council": {
@@ -533,12 +533,8 @@
                 ]
               },
               {"action_endgame": [
-                  {"type": "requirement","requirement": [
-                    { "type": "resource", "resource": "Spice", "amount": 10 }
-                    ] 
-                  },
                   {"gain": 
-                    { "type": "resource", "resource": "VP", "amount": 1 }
+                    { "type": "resource", "resource": "Spice", "amount": 10 }
                   }
                 ]
               }
@@ -549,7 +545,7 @@
       ]
          
     },
-    "description": "Fight: Gain 2 fight points. —OR— Endgame: If you have 10 or more Tech, gain 1 VP."
+    "description": "Fight: Gain 2 fight points. —OR— Endgame:  gain 10 Spice."
   },
 
   "feigned_incident": {
