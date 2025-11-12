@@ -8,7 +8,7 @@
     ],
     "actions": [{
        "gain": { "type": "resource", "resource": "troops", "amount": 1 },
-       "gain1": { "type": "resource", "resource": "card from unused pile", "amount": 1 }
+       "gain1": { "type": "resource", "resource": "card from unplayed pile", "amount": 1 }
     }],
 
     "conflict": [
@@ -27,7 +27,7 @@
     "actions": [
       { 
        "gain": { "type": "resource", "resource": "troops", "amount": 1 } ,
-       "gain1": { "type": "resource", "resource": "intrigue card", "amount": 1 } 
+       "gain1": { "type": "resource", "resource": "intrigue", "amount": 1 } 
       }
     ],
     "conflict": [
@@ -44,7 +44,7 @@
       { "type": "resource", "resource": "water", "amount": 2 }
     ],
     "gain": [
-      { "type": "resource", "resource": "card from unused pile", "amount": 3 }
+      { "type": "resource", "resource": "card from unplayed pile", "amount": 3 }
     ],
     "conflict": [
       { "type": "isconflict" }
@@ -78,8 +78,8 @@
     ],
     "actions": [
       { 
-      "gain": { "type": "resource", "resource": "spice", "amount": 3 } ,
-      "gain1": { "type": "extra gain", "description": "you take all extra spice from this location" }
+      "gain": { "type": "resource", "resource": "Spice", "amount": 3 } ,
+      "gain1": { "type": "extra gain", "description": "you take all extra Spice from this location" }
      }
     ],
     "conflict": [
@@ -95,8 +95,8 @@
       { "type": "resource", "resource": "water", "amount": 1 }
     ],
     "actions": [
-      { "gain": { "type": "resource", "resource": "spice", "amount": 2 } },
-      { "gain1": { "type": "extra gain", "description": "you take all extra spice from this location" } }
+      { "gain": { "type": "resource", "resource": "Spice", "amount": 2 } },
+      { "gain1": { "type": "extra gain", "description": "you take all extra Spice from this location" } }
     ],
     "conflict": [
       { "type": "isconflict" }
@@ -112,13 +112,13 @@
     ],
     "actions": [
       { 
-      "gain": { "type": "resource", "resource": "spice", "amount": 2 } ,
-      "gain1": { "type": "extra gain", "description": "you take all extra spice from this location" }
+      "gain": { "type": "resource", "resource": "Spice", "amount": 2 } ,
+      "gain1": { "type": "extra gain", "description": "you take all extra Spice from this location" }
      }
     ],
     "conflict": [
       { "type": "isconflict" },
-      { "description": "If you control this location , you gain 1 spice each time somebody stay here." }
+      { "description": "If you control this location , you gain 1 Spice each time somebody stay here." }
       ]
   },
 
@@ -136,15 +136,15 @@
         "gain": { "type": "resource", "resource": "solari", "amount": 6 }
       },
       "exchange1": {
-        "pay": { "type": "resource", "resource": "spice", "amount": 3 },
+        "pay": { "type": "resource", "resource": "Spice", "amount": 3 },
         "gain": { "type": "resource", "resource": "solari", "amount": 8 }
       },
       "exchange2": {
-        "pay": { "type": "resource", "resource": "spice", "amount": 4 },
+        "pay": { "type": "resource", "resource": "Spice", "amount": 4 },
         "gain": { "type": "resource", "resource": "solari", "amount": 10 }
       },
       "exchange3": {
-        "pay": { "type": "resource", "resource": "spice", "amount": 5 },
+        "pay": { "type": "resource", "resource": "Spice", "amount": 5 },
         "gain": { "type": "resource", "resource": "solari", "amount": 12 }
       }
       
@@ -199,7 +199,7 @@
     "actions": [
       { 
       "gain": { "type": "extra gain", "description": "take extra agent for this round" } ,
-      "gain1": { "type": "resource", "resource": "card from unused pile", "amount": 1 }
+      "gain1": { "type": "resource", "resource": "card from unplayed pile", "amount": 1 }
       }
     ],
     "conflict": [
@@ -264,12 +264,12 @@
     "symbol_required": "emperor",
     "extra_requirement": "none",
     "cost": [
-      { "type": "resource", "resource": "spice", "amount": 4 }
+      { "type": "resource", "resource": "Spice", "amount": 4 }
     ],
     "actions": [
       { 
       "gain": { "type": "resource", "resource": "troops", "amount": 2 },
-      "gain1": { "type": "resource", "resource": "intrigue card", "amount": 1 },
+      "gain1": { "type": "resource", "resource": "intrigue", "amount": 1 },
       "gain2": { "type": "resource", "resource": "solari", "amount": 5 },
       "gain3": { "type": "resource", "resource": "emperor influence point", "amount": 1 }
       }
@@ -302,7 +302,7 @@
     "symbol_required": "guild",
     "extra_requirement": "none",
     "cost": [
-      { "type": "resource", "resource": "spice", "amount": 6}
+      { "type": "resource", "resource": "Spice", "amount": 6}
     ],
     "actions": [
       { 
@@ -339,12 +339,12 @@
     "symbol_required": "bene gesserit",
     "extra_requirement": "none",
     "cost": [
-      { "type": "resource", "resource": "spice", "amount":2 }
+      { "type": "resource", "resource": "Spice", "amount":2 }
     ],
     "actions": [
       { 
       "destroy": { "type": "resource", "resource": "card", "amount": 1 },
-      "gain": { "type": "resource", "resource": "card from unused pile", "amount": 2 },
+      "gain": { "type": "resource", "resource": "card from unplayed pile", "amount": 2 },
       "gain1": { "type": "resource", "resource": "bene gesserit influence point", "amount": 1 }
       }
     ],
@@ -362,7 +362,7 @@
     ],
     "actions": [
       { 
-      "gain": { "type": "resource", "resource": "intrigue card", "amount": 1 },
+      "gain": { "type": "resource", "resource": "intrigue", "amount": 1 },
       "gain1": { "type": "resource", "resource": "bene gesserit influence point", "amount": 1 },
       "gain2": { "type": "extra gain", "description": "every player with more than three intrigue cards gives you one of them - you choose it randomly" }
       }

@@ -121,7 +121,7 @@
     "type": "leader",
     "ability_passive": {
       "name": "Fief of Arrakis",
-      "description": "You start the game with additional resources: 1 Solari and 1 Water.",
+      "description": "You start the game with additional resources: 1 Solari and 1 water.",
       "gain": [
         { "type": "resource", "resource": "solari", "amount": 1 },
         { "type": "resource", "resource": "water", "amount": 1 }
@@ -157,7 +157,7 @@
           { "type": "resource", "resource": "water", "amount": 1 }
         }
       ],
-      "description": "Gain 1 Water."
+      "description": "Gain 1 water."
     }
   }
 }

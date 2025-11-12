@@ -545,7 +545,7 @@
         {"type": "gain", "resource": "solari", "amount": 1 },
         {"type": "gain", "resource": "troops", "amount": 1 }
       ],
-      "description": "Pay 1 Water to gain 1 Solari and 1 Troop."
+      "description": "Pay 1 water to gain 1 Solari and 1 Troop."
     },
     "reveal_effect": {
       "water": 1,
@@ -744,7 +744,7 @@
       "actions": [
         {"type": "gain", "resource": "water", "amount": 1 }
       ],
-      "description": "Gain 1 Water."
+      "description": "Gain 1 water."
     },
     "reveal_effect": {
       "persuasion": 2,
@@ -987,7 +987,7 @@
       "gain": [
         { "type": "gain", "resource": "water", "amount": 1 }
       ],
-      "description": "Gain 1 Water on buy."
+      "description": "Gain 1 water on buy."
     },
     "agent_effect": {
       "actions": [
@@ -1055,7 +1055,7 @@
       "swords": 0,
       "possible actions": {
         "action": { "type": "pay", "resource": "solari", "amount": 6},
-        "action1": { "type": "gain", "resource": "VP", "amount": 1 },
+        "action1": { "type": "gain", "resource": "vp", "amount": 1 },
         "description": "pay 6 Solari to gain 1 Victory Point."
       }
     }
@@ -1119,7 +1119,7 @@
       "possible actions": {
         "action": { "type": "requirement", "resource": "guild token" , "amount": 1 },
         "action1": { "type": "pay", "resource": "spice", "amount": 3 },
-        "action2": { "type": "gain", "resource": "VP", "amount": 1 },
+        "action2": { "type": "gain", "resource": "vp", "amount": 1 },
         "description": "You may pay 3 Spice to gain 1 Victory Point."
       }
     }
@@ -1388,7 +1388,7 @@
     ],
     "buy_effect": {
       "gain": [
-        { "type": "gain", "resource": "VP", "amount": 1}
+        { "type": "gain", "resource": "vp", "amount": 1}
       ],
       "description": "gain 1 victory point."
     },
