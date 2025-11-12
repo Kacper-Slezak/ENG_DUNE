@@ -563,7 +563,6 @@ def calculate_reveal_stats(player_state, cards_db):
         card_data = cards_db.get(card_detail["id"])
         if not card_data: continue
 
-        # --- NOWY, NIEZAWODNY BLOK OBSŁUGI BONUSÓW ---
         bonuses = card_data.get("reveal_effect", {}).get("conditional_bonuses", [])
         for bonus in bonuses:
             if bonus.get("type") == "requirement":
@@ -601,9 +600,6 @@ def calculate_reveal_stats(player_state, cards_db):
                         # UWAGA: Jak wspomniano, ta funkcja nie może dodawać
                         # zasobów (np. Przyprawy). To ograniczenie architektury.
                         
-        # --- KONIEC NOWEGO BLOKU ---
-
-        # --- BLOKERY AUTOMATYZACJI (nadal wymagają ręcznej interwencji) ---
         description = card_detail["description"]
         if "You may pay" in description or " or " in description.lower():
             card_detail["description"] = f"[MANUAL ACTION NEEDED] {description}"
