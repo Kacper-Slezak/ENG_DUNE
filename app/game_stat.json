@@ -1,14 +1,65 @@
 {
   "round": 1,
-  "currentPlayer": "Peter",
+  "currentPlayer": "Paul",
   "current_phase": "AGENT_TURN",
-  "round_history": [],
+  "round_history": [
+    {
+      "summary": "Conflict set: Skirmish1"
+    },
+    {
+      "player": "Paul",
+      "card": "Dune, The Desert Planet",
+      "location": "Imperial Basin",
+      "summary": "Paul played 'Dune, The Desert Planet' on 'Imperial Basin'. (NEEDS MANUAL ACTION: you take all extra spice from this location)"
+    },
+    {
+      "player": "Paul",
+      "card": "Reconnaissance",
+      "location": "Carthag",
+      "summary": "Paul played 'Reconnaissance' on 'Carthag'. (gained 1 troops to garrison) (gained 1 intrigue from location)"
+    },
+    {
+      "summary": "Player Paul played intrigue: 'Intrigue_Card_604'. (EFFECT: No description found.) - APPLY MANUALLY."
+    }
+  ],
   "destroyed_pile": [],
   "imperium_row": [],
   "conflict_deck": [],
   "current_conflict_card": {
-    "name": "N/A",
-    "rewards_text": []
+    "name": "Skirmish1",
+    "rewards": {
+      "1": [
+        {
+          "type": "resource",
+          "resource": "influence point",
+          "amount": 1
+        },
+        {
+          "type": "resource",
+          "resource": "Spice",
+          "amount": 3
+        }
+      ],
+      "2": [
+        {
+          "type": "resource",
+          "resource": "solari",
+          "amount": 3
+        }
+      ],
+      "3": [
+        {
+          "type": "resource",
+          "resource": "solari",
+          "amount": 2
+        }
+      ]
+    },
+    "rewards_text": [
+      "1st: 1 influence point, 3 Spice",
+      "2st: 3 solari",
+      "3st: 2 solari"
+    ]
   },
   "players": {
     "Peter": {
@@ -99,7 +150,7 @@
         "solari": 0,
         "water": 1,
         "Spice": 0,
-        "troops_garrison": 0
+        "troops_garrison": 1
       },
       "influence": {
         "emperor": 0,
@@ -117,14 +168,15 @@
       "hand": [
         "dagger",
         "dagger",
-        "dune_the_desert_planet",
-        "reconnaissance",
         "convincing_argument"
       ],
-      "discard_pile": [],
+      "discard_pile": [
+        "dune_the_desert_planet",
+        "reconnaissance"
+      ],
       "draw_deck": [],
       "agents_total": 2,
-      "agents_placed": 0,
+      "agents_placed": 2,
       "intrigue_hand": [],
       "has_passed": false,
       "reveal_stats": {
@@ -140,7 +192,7 @@
       "occupied_by": null
     },
     "carthag": {
-      "occupied_by": null
+      "occupied_by": "Paul"
     },
     "research_station": {
       "occupied_by": null
@@ -155,7 +207,7 @@
       "occupied_by": null
     },
     "imperial_basin": {
-      "occupied_by": null
+      "occupied_by": "Paul"
     },
     "sell_melange": {
       "occupied_by": null
