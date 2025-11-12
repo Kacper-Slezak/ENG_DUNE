@@ -4,7 +4,7 @@
     "type": "conspiracy",
     "actions": {
       "gain": [
-        { "type": "resource", "resource": " fremen influence point", "amount": 1 }
+        { "type": "resource", "resource": "fremen influence point", "amount": 1 }
       ]
     },
     "description": "get 1 fremen influence point"
@@ -14,15 +14,14 @@
     "type": "conspiracy",
     "actions": {
       "gain": [
-        { "type": "resource", "resource": "persuasion ", "amount": 1 }
+        { "type": "resource", "resource": "persuasion", "amount": 1 }
       ],
       "action": [
         { "type": "action", "description": "You may put bought cards on top of unplayed pile" }
       ]
-  },
+    },
     "description": "get 1 persuasion and may put bought cards on top of unplayed pile"
   },
-
   "occasion": {
     "name": "occasion",
     "type": "conspiracy",
@@ -33,7 +32,6 @@
     },
     "description": "get 2 solari "
   },
-
   "concentration": {
     "name": "concentration",
     "type": "conspiracy",
@@ -44,7 +42,6 @@
     },
     "description": "mix your unplayed pile and discard pile into new unplayed pile and take card from the top"
   },
-
   "calculated_recruitment": {
     "name": "calculated recruitment",
     "type": "conspiracy",
@@ -56,7 +53,7 @@
         ,
         { "type": "action", "description": " take your mentat from his station in Landsraad"}
       ]
-         },
+        },
     "description": "pay 1 Spice to take your mentat from his station in Landsraad"
   },
   "infiltration": {
@@ -66,7 +63,7 @@
       "action": [
         { "type": "action", "description": "you may send your next agent on already occupied location  " }
       ]
-         },
+        },
     "description": "you may send your next agent on already occupied location"
   },
   "poison_detector": {
@@ -76,7 +73,7 @@
       "action": [
         { "type": "action", "description": "check card from the top of your unplayed pile - take it or destroy it" }
       ]
-         },
+        },
     "description": "check card from the top of your unplayed pile - take it or destroy it"
   },
   "market_manopoly": {
@@ -84,70 +81,64 @@
     "type": "endgame",
     "actions": {
       "action1": [
-          {"type": "requirement","requirement": [
-              { "type": "resource", "resource": "The Spice Must Flow", "description": "at least 2" }
-            ]
-          },
-          {"gain":  
-            { "type": "resource", "resource": "VP", "amount": 1 } 
-          }      
-        ] ,
-
-        "action2": [
-          {"type": "requirement","requirement": [
-              { "type": "resource", "resource": "The Spice Must Flow", "description": "you are the person with the highest number of this cards (not execquo)" }
-            ]
-          },
-          { "type": "gain", "requirement": "vp", "amount": 1 }       
-        ] 
-      },
-      "description": "if you have at least 2 'The Spice Must Flow' cards, gain 1 VP, if you are the person with the highest number of this cards, gain 1 VP"
-    
+        {"type": "requirement","requirement": [
+          { "type": "resource", "resource": "The Spice Must Flow", "description": "at least 2" }
+        ]
+        },
+        { "type": "gain", "resource": "vp", "amount": 1 }
+      ] ,
+      "action2": [
+        {"type": "requirement","requirement": [
+          { "type": "resource", "resource": "The Spice Must Flow", "description": "you are the person with the highest number of this cards (not execquo)" }
+        ]
+        },
+        { "type": "gain", "resource": "vp", "amount": 1 }
+      ] 
     },
-    "demand_for_a_respect": {
+    "description": "if you have at least 2 'The Spice Must Flow' cards, gain 1 VP, if you are the person with the highest number of this cards, gain 1 VP"
+  },
+  "demand_for_a_respect": {
     "name": "demand for an respect",
     "type": "fight",
     "actions": {
       "action": [
         {"type": "requirement","requirement": [
-            { "type": "action", "description": "win the conflict" }
-          ]
+          { "type": "action", "description": "win the conflict" }
+        ]
         },
-
         {"type": "choice","choice": [
-            {"gain": { "type": "resource", "resource": "influence point", "amount": 1 } },
-            {"exchange":
-              [
-                {"pay":
-                  { "type": "resource", "resource": "Spice", "amount": 2 }
-                },
-                {"gain":
-                  { "type": "resource", "resource": "influence point", "amount": 2 }  
-                }
-              ]
-            }      
-          ],"choose": 1
+          {"gain": { "type": "resource", "resource": "influence point", "amount": 1 } },
+          {"exchange":
+            [
+              {"pay":
+                { "type": "resource", "resource": "Spice", "amount": 2 }
+              },
+              {"gain":
+                { "type": "resource", "resource": "influence point", "amount": 2 }  
+              }
+            ]
+          } 
+        ],"choose": 1
         }
       ]
-         },
+        },
     "description": "if you win the conflict you may gain one influence point or exchange 2 Spice for 2 influence points"
   },
-
   "master_tactitian": {
     "name": "master of tactics",
     "type": "fight",
     "actions": {
       "action": [
         {"type": "choice","choice": [
-            {"gain": 
-              { "type": "resource", "resource": "fight points", "amount": 3 }
-            },
-            {"action": 
-              { "type": "action", "description": "withdraw up to 3 troops to your garnison from conflict" }
-            }
-          ],"choose": 1
-        }      
-      ]     
+          {"gain": 
+            { "type": "resource", "resource": "fight points", "amount": 3 }
+          },
+          {"action": 
+            { "type": "action", "description": "withdraw up to 3 troops to your garnison from conflict" }
+          }
+        ],"choose": 1
+        } 
+      ] 
     },
     "description": "gain 3 faight points or withdraw up to 3 troops to your garnison from conflict  "
   },
@@ -157,18 +148,16 @@
     "actions": {
       "action": [
         {"type": "requirement","requirement": [
-            { "type": "action", "description": "win the conflict" }
-          ]
+          { "type": "action", "description": "win the conflict" }
+        ]
         },
-        
         {"gain": 
           { "type": "resource", "resource": "Spice", "amount": 3 }
         }
       ]
-         },
+        },
     "description": "if you win the conflict you may gain 3 Spice"
   },
-
   "dispatching_an_envoy": {
     "name": "dispatching an envoy",
     "type": "conspiracy",
@@ -194,7 +183,7 @@
             }
           ]
         }
-        ]
+      ]
     },
     "description": " exchange 2 solari for 1 influence point"
   },
@@ -213,7 +202,7 @@
             }
           ]
         }
-        ]
+      ]
     },
     "description": " exchange 2 Spice for 5 fight points"
   },
@@ -227,11 +216,11 @@
             {"pay":
               { "type": "resource", "resource": "solari", "amount": 1 }
             },
-            {"type":"action" , "description:":"player you choose lose 1 troops from conflict ( if he has any) and you send to conflict 1 troop from your garnison"  
+            {"type":"action" , "description":"player you choose lose 1 troops from conflict ( if he has any) and you send to conflict 1 troop from your garnison" 
             }
           ]
         }
-        ]
+      ]
     },
     "description": " pay 1 solari to: player you choose lose 1 troops from conflict ( if he has any) and you send to conflict 1 troop from your garnison"
   },
@@ -246,15 +235,14 @@
               { "type": "resource", "resource": "Spice", "amount": 4 }
             },
             {"gain":
-              { "type": "resource", "resource": "VP", "amount": 1 }  
+              { "type": "resource", "resource": "vp", "amount": 1 } 
             }
           ]
         }
-        ]
+      ]
     },
     "description": " exchange 4 Spice for 1 VP"
   },
-
   "favourite_subject": {
     "name": "favourite subject",
     "type": "conspiracy",
@@ -278,19 +266,16 @@
               { "type": "resource", "resource": "solari", "amount": 3 }
             },
             {"gain":[
-                { "type": "resource", "resource": "troops", "amount": 3 },
-                { "type": "action", "description": "if you use this card during reaveal phase , you may send any of your troops to conflict immediatelly after playing this card"}  
-              ]
+              { "type": "resource", "resource": "troops", "amount": 3 },
+              { "type": "action", "description": "if you use this card during reaveal phase , you may send any of your troops to conflict immediatelly after playing this card"}  
+            ]
             }
-
-            
           ]
         }
-        ]
+      ]
     },
     "description": " exchange 3 solari for 3 troops and if you use this card during reaveal phase , you may send any of your troops to conflict immediatelly after playing this card"
   },
-
   "water of life": {
     "name": "water of life",
     "type": "conspiracy",
@@ -299,36 +284,33 @@
         {"exchange":
           [
             {"pay":[
-                { "type": "resource", "resource": "Spice", "amount": 1 },
-                { "type": "resource", "resource": "water", "amount": 1 }
-              ]
+              { "type": "resource", "resource": "Spice", "amount": 1 },
+              { "type": "resource", "resource": "water", "amount": 1 }
+            ]
             },
-              
             {"gain":
               { "type": "action", "description":"take 3 card from your unplayed pile" }
-            }           
+            } 
           ]
         }
-        ]
+      ]
     },
     "description": " echange 1 Spice and 1 water to get 3 card from your unplayed pile "
   },
-
-   "agreement_from_high_council": {
+  "agreement_from_high_council": {
     "name": "agreement from high council",
     "type": "conspiracy",
     "actions": {
       "action": [
         {"type": "requirement","requirement": [
-            { "type": "action", "description": "if you have a place in high council" }
-          ]
+          { "type": "action", "description": "if you have a place in high council" }
+        ]
         },
-        
         {"gain": 
           { "type": "resource", "resource": "Spice", "amount": 2 }
         }
       ]
-         },
+        },
     "description": "if you have a place in high council you gain 2 Spice"
   },
   "khoam_shares": {
@@ -342,7 +324,7 @@
               { "type": "resource", "resource": "solari", "amount": 7 }
             },
             {"gain":
-              { "type": "resource", "resource": "VP", "amount": 1 }
+              { "type": "resource", "resource": "vp", "amount": 1 }
             }
           ]
         }
@@ -370,36 +352,33 @@
     },
     "description": "Gain 1 Water"
   },
-
   "plans_within_plans": {
     "name": "Plans Within Plans",
     "type": "endgame",
     "actions": {
       "action": [
         {"type": "choice","choice": [
-            {"action1": [
-                {"type": "requirement","requirement": [
-                  { "type": "influence", "description": "at least 3 influence on 3 faction tracks" }
-                ]},
-                {"gain": 
-                  { "type": "resource", "resource": "VP", "amount": 1 }
-                }
-              ]
-            },
-            {"action2": [
-                {"type": "requirement","requirement": [
-                  { "type": "influence", "description": "at least 3 influence on 4 faction tracks" }
-                ]},
-                {"gain": 
-                  { "type": "resource", "resource": "VP", "amount": 2 }
-                }
-              ]
+          {"action1": [
+            {"type": "requirement","requirement": [
+              { "type": "influence", "description": "at least 3 influence on 3 faction tracks" }
+            ]},
+            {"gain": 
+              { "type": "resource", "resource": "vp", "amount": 1 }
             }
-              
-          ],"choose": 1
+          ]
+          },
+          {"action2": [
+            {"type": "requirement","requirement": [
+              { "type": "influence", "description": "at least 3 influence on 4 faction tracks" }
+            ]},
+            {"gain": 
+              { "type": "resource", "resource": "vp", "amount": 2 }
+            }
+          ]
+          }
+        ],"choose": 1
         } 
       ]
-      
     },
     "description": "If you have at least 3 influence on 3 faction tracks, gain 1 VP. —OR— If you have at least 3 influence on 4 faction tracks, gain 2 VP."
   },
@@ -413,7 +392,6 @@
     },
     "description": "gain 1 bene gesserit influence point"
   },
-
   "guild_authorization": {
     "name": "Guild Authorization",
     "type": "conspiracy",
@@ -424,27 +402,24 @@
     },
     "description": "gain 1 guild influence point"
   },
-
   "bypass_protocol": {
     "name": "Bypass Protocol",
     "type": "conspiracy",
     "actions": {
       "action": [
         {"type": "choice","choice": [
-            {"action1":[
-                { "type": "action", "description": "Gain a card costing 3 or less" }
-              ]
+          {"action1":[
+            { "type": "action", "description": "Gain a card costing 3 or less" }
+          ]
+          },
+          {"action2":[
+            {"pay": 
+              { "type": "resource", "resource": "Spice", "amount": 2 }
             },
-            
-            {"action2":[
-                {"pay": 
-                  { "type": "resource", "resource": "Spice", "amount": 2 }
-                },
-                { "type": "action", "description": "Gain a card costing 5 or less and put it on top of your unplayed pile" }
-            
-              ]
-            }
-          ],"choose": 1
+            { "type": "action", "description": "Gain a card costing 5 or less and put it on top of your unplayed pile" }
+          ]
+          }
+        ],"choose": 1
         }
       ]
     },
@@ -460,7 +435,6 @@
     },
     "description": "Gain 2 persuasion on your reveal turn this round."
   },
-
   "sudden_mobilization": {
     "name": "Sudden Mobilization",
     "type": "conspiracy",
@@ -471,7 +445,6 @@
     },
     "description": "Deploy to the conflict any number of troops from your garrison."
   },
-
   "urgent_mission": {
     "name": "Urgent Mission",
     "type": "conspiracy",
@@ -482,8 +455,6 @@
     },
     "description": "Recall 1 of your agents."
   },
-  
-
   "allied_armada": {
     "name": "Allied Armada",
     "type": "fight",
@@ -506,7 +477,6 @@
     },
     "description": "If you have any faction alliance: Pay 2 Spice to gain 7 fight points."
   },
-
   "ambush": {
     "name": "Ambush",
     "type": "fight",
@@ -519,35 +489,30 @@
     },
     "description": "Gain 4 fight points."
   },
-
   "tie_breaker": {
     "name": "Tie Breaker",
     "type": "fight / endgame",
     "actions": {
       "action":[
         {"type": "choice","choice":[
-              {"action_fight": [
-                  {"gain": 
-                    { "type": "resource", "resource": "fight points", "amount": 2 }
-                  }
-                ]
-              },
-              {"action_endgame": [
-                  {"gain": 
-                    { "type": "resource", "resource": "Spice", "amount": 10 }
-                  }
-                ]
-              }
-        
+          {"action_fight": [
+            {"gain": 
+              { "type": "resource", "resource": "fight points", "amount": 2 }
+            }
+          ]
+          },
+          {"action_endgame": [
+            {"gain": 
+              { "type": "resource", "resource": "Spice", "amount": 10 }
+            }
+          ]
+          }
         ],"choose":1
-
-      }   
+        }  
       ]
-         
     },
     "description": "Fight: Gain 2 fight points. —OR— Endgame:  gain 10 Spice."
   },
-
   "feigned_incident": {
     "name": "Feigned Incident",
     "type": "fight",
@@ -559,7 +524,7 @@
               { "type": "resource", "resource": "troops in conflict", "amount": 3 }
             },
             {"gain":
-              { "type": "resource", "resource": "VP", "amount": 1 }
+              { "type": "resource", "resource": "vp", "amount": 1 }
             }
           ]
         }
@@ -567,9 +532,4 @@
     },
     "description": "Lose 3 of your troops in the conflict to gain 1 VP."
   }
-
-  
-
-  
-  
 }

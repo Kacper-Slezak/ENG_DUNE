@@ -1,8 +1,27 @@
 {
   "round": 1,
-  "currentPlayer": "Peter",
+  "currentPlayer": "Helen",
   "current_phase": "AGENT_TURN",
-  "round_history": [],
+  "round_history": [
+    {
+      "player": "Paul",
+      "card": "Reconnaissance",
+      "location": "Carthag",
+      "summary": "Paul played 'Reconnaissance' on 'Carthag'. (gained 1 troops to garrison) (gained 1 intrigue from location)"
+    },
+    {
+      "player": "Paul",
+      "card": "Dagger",
+      "location": "Hall of Oratory",
+      "summary": "Paul played 'Dagger' on 'Hall of Oratory'. (gained 1 troops to garrison)"
+    },
+    {
+      "player": "Helen",
+      "card": "Dune, The Desert Planet",
+      "location": "Secure Contract",
+      "summary": "Helen played 'Dune, The Desert Planet' on 'Secure Contract'."
+    }
+  ],
   "destroyed_pile": [],
   "imperium_row": [],
   "conflict_deck": [],
@@ -55,7 +74,7 @@
     "Helen": {
       "victory_points": 0,
       "resources": {
-        "solari": 0,
+        "solari": 3,
         "water": 1,
         "Spice": 0,
         "troops_garrison": 0
@@ -76,14 +95,15 @@
       "hand": [
         "dagger",
         "dagger",
-        "dune_the_desert_planet",
         "reconnaissance",
         "convincing_argument"
       ],
-      "discard_pile": [],
+      "discard_pile": [
+        "dune_the_desert_planet"
+      ],
       "draw_deck": [],
       "agents_total": 2,
-      "agents_placed": 0,
+      "agents_placed": 1,
       "intrigue_hand": [],
       "has_passed": false,
       "reveal_stats": {
@@ -99,7 +119,7 @@
         "solari": 0,
         "water": 1,
         "Spice": 0,
-        "troops_garrison": 0
+        "troops_garrison": 2
       },
       "influence": {
         "emperor": 0,
@@ -116,16 +136,19 @@
       ],
       "hand": [
         "dagger",
-        "dagger",
         "dune_the_desert_planet",
-        "reconnaissance",
         "convincing_argument"
       ],
-      "discard_pile": [],
+      "discard_pile": [
+        "reconnaissance",
+        "dagger"
+      ],
       "draw_deck": [],
       "agents_total": 2,
-      "agents_placed": 0,
-      "intrigue_hand": [],
+      "agents_placed": 2,
+      "intrigue_hand": [
+        "Intrigue_Card_415"
+      ],
       "has_passed": false,
       "reveal_stats": {
         "total_persuasion": 0,
@@ -140,7 +163,7 @@
       "occupied_by": null
     },
     "carthag": {
-      "occupied_by": null
+      "occupied_by": "Paul"
     },
     "research_station": {
       "occupied_by": null
@@ -161,7 +184,7 @@
       "occupied_by": null
     },
     "secure_contract": {
-      "occupied_by": null
+      "occupied_by": "Helen"
     },
     "high_council": {
       "occupied_by": null
@@ -173,7 +196,7 @@
       "occupied_by": null
     },
     "hall_of_oratory": {
-      "occupied_by": null
+      "occupied_by": "Paul"
     },
     "swordmaster": {
       "occupied_by": null

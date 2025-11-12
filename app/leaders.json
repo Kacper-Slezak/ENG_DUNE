@@ -10,21 +10,18 @@
     "ability_signet": {
       "name": "Discipline",
       "action": [
-        {"gain": 
-          { "type": "resource", "resource": "card from unplayed pile", "amount": 1 }
-        }
+        { "type": "action", "description": "Gain 1 card from unplayed pile." }
       ],
       "description": "Gain 1 card from unplayed pile."
     }
   },
-
   "helena_richese": {
     "name": "Helena Richese",
     "house": "House Richese",
     "type": "leader",
     "ability_passive": {
       "name": "Knows Everything",
-      "description": "You may send your agents to occupied spaces in fraction 'populated ares' and 'landsraad'."
+      "description": "You may send your agents to occupied spaces in faction 'populated areas' and 'landsraad'."
     },
     "ability_signet": {
       "name": "Manipulation",
@@ -34,7 +31,6 @@
       "description": "Trash a card from the Imperium row and replace it. During your reveal turn this round, you may acquire the trashed card for 1 Solari less."
     }
   },
-
   "earl_memnon_thorvald": {
     "name": "Earl Memnon Thorvald",
     "house": "House Thorvald",
@@ -53,7 +49,6 @@
       "description": "Gain 1 Spice."
     }
   },
-
   "baron_vladimir_harkonnen": {
     "name": "Baron Vladimir Harkonnen",
     "house": "House Harkonnen",
@@ -66,23 +61,17 @@
       "name": "Scheming",
       "action": [
         {"exchange": [
-            {"pay":
-                {
-                    "type": "resource", "resource": "solari", "amount": 1 
-                }
-            },
-            {"gain":
-                {
-                     "type": "resource", "resource": "intrigue", "amount": 1 
-                }
-            }
+          {"pay":
+            { "type": "resource", "resource": "solari", "amount": 1 }
+          },
+          {"gain":
+            { "type": "resource", "resource": "intrigue", "amount": 1 }
+          }
         ]}
-        
       ],
       "description": "pay 1 Solari to get 1 Intrigue card."
     }
   },
-
   "count_ilban_richese": {
     "name": "Count Ilban Richese",
     "house": "House Richese",
@@ -101,7 +90,6 @@
       "description": "Gain 1 Solari."
     }
   },
-
   "duke_leto_atreides": {
     "name": "Duke Leto Atreides",
     "house": "House Atreides",
@@ -127,21 +115,17 @@
       "description": "Pay 1 Spice to gain 1 influence with a faction where an opponent has more influence than you."
     }
   },
-
   "glossu_beast_rabban": {
     "name": "Glossu \"Beast\" Rabban",
     "house": "House Harkonnen",
     "type": "leader",
-    "starting_bonus": {
+    "ability_passive": {
+      "name": "Fief of Arrakis",
       "description": "You start the game with additional resources: 1 Solari and 1 Water.",
       "gain": [
         { "type": "resource", "resource": "solari", "amount": 1 },
         { "type": "resource", "resource": "water", "amount": 1 }
       ]
-    },
-    "ability_passive": {
-      "name": "Fief of Arrakis",
-      "description": "You start the game with additional resources: 1 Solari and 1 Water."
     },
     "ability_signet": {
       "name": "Brutality",
@@ -158,7 +142,6 @@
       "description": "Gain 1 troops —OR— Gain 2 troops, if you have at least 1 faction alliance."
     }
   },
-
   "countess_ariana_thorvald": {
     "name": "Countess Ariana Thorvald",
     "house": "House Thorvald",
