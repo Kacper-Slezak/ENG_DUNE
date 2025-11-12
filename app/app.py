@@ -51,9 +51,9 @@ def get_available_locations(locations_db, game_state):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    game_state, locations_db, cards_db, intrigues_db, conflicts_db = load_game_data()
+    game_state, locations_db, cards_db, intrigues_db, conflicts_db, leaders_db = load_game_data() 
 
-    if not all([game_state, locations_db, cards_db, intrigues_db, conflicts_db]):
+    if not all([game_state, locations_db, cards_db, intrigues_db, conflicts_db, leaders_db]): 
         flash("CRITICAL ERROR: Cannot load core game data. Check JSON files.", "error")
         return render_template('error.html'), 500
 
@@ -66,10 +66,10 @@ def index():
         card_id_input = request.form.get('card_id')
         location_id_input = request.form.get('location_id')
         
-        is_valid, message = is_move_valid(game_state, locations_db, cards_db, player_name_input, card_id_input, location_id_input)
+        is_valid, message = is_move_valid(game_state, locations_db, cards_db, player_name_input, card_id_input, location_id_input) 
 
         if is_valid:
-            new_game_state = process_move(game_state, locations_db, cards_db, player_name_input, card_id_input, location_id_input)
+            new_game_state = process_move(game_state, locations_db, cards_db, leaders_db, player_name_input, card_id_input, location_id_input)
             final_game_state = check_and_advance_phase(new_game_state, cards_db)
             
             if save_json_file(GAME_STATE_FILE, final_game_state):
@@ -274,27 +274,45 @@ def reveal_phase():
         current_conflict=current_conflict
     )
 
-@app.route('/resolve_conflict', methods=['POST'])
-def resolve_conflict():
+@app.route('/resolve_conflict_auto', methods=['POST'])
+def resolve_conflict_auto():
     game_state, _, _, _, _ = load_game_data()
 
     if game_state.get("current_phase") != "REVEAL":
         flash("Cannot resolve conflict: Not in REVEAL phase.", "error")
         return redirect(url_for('reveal_phase'))
 
-    first_place = request.form.get('first_place')
-    second_place = request.form.get('second_place')
-    third_place = request.form.get('third_place')
+    # 1. Zbierz statystyki graczy
+    player_stats = []
+    for player_name, player_data in game_state.get("players", {}).items():
+        stats = player_data.get("reveal_stats", {})
+        player_stats.append({
+            "name": player_name,
+            "swords": stats.get("total_swords", 0)
+        })
     
+    # 2. Posortuj graczy malejąco wg siły
+    player_stats.sort(key=lambda x: x['swords'], reverse=True)
+    
+    # 3. Wybierz zwycięzców
+    # Prosta logika (jeszcze bez obsługi remisów - zakłada, że > 0 mieczy)
+    first_place = player_stats[0]['name'] if len(player_stats) > 0 and player_stats[0]['swords'] > 0 else None
+    second_place = player_stats[1]['name'] if len(player_stats) > 1 and player_stats[1]['swords'] > 0 else None
+    third_place = player_stats[2]['name'] if len(player_stats) > 2 and player_stats[2]['swords'] > 0 else None
+
+    if not first_place:
+         flash("Conflict resolved automatically: No one had any swords.", "success")
+         return redirect(url_for('reveal_phase'))
+
     is_valid, message = process_conflict_resolve(game_state, first_place, second_place, third_place)
     
     if is_valid:
         if save_json_file(GAME_STATE_FILE, game_state):
-            flash(message, "success")
+            flash(f"Conflict Resolved Automatically! {message}", "success")
         else:
             flash("CRITICAL ERROR: Cannot save game state after resolving conflict.", "error")
     else:
-        flash(f"Failed to resolve conflict: {message}", "error")
+        flash(f"Failed to auto-resolve conflict: {message}", "error")
         
     return redirect(url_for('reveal_phase'))
 
