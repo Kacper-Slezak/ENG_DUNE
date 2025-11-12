@@ -357,6 +357,7 @@
     "type": "endgame",
     "actions": {
       "action": [
+        
         {"type": "choice","choice": [
           {"action1": [
             {"type": "requirement","requirement": [

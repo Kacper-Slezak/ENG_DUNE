@@ -2,19 +2,31 @@
   "dagger": {
     "name": "Dagger",
     "type": "Agent",
-    "agent_symbols": ["Landsraad"],
+    "agent_symbols": [
+      "Landsraad"
+    ],
     "buy_cost": [
-      { "type": "none" }
+      {
+        "type": "none"
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no agent effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "No agent effect."
     },
@@ -22,6 +34,9 @@
       "persuasion": 0,
       "swords": 1,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -30,18 +45,33 @@
     "name": "Scout",
     "type": "Agent",
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 1 }
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 1
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
-    "agent_symbols": ["CHOAM","populated areas"],
+    "agent_symbols": [
+      "CHOAM",
+      "populated areas"
+    ],
     "agent_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "no agent effect."
     },
@@ -49,6 +79,10 @@
       "persuasion": 1,
       "swords": 1,
       "possible actions": {
+        "action": {
+          "type": "action",
+          "description": "retreat up to two of your troops"
+        },
         "description": "retreat up to two of your troops"
       }
     }
@@ -57,18 +91,30 @@
     "name": "Dune, The Desert Planet",
     "type": "Agent",
     "buy_cost": [
-      { "type": "none" }
+      {
+        "type": "none"
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
-    "agent_symbols": ["CHOAM"],
+    "agent_symbols": [
+      "CHOAM"
+    ],
     "agent_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "no agent effect."
     },
@@ -76,6 +122,9 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -84,20 +133,48 @@
     "name": "Spice Smugglers",
     "type": "Agent",
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 2 }
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 2
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none"}
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
-    "agent_symbols": ["populated areas"],
+    "agent_symbols": [
+      "populated areas"
+    ],
     "agent_effect": {
       "actions": [
-        { "type": "pay", "resource": "Spice", "amount": 2 },
-        { "type": "gain", "resource": "solari", "amount": 3 },
-        { "type": "gain", "resource": "guild influence point", "amount": 2 }
+        {
+          "action": [
+            {
+              "type": "pay",
+              "resource": "Spice",
+              "amount": 2
+            },
+            {
+              "type": "gain",
+              "resource": "solari",
+              "amount": 3
+            },
+            {
+              "type": "gain",
+              "resource": "guild influence point",
+              "amount": 2
+            },
+            {
+              "type": "action",
+              "description": "pay 2 spice to gain 3 solari and 2 guild influence points."
+            }
+          ]
+        }
       ],
       "description": "pay 2 spice to gain 3 solari and 2 guild influence points."
     },
@@ -105,6 +182,9 @@
       "persuasion": 1,
       "swords": 1,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -113,18 +193,38 @@
     "name": "Gurney Halleck",
     "type": "Agent",
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 6 }
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 6
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
-    "agent_symbols": ["populated areas"],
+    "agent_symbols": [
+      "populated areas"
+    ],
     "agent_effect": {
       "actions": [
-        { "type": "gain", "resource": "troops", "amount": 2 }
+        {
+          "action": [
+            {
+              "type": "gain",
+              "resource": "troops",
+              "amount": 2
+            },
+            {
+              "type": "action",
+              "description": "Gain 2 troops."
+            }
+          ]
+        }
       ],
       "description": "Gain 2 troops."
     },
@@ -132,8 +232,24 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "action": { "type": "pay", "resource": "solari", "amount": 3 },
-        "action2": { "type": "gain", "resource": "troops", "amount": 2 },
+        "requirement": {
+          "type": "condition",
+          "description": "You may pay 3 solari"
+        },
+        "action": {
+          "type": "pay",
+          "resource": "solari",
+          "amount": 3
+        },
+        "action2": {
+          "type": "gain",
+          "resource": "troops",
+          "amount": 2
+        },
+        "action3": {
+          "type": "action",
+          "description": "You may pay 3 solari to gain 2 additional troops which you could deploy to the conflict."
+        },
         "description": "You may pay 3 solari to gain 2 additional troops which you could deploy to the conflict."
       }
     }
@@ -142,45 +258,92 @@
     "name": "Reconnaissance",
     "type": "Agent",
     "buy_cost": [
-      { "type": "none" }
+      {
+        "type": "none"
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
-    "agent_symbols": ["populated areas"],
+    "agent_symbols": [
+      "populated areas"
+    ],
     "agent_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ]
     },
     "reveal_effect": {
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "description": "No more effects."}
+        "action": {
+          "type": "none"
+        },
+        "description": "No more effects."
+      }
     }
   },
   "liet_kynes": {
     "name": "Liet Kynes",
     "type": "Agent",
-    "agent_symbols": ["fremen", "populated areas"],
+    "agent_symbols": [
+      "fremen",
+      "populated areas"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 5 }
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 5
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "gain", "resource": "emperor influence point", "amount": 1 }
+        {
+          "type": "gain",
+          "resource": "emperor influence point",
+          "amount": 1
+        }
       ],
       "description": "Gain 1 emperor influence point."
     },
     "agent_effect": {
       "actions": [
-        { "type": "pay", "resource": "Spice", "amount": 2 },
-        { "type": "gain", "resource": "solari", "amount": 3 },
-        { "type": "gain", "resource": "guild influence point", "amount": 2 }
+        {
+          "action": [
+            {
+              "type": "pay",
+              "resource": "Spice",
+              "amount": 2
+            },
+            {
+              "type": "gain",
+              "resource": "solari",
+              "amount": 3
+            },
+            {
+              "type": "gain",
+              "resource": "guild influence point",
+              "amount": 2
+            },
+            {
+              "type": "action",
+              "description": "pay 2 spice to gain 3 solari and 2 guild influence points."
+            }
+          ]
+        }
       ],
       "description": "pay 2 spice to gain 3 solari and 2 guild influence points."
     },
@@ -188,6 +351,14 @@
       "persuasion": 2,
       "swords": 1,
       "possible actions": {
+        "requirement": {
+          "type": "condition",
+          "description": "for each fremen card you have in play"
+        },
+        "action": {
+          "type": "action",
+          "description": "you achieve 2 persuasive for each fremen card you have in play."
+        },
         "description": "you achieve 2 persuasive for each fremen card you have in play."
       }
     }
@@ -195,19 +366,31 @@
   "convincing_argument": {
     "name": "Convincing Argument",
     "type": "Agent",
-    "agent_symbols": ["none"],
+    "agent_symbols": [
+      "none"
+    ],
     "buy_cost": [
-      { "type": "none" }
+      {
+        "type": "none"
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "no agent effect."
     },
@@ -215,6 +398,9 @@
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -222,24 +408,59 @@
   "firm_grip": {
     "name": "Firm grip",
     "type": "Agent",
-    "agent_symbols": ["Landsraad", "emperor"],
+    "agent_symbols": [
+      "Landsraad",
+      "emperor"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 4 }
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 4
+      }
     ],
     "buy_effect": {
-      "gain": [],
+      "gain": [
+        {
+          "type": "none"
+        }
+      ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "pay", "resource": "solari", "amount": 2 },
         {
-          "type": "choice",
-          "choose": 1,
-          "choice": [
-            { "type": "gain", "resource": "guild influence point", "amount": 1 },
-            { "type": "gain", "resource": "emperor influence point", "amount": 1 },
-            { "type": "gain", "resource": "fremen influence point", "amount": 1 }
+          "action": [
+            {
+              "type": "pay",
+              "resource": "solari",
+              "amount": 2
+            },
+            {
+              "type": "choice",
+              "choice": [
+                {
+                  "type": "gain",
+                  "resource": "guild influence point",
+                  "amount": 1
+                },
+                {
+                  "type": "gain",
+                  "resource": "emperor influence point",
+                  "amount": 1
+                },
+                {
+                  "type": "gain",
+                  "resource": "fremen influence point",
+                  "amount": 1
+                }
+              ],
+              "choose": 1
+            },
+            {
+              "type": "action",
+              "description": " pay 2 solari to gain 1 guild influence point or emperor influence point or fremen influence point."
+            }
           ]
         }
       ],
@@ -248,16 +469,20 @@
     "reveal_effect": {
       "persuasion": 0,
       "swords": 0,
-      "conditional_bonuses": [
-        {
-          "type": "requirement",
-          "requires": { "type": "alliance", "faction": "emperor" },
-          "gain": [
-            { "type": "resource", "resource": "persuasion", "amount": 4 }
-          ]
-        }
-      ],
       "possible actions": {
+        "requirement": {
+          "type": "condition",
+          "description": "if you have emperor token"
+        },
+        "action": {
+          "type": "action",
+          "description": "if you have emperor token you gain 4 persuasion."
+        },
+        "action1": {
+          "type": "gain",
+          "resource": "persuasion",
+          "amount": 4
+        },
         "description": "if you have emperor token you gain 4 persuasion."
       }
     }
@@ -265,19 +490,33 @@
   "sardaukar_infantry": {
     "name": "Sardaukar Infantry",
     "type": "Agent",
-    "agent_symbols": ["none"],
+    "agent_symbols": [
+      "none"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 1 }
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 1
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "none"}
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "no agent effect."
     },
@@ -285,6 +524,9 @@
       "persuasion": 1,
       "swords": 2,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -292,36 +534,67 @@
   "sietch_reverend_mother": {
     "name": "Sietch Reverend Mother",
     "type": "Agent",
-    "agent_symbols": ["bene gesserit", "fremen"],
+    "agent_symbols": [
+      "bene gesserit",
+      "fremen"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 4 }
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 4
+      }
     ],
     "buy_effect": {
-      "gain": [],
+      "gain": [
+        {
+          "type": "none"
+        }
+      ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "destroy card", "amount": 1 }
+        {
+          "action": [
+            {
+              "type": "destroy",
+              "resource": "card",
+              "amount": 1,
+              "description": "Destroy card from unplayed pile or hand."
+            }
+          ]
+        }
       ],
       "description": "Destroy one of your cards."
     },
     "reveal_effect": {
       "persuasion": 0,
       "swords": 0,
-      "conditional_bonuses": [
-        {
-          "type": "requirement",
-          "requires": { "type": "card_in_play", "faction": "fremen" },
-          "gain": [
-            { "type": "resource", "resource": "persuasion", "amount": 3 },
-            { "type": "resource", "resource": "spice", "amount": 1 }
-          ]
-        }
-      ],
       "possible actions": {
-        "action": { "resource": "persuasion", "amount": 3 },
-        "action2": { "resource": "spice", "amount": 1 },
+        "action": [
+          {
+            "type": "requirement",
+            "requirement": {
+              "type": "condition",
+              "description": "if you already have a fremen card in play"
+            }
+          },
+          {
+            "gain": {
+              "type": "resource",
+              "resource": "persuasion",
+              "amount": 3
+            }
+          },
+          {
+            "gain": {
+              "type": "resource",
+              "resource": "spice",
+              "amount": 1
+            }
+          }
+        ],
         "description": "if you already have a fremen card in play, you gain 3 persuasion and 1 spice."
       }
     }
@@ -329,19 +602,36 @@
   "diplomacy": {
     "name": "Diplomacy",
     "type": "Agent",
-    "agent_symbols": ["bene gesserit", "fremen", "emperor","guild"],
+    "agent_symbols": [
+      "bene gesserit",
+      "fremen",
+      "emperor",
+      "guild"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 4 }
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 4
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "no agent effect."
     },
@@ -349,6 +639,9 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -356,20 +649,39 @@
   "imperial_spy": {
     "name": "Imperial Spy",
     "type": "Agent",
-    "agent_symbols": ["emperor"],
+    "agent_symbols": [
+      "emperor"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 2 }
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 2
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "destroy this card", "amount": 1 },
-        { "type": "gain", "resource": "intrigue", "amount": 1 }
+        {
+          "action": [
+            {
+              "type": "destroy this card",
+              "amount": 1
+            },
+            {
+              "type": "gain",
+              "resource": "intrigue",
+              "amount": 1
+            }
+          ]
+        }
       ],
       "description": "Destroy this card and gain 1 intrigue."
     },
@@ -377,6 +689,9 @@
       "persuasion": 1,
       "swords": 1,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -384,26 +699,57 @@
   "power_play": {
     "name": "Power play",
     "type": "Agent",
-    "agent_symbols": ["emperor","guild","bene gesserit","fremen"],
+    "agent_symbols": [
+      "emperor",
+      "guild",
+      "bene gesserit",
+      "fremen"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 5}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 5
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
         {
-          "type": "choice",
-          "choose": 1,
-          "choice": [
-            { "type": "gain", "resource": "guild influence point", "amount": 1 },
-            { "type": "gain", "resource": "emperor influence point", "amount": 1 },
-            { "type": "gain", "resource": "fremen influence point", "amount": 1 },
-            { "type": "gain", "resource": "bene gesserit influence point", "amount": 1 }
+          "action": [
+            {
+              "type": "choice",
+              "choose": 1,
+              "choice": [
+                {
+                  "type": "gain",
+                  "resource": "guild influence point",
+                  "amount": 1
+                },
+                {
+                  "type": "gain",
+                  "resource": "emperor influence point",
+                  "amount": 1
+                },
+                {
+                  "type": "gain",
+                  "resource": "fremen influence point",
+                  "amount": 1
+                },
+                {
+                  "type": "gain",
+                  "resource": "bene gesserit influence point",
+                  "amount": 1
+                }
+              ]
+            }
           ]
         }
       ],
@@ -413,6 +759,9 @@
       "persuasion": 1,
       "swords": 1,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -420,19 +769,36 @@
   "sardaukar_legion": {
     "name": "Sardaukar Legion",
     "type": "Agent",
-    "agent_symbols": ["emperor","Landsraad"],
+    "agent_symbols": [
+      "emperor",
+      "Landsraad"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 5}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 5
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "gain", "resource": "troops", "amount": 2 }
+        {
+          "action": [
+            {
+              "type": "gain",
+              "resource": "troops",
+              "amount": 2
+            }
+          ]
+        }
       ],
       "description": "Gain 2 troops."
     },
@@ -440,6 +806,10 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "action",
+          "description": "deploy up to 3 troops from your garrison to the conflict."
+        },
         "description": "deploy up to 3 troops from your garrison to the conflict."
       }
     }
@@ -447,33 +817,55 @@
   "other_memory": {
     "name": "Other Memory",
     "type": "Agent",
-    "agent_symbols": ["populated areas","CHOAM"],
+    "agent_symbols": [
+      "populated areas",
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 4}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 4
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
         {
-          "type": "choice",
-          "choose": 1,
-          "choice": [
-            { "type": "action", "description": "Gain 1 card from unused pile" },
-            { "type": "action", "description": "Draw a Bene Gesserit card from your discard pile" }
+          "action": [
+            {
+              "type": "choice",
+              "choose": 1,
+              "choice": [
+                {
+                  "type": "action",
+                  "description": "Gain 1 card from unplayed pile"
+                },
+                {
+                  "type": "action",
+                  "description": "Draw a Bene Gesserit card from your discard pile"
+                }
+              ]
+            }
           ]
         }
       ],
-      "description": "Gain 1 card from the unused pile or draw a Bene Gesserit card from your discard pile."
+      "description": "Gain 1 card from the unplayed pile or draw a Bene Gesserit card from your discard pile."
     },
     "reveal_effect": {
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -481,26 +873,55 @@
   "shifting_allegiances": {
     "name": "Shifting Allegiances",
     "type": "Agent",
-    "agent_symbols": ["Landsraad","CHOAM"],
+    "agent_symbols": [
+      "Landsraad",
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 3}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 3
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
         {
-          "type": "choice",
-          "choose": 2,
-          "choice": [
-            { "type": "gain", "resource": "guild influence point", "amount": 1 },
-            { "type": "gain", "resource": "emperor influence point", "amount": 1 },
-            { "type": "gain", "resource": "fremen influence point", "amount": 1 },
-            { "type": "gain", "resource": "bene gesserit influence point", "amount": 1 }
+          "action": [
+            {
+              "type": "choice",
+              "choose": 2,
+              "choice": [
+                {
+                  "type": "gain",
+                  "resource": "guild influence point",
+                  "amount": 1
+                },
+                {
+                  "type": "gain",
+                  "resource": "emperor influence point",
+                  "amount": 1
+                },
+                {
+                  "type": "gain",
+                  "resource": "fremen influence point",
+                  "amount": 1
+                },
+                {
+                  "type": "gain",
+                  "resource": "bene gesserit influence point",
+                  "amount": 1
+                }
+              ]
+            }
           ]
         }
       ],
@@ -510,6 +931,9 @@
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -517,19 +941,36 @@
   "piter_de_vries": {
     "name": "Piter De Vries",
     "type": "Agent",
-    "agent_symbols": ["Landsraad","populated areas"],
+    "agent_symbols": [
+      "Landsraad",
+      "populated areas"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 5}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 5
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "gain", "resource": "intrigue", "amount": 1}
+        {
+          "action": [
+            {
+              "type": "gain",
+              "resource": "intrigue",
+              "amount": 1
+            }
+          ]
+        }
       ],
       "description": "Gain 1 intrigue."
     },
@@ -537,6 +978,9 @@
       "persuasion": 3,
       "swords": 1,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -544,21 +988,45 @@
   "duncan_idaho": {
     "name": "Duncan Idaho",
     "type": "Agent",
-    "agent_symbols": ["populated areas"],
+    "agent_symbols": [
+      "populated areas"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 4}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 4
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "pay", "resource": "water", "amount": 1 },
-        {"type": "gain", "resource": "solari", "amount": 1 },
-        {"type": "gain", "resource": "troops", "amount": 1 }
+        {
+          "action": [
+            {
+              "type": "pay",
+              "resource": "water",
+              "amount": 1
+            },
+            {
+              "type": "gain",
+              "resource": "solari",
+              "amount": 1
+            },
+            {
+              "type": "gain",
+              "resource": "troops",
+              "amount": 1
+            }
+          ]
+        }
       ],
       "description": "Pay 1 water to gain 1 Solari and 1 Troop."
     },
@@ -566,6 +1034,9 @@
       "water": 1,
       "swords": 2,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -573,26 +1044,52 @@
   "thufir_hawat": {
     "name": "Thufir Hawat",
     "type": "Agent",
-    "agent_symbols": ["populated areas","CHOAM","bene gesserit","emperor","guild","fremen"],
+    "agent_symbols": [
+      "populated areas",
+      "CHOAM",
+      "bene gesserit",
+      "emperor",
+      "guild",
+      "fremen"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 5}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 5
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "gain", "resource": "card from unused pile", "amount": 1 }
+        {
+          "action": [
+            {
+              "type": "gain",
+              "resource": "card from unplayed pile",
+              "amount": 1
+            }
+          ]
+        }
       ],
-      "description": "Gain 1 card from unused pile."
+      "description": "Gain 1 card from unplayed pile."
     },
     "reveal_effect": {
       "water": 1,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "gain",
+          "resource": "intrigue",
+          "amount": 1
+        },
         "description": "Gain 1 intrigue."
       }
     }
@@ -600,35 +1097,61 @@
   "worm_riders": {
     "name": "Worm Riders",
     "type": "Agent",
-    "agent_symbols": ["populated areas","CHOAM"],
+    "agent_symbols": [
+      "populated areas",
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 6}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 6
+      }
     ],
     "buy_effect": {
-      "gain": [],
+      "gain": [
+        {
+          "type": "none"
+        }
+      ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "gain", "resource": "spice", "amount": 2 }
+        {
+          "action": [
+            {
+              "type": "gain",
+              "resource": "spice",
+              "amount": 2
+            }
+          ]
+        }
       ],
       "description": "Gain 2 spice."
     },
     "reveal_effect": {
       "persuasion": 0,
       "swords": 4,
-      "conditional_bonuses": [
-        {
-          "type": "requirement",
-          "requires": { "type": "influence", "faction": "fremen", "amount": 2 },
-          "gain": [
-            { "type": "resource", "resource": "troops", "amount": 4 }
-          ]
-        }
-      ],
       "possible actions": {
-        "action": { "type": "gain", "resource": "troops", "amount": 4 },
-        "action2": { "type": "gain", "resource": "troops", "amount": 6 },
+        "requirement": {
+          "type": "condition",
+          "description": "if you have 2 fremen influence points"
+        },
+        "action": {
+          "type": "gain",
+          "resource": "troops",
+          "amount": 4
+        },
+        "requirement2": {
+          "type": "condition",
+          "description": "if you have fremen token points"
+        },
+        "action2": {
+          "type": "gain",
+          "resource": "troops",
+          "amount": 6
+        },
         "description": "if you have 2 fremen influence points you gain 4 troops, if you have fremen token points you gain 6 troops."
       }
     }
@@ -636,26 +1159,45 @@
   "space_travel": {
     "name": "Space Travel",
     "type": "Agent",
-    "agent_symbols": ["guild"],
+    "agent_symbols": [
+      "guild"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 3}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 3
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "gain", "resource": "card from unused pile", "amount": 1 }
+        {
+          "action": [
+            {
+              "type": "gain",
+              "resource": "card from unplayed pile",
+              "amount": 1
+            }
+          ]
+        }
       ],
-      "description": "Gain 1 card from unused pile."
+      "description": "Gain 1 card from unplayed pile."
     },
     "reveal_effect": {
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -663,9 +1205,18 @@
   "lady_jessica": {
     "name": "Lady Jessica",
     "type": "Agent",
-    "agent_symbols": ["bene gesserit","Landsraad","populated areas","CHOAM"],
+    "agent_symbols": [
+      "bene gesserit",
+      "Landsraad",
+      "populated areas",
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 7}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 7
+      }
     ],
     "buy_effect": {
       "gain": [
@@ -673,10 +1224,26 @@
           "type": "choice",
           "choose": 1,
           "choice": [
-            { "type": "gain", "resource": "guild influence point", "amount": 1 },
-            { "type": "gain", "resource": "emperor influence point", "amount": 1 },
-            { "type": "gain", "resource": "fremen influence point", "amount": 1 },
-            { "type": "gain", "resource": "bene gesserit influence point", "amount": 1 }
+            {
+              "type": "gain",
+              "resource": "guild influence point",
+              "amount": 1
+            },
+            {
+              "type": "gain",
+              "resource": "emperor influence point",
+              "amount": 1
+            },
+            {
+              "type": "gain",
+              "resource": "fremen influence point",
+              "amount": 1
+            },
+            {
+              "type": "gain",
+              "resource": "bene gesserit influence point",
+              "amount": 1
+            }
           ]
         }
       ],
@@ -684,14 +1251,25 @@
     },
     "agent_effect": {
       "actions": [
-        {"type": "gain", "resource": "card from unused pile", "amount": 2 }
+        {
+          "action": [
+            {
+              "type": "gain",
+              "resource": "card from unplayed pile",
+              "amount": 2
+            }
+          ]
+        }
       ],
-      "description": "Gain 2 cards from unused pile."
+      "description": "Gain 2 cards from unplayed pile."
     },
     "reveal_effect": {
       "persuasion": 3,
       "swords": 1,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -699,19 +1277,34 @@
   "reverend_mother_mohiam": {
     "name": "Reverend Mother Mohiam",
     "type": "Agent",
-    "agent_symbols": ["emperor", "bene gesserit"],
+    "agent_symbols": [
+      "emperor",
+      "bene gesserit"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 6}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 6
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "If you have another Bene Gesserit card in play, each opponent discards two cards."
     },
@@ -719,7 +1312,11 @@
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
-        "action": { "type": "gain", "resource": "spice", "amount": 2 },
+        "action": {
+          "type": "gain",
+          "resource": "spice",
+          "amount": 2
+        },
         "description": "you gain 2 Spice "
       }
     }
@@ -727,24 +1324,45 @@
   "test_of_humanity": {
     "name": "Test Of Humanity",
     "type": "Agent",
-    "agent_symbols": ["bene gesserit", "populated areas","Landsraad"],
+    "agent_symbols": [
+      "bene gesserit",
+      "populated areas",
+      "Landsraad"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 3}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 3
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
-      "actions": [],
+      "actions": [
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
+      ],
       "description": "Each opponent chooses: Discard a card -OR- lose a displayed troop."
     },
     "reveal_effect": {
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -752,19 +1370,37 @@
   "stilgar": {
     "name": "Stilgar",
     "type": "Agent",
-    "agent_symbols": ["fremen", "CHOAM","populated areas"],
+    "agent_symbols": [
+      "fremen",
+      "CHOAM",
+      "populated areas"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 5}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 5
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "gain", "resource": "water", "amount": 1 }
+        {
+          "action": [
+            {
+              "type": "gain",
+              "resource": "water",
+              "amount": 1
+            }
+          ]
+        }
       ],
       "description": "Gain 1 water."
     },
@@ -772,6 +1408,9 @@
       "persuasion": 2,
       "swords": 3,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -779,19 +1418,34 @@
   "signet_ring": {
     "name": "Signet Ring",
     "type": "Agent",
-    "agent_symbols": ["Landsraad","populated areas","CHOAM"],
+    "agent_symbols": [
+      "Landsraad",
+      "populated areas",
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "none" }
+      {
+        "type": "none"
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "use signet effect of your player card", "amount": 1 }
+        {
+          "action": [
+            {
+              "type": "use signet effect of your player card",
+              "amount": 1
+            }
+          ]
+        }
       ],
       "description": "use signet effect of your player card."
     },
@@ -799,6 +1453,9 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -806,28 +1463,52 @@
   "smugglers_thopter": {
     "name": "Smuggler's Thopter",
     "type": "Agent",
-    "agent_symbols": ["CHOAM"],
+    "agent_symbols": [
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 4}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 4
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "requirement", "resource": "guild influence point", "amount": 2 },
-        {"type": "gain", "resource": "card from unused pile", "amount": 2 }
+        {
+          "action": [
+            {
+              "type": "requirement",
+              "resource": "guild influence point",
+              "amount": 2
+            },
+            {
+              "type": "gain",
+              "resource": "card from unplayed pile",
+              "amount": 2
+            }
+          ]
+        }
       ],
-      "description": "Gain 2 cards from the unused pile. if you have at least 2 guild influence points."
+      "description": "Gain 2 cards from the unplayed pile. if you have at least 2 guild influence points."
     },
     "reveal_effect": {
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "action": { "type": "gain", "resource": "solari", "amount": 1 },
+        "action": {
+          "type": "gain",
+          "resource": "solari",
+          "amount": 1
+        },
         "description": "You gain 1 Solari."
       }
     }
@@ -835,19 +1516,35 @@
   "seek_allies": {
     "name": "Seek Allies",
     "type": "Agent",
-    "agent_symbols": ["emperor", "guild", "bene gesserit", "fremen"],
+    "agent_symbols": [
+      "emperor",
+      "guild",
+      "bene gesserit",
+      "fremen"
+    ],
     "buy_cost": [
-      { "type": "none" }
+      {
+        "type": "none"
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "destroy this card", "amount": 1 }
+        {
+          "action": [
+            {
+              "type": "destroy this card",
+              "amount": 1
+            }
+          ]
+        }
       ],
       "description": "Trash this card."
     },
@@ -855,6 +1552,9 @@
       "persuasion": 0,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -862,19 +1562,35 @@
   "guild_bankers": {
     "name": "Guild Bankers",
     "type": "Agent",
-    "agent_symbols": ["guild", "emperor", "Landsraad"],
+    "agent_symbols": [
+      "guild",
+      "emperor",
+      "Landsraad"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 3}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 3
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "no agent effect."
     },
@@ -882,6 +1598,10 @@
       "persuasion": 0,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "effect",
+          "description": "the 'spice must flow' card costs 3 persuasion less to acquire this turn."
+        },
         "description": "the 'spice must flow' card costs 3 persuasion less to acquire this turn."
       }
     }
@@ -889,19 +1609,34 @@
   "spice_hunter": {
     "name": "Spice Hunter",
     "type": "Agent",
-    "agent_symbols": ["fremen", "CHOAM"],
+    "agent_symbols": [
+      "fremen",
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 2}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 2
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "no agent effect."
     },
@@ -909,7 +1644,15 @@
       "persuasion": 1,
       "swords": 1,
       "possible actions": {
-        "action": { "type": "gain", "resource": "spice", "amount": 1 },
+        "requirement": {
+          "type": "condition",
+          "description": "Fremen Bond"
+        },
+        "action": {
+          "type": "gain",
+          "resource": "spice",
+          "amount": 1
+        },
         "description": "Fremen Bond: Gain 1 Spice"
       }
     }
@@ -917,21 +1660,46 @@
   "gene_manipulation": {
     "name": "Gene Manipulation",
     "type": "Agent",
-    "agent_symbols": ["Landsraad", "populated areas"],
+    "agent_symbols": [
+      "Landsraad",
+      "populated areas"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 3}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 3
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "destroy card", "resource": "card", "amount": 1 },
-        { "type": "requirement", "resource": "bene gesserit", "amount": 1 },
-        { "type": "gain", "resource": "spice", "amount": 2 }
+        {
+          "action": [
+            {
+              "type": "destroy card",
+              "resource": "card",
+              "amount": 1
+            },
+            {
+              "type": "requirement",
+              "resource": "bene gesserit",
+              "amount": 1
+            },
+            {
+              "type": "gain",
+              "resource": "spice",
+              "amount": 2
+            }
+          ]
+        }
       ],
       "description": "Destroy one of your cards and if you have another Bene Gesserit card in play: Gain 2 Spice."
     },
@@ -939,6 +1707,9 @@
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -946,26 +1717,45 @@
   "dr_yueh": {
     "name": "Dr. Yueh",
     "type": "Agent",
-    "agent_symbols": ["populated areas"],
+    "agent_symbols": [
+      "populated areas"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 1}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 1
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "gain", "resource": "card from unused pile", "amount": 1 }
+        {
+          "action": [
+            {
+              "type": "gain",
+              "resource": "card from unplayed pile",
+              "amount": 1
+            }
+          ]
+        }
       ],
-      "description": "Gain 1 card from unused pile."
+      "description": "Gain 1 card from unplayed pile."
     },
     "reveal_effect": {
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -973,20 +1763,40 @@
   "fremen_camp": {
     "name": "Fremen Camp",
     "type": "Agent",
-    "agent_symbols": [ "CHOAM"],
+    "agent_symbols": [
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 4}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 4
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "pay", "resource": "spice", "amount": 2 },
-        {"type": "gain", "resource": "troops", "amount": 3 }
+        {
+          "action": [
+            {
+              "type": "pay",
+              "resource": "spice",
+              "amount": 2
+            },
+            {
+              "type": "gain",
+              "resource": "troops",
+              "amount": 3
+            }
+          ]
+        }
       ],
       "description": "Pay 2 Spice to gain 3 Troops."
     },
@@ -994,6 +1804,9 @@
       "persuasion": 2,
       "swords": 1,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -1001,19 +1814,37 @@
   "chani": {
     "name": "Chani",
     "type": "Agent",
-    "agent_symbols": ["fremen", "populated areas", "CHOAM"],
+    "agent_symbols": [
+      "fremen",
+      "populated areas",
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 5}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 5
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "gain", "resource": "water", "amount": 1 }
+        {
+          "type": "gain",
+          "resource": "water",
+          "amount": 1
+        }
       ],
       "description": "Gain 1 water on buy."
     },
     "agent_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "no agent effect."
     },
@@ -1021,6 +1852,10 @@
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "action",
+          "description": "retreat any number of your troops"
+        },
         "description": "retreat any number of your troops"
       }
     }
@@ -1028,19 +1863,36 @@
   "fedaykin_death_commando": {
     "name": "Fedaykin Death Commando",
     "type": "Agent",
-    "agent_symbols": ["populated areas", "CHOAM"],
+    "agent_symbols": [
+      "populated areas",
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 3}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 3
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "destroy card", "resource": "card", "amount": 1 }
+        {
+          "action": [
+            {
+              "type": "destroy card",
+              "resource": "card",
+              "amount": 1
+            }
+          ]
+        }
       ],
       "description": "Destroy 1 card."
     },
@@ -1048,7 +1900,15 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "action": { "type": "gain", "resource": "swords", "amount": 3 },
+        "requirement": {
+          "type": "condition",
+          "description": "if you have any other fremen cards in play"
+        },
+        "action": {
+          "type": "gain",
+          "resource": "swords",
+          "amount": 3
+        },
         "description": " if you have any other fremen cards in play: Gain 3 swords."
       }
     }
@@ -1056,19 +1916,35 @@
   "opulence": {
     "name": "Opulence",
     "type": "Agent",
-    "agent_symbols": ["emperor"],
+    "agent_symbols": [
+      "emperor"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 6}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 6
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "gain", "resource": "solari", "amount": 3 }
+        {
+          "action": [
+            {
+              "type": "gain",
+              "resource": "solari",
+              "amount": 3
+            }
+          ]
+        }
       ],
       "description": "Gain 3 Solari. "
     },
@@ -1076,8 +1952,16 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "action": { "type": "pay", "resource": "solari", "amount": 6},
-        "action1": { "type": "gain", "resource": "vp", "amount": 1 },
+        "action": {
+          "type": "pay",
+          "resource": "solari",
+          "amount": 6
+        },
+        "action1": {
+          "type": "gain",
+          "resource": "vp",
+          "amount": 1
+        },
         "description": "pay 6 Solari to gain 1 Victory Point."
       }
     }
@@ -1085,19 +1969,33 @@
   "kwisatz_haderach": {
     "name": "Kwisatz Haderach",
     "type": "Agent",
-    "agent_symbols": ["none"],
+    "agent_symbols": [
+      "none"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 8}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 8
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "none"}
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "no agent effect."
     },
@@ -1105,6 +2003,10 @@
       "persuasion": 0,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "action",
+          "description": "Send one of your Agents from anywhere to ANY board space (even if occupied)."
+        },
         "description": "Send one of your Agents from anywhere to ANY board space (even if occupied)."
       }
     }
@@ -1112,24 +2014,44 @@
   "guild_ambassador": {
     "name": "Guild Ambassador",
     "type": "Agent",
-    "agent_symbols": ["Landsraad"],
+    "agent_symbols": [
+      "Landsraad"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 4}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 4
+      }
     ],
     "buy_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
         {
-          "type": "choice",
-          "choose": 1,
-          "choice": [
-            { "type": "gain", "resource": "guild influence point", "amount": 1 },
-            { "type": "gain", "resource": "spice", "amount": 2 }
+          "action": [
+            {
+              "type": "choice",
+              "choose": 1,
+              "choice": [
+                {
+                  "type": "gain",
+                  "resource": "guild influence point",
+                  "amount": 1
+                },
+                {
+                  "type": "gain",
+                  "resource": "spice",
+                  "amount": 2
+                }
+              ]
+            }
           ]
         }
       ],
@@ -1139,9 +2061,21 @@
       "persuasion": 0,
       "swords": 0,
       "possible actions": {
-        "action": { "type": "requirement", "resource": "guild token" , "amount": 1 },
-        "action1": { "type": "pay", "resource": "spice", "amount": 3 },
-        "action2": { "type": "gain", "resource": "vp", "amount": 1 },
+        "action": {
+          "type": "requirement",
+          "resource": "guild token",
+          "amount": 1
+        },
+        "action1": {
+          "type": "pay",
+          "resource": "spice",
+          "amount": 3
+        },
+        "action2": {
+          "type": "gain",
+          "resource": "vp",
+          "amount": 1
+        },
         "description": "You may pay 3 Spice to gain 1 Victory Point."
       }
     }
@@ -1149,26 +2083,47 @@
   "bene_gesserit_initiate": {
     "name": "Bene Gesserit Initiate",
     "type": "Agent",
-    "agent_symbols": ["populated areas", "Landsraad", "CHOAM"],
+    "agent_symbols": [
+      "populated areas",
+      "Landsraad",
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 3}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 3
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "gain", "resource": "card from unused pile", "amount": 1 }
+        {
+          "action": [
+            {
+              "type": "gain",
+              "resource": "card from unplayed pile",
+              "amount": 1
+            }
+          ]
+        }
       ],
-      "description": "Gain 1 card from the unused pile."
+      "description": "Gain 1 card from the unplayed pile."
     },
     "reveal_effect": {
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -1176,19 +2131,35 @@
   "arrakis_recruiter": {
     "name": "Arrakis Recruiter",
     "type": "Agent",
-    "agent_symbols": ["populated areas"],
+    "agent_symbols": [
+      "populated areas"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 2}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 2
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "gain", "resource": "troops", "amount": 1 }
+        {
+          "action": [
+            {
+              "type": "gain",
+              "resource": "troops",
+              "amount": 1
+            }
+          ]
+        }
       ],
       "description": "Gain 1 Troop."
     },
@@ -1196,6 +2167,9 @@
       "persuasion": 1,
       "swords": 1,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -1205,17 +2179,29 @@
     "type": "Agent",
     "agent_symbols": [],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 1}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 1
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "No agent effect."
     },
@@ -1223,7 +2209,20 @@
       "persuasion": 1,
       "swords": 1,
       "possible actions": {
-        "action": { "type": "requirement", "resource": "played another card with destroy ability before", "amount": 1 },
+        "requirement": {
+          "type": "condition",
+          "description": "When this card is trashed"
+        },
+        "action": {
+          "type": "requirement",
+          "resource": "played another card with destroy ability before",
+          "amount": 1
+        },
+        "action1": {
+          "type": "gain",
+          "resource": "solari",
+          "amount": 4
+        },
         "description": "When this card is trashed: 4 solari."
       }
     }
@@ -1231,19 +2230,34 @@
   "arrakis_liaison": {
     "name": "Arrakis Liaison",
     "type": "Agent",
-    "agent_symbols": ["populated areas", "Landsraad"],
+    "agent_symbols": [
+      "populated areas",
+      "Landsraad"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 2}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 2
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "No agent effect."
     },
@@ -1251,6 +2265,9 @@
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -1258,19 +2275,36 @@
   "crysknife": {
     "name": "Crysknife",
     "type": "Agent",
-    "agent_symbols": ["fremen", "CHOAM"],
+    "agent_symbols": [
+      "fremen",
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 3}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 3
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "gain", "resource": "solari", "amount": 1 }
+        {
+          "action": [
+            {
+              "type": "gain",
+              "resource": "solari",
+              "amount": 1
+            }
+          ]
+        }
       ],
       "description": "Gain 1 solari."
     },
@@ -1278,8 +2312,16 @@
       "persuasion": 0,
       "swords": 1,
       "possible actions": {
-        "action": { "type": "requirement", "resource": "played fremen card", "amount": 1 },
-        "action1": { "type": "gain", "resource": "fremen influence point", "amount": 1 },
+        "action": {
+          "type": "requirement",
+          "resource": "played fremen card",
+          "amount": 1
+        },
+        "action1": {
+          "type": "gain",
+          "resource": "fremen influence point",
+          "amount": 1
+        },
         "description": "If you have a played Fremen card: Gain 1 Fremen Influence Point."
       }
     }
@@ -1287,22 +2329,50 @@
   "choam_directorship": {
     "name": "Choam Directorship",
     "type": "Agent",
-    "agent_symbols": ["none"],
+    "agent_symbols": [
+      "none"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 8}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 8
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "gain", "resource": "emperor influence point", "amount": 1 },
-        { "type": "gain", "resource": "bene gesserit influence point", "amount": 1 },
-        { "type": "gain", "resource": "guild influence point", "amount": 1 },
-        { "type": "gain", "resource": "fremen influence point", "amount": 1 }
+        {
+          "type": "gain",
+          "resource": "emperor influence point",
+          "amount": 1
+        },
+        {
+          "type": "gain",
+          "resource": "bene gesserit influence point",
+          "amount": 1
+        },
+        {
+          "type": "gain",
+          "resource": "guild influence point",
+          "amount": 1
+        },
+        {
+          "type": "gain",
+          "resource": "fremen influence point",
+          "amount": 1
+        }
       ],
       "description": "Gain 1 influence point with all 4 factions."
     },
     "agent_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "No agent effect."
     },
@@ -1310,7 +2380,11 @@
       "persuasion": 0,
       "swords": 0,
       "possible actions": {
-        "action": { "type": "gain", "resource": "solari", "amount": 3 },
+        "action": {
+          "type": "gain",
+          "resource": "solari",
+          "amount": 3
+        },
         "description": "No more effects."
       }
     }
@@ -1318,19 +2392,33 @@
   "carryall": {
     "name": "Carryall",
     "type": "Agent",
-    "agent_symbols": ["CHOAM"],
+    "agent_symbols": [
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 5}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 5
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "Double the base (not bonus) spice you harvest with this Agent."
     },
@@ -1338,7 +2426,11 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "gain": { "type": "gain", "resource": "spice", "amount": 1 },
+        "action": {
+          "type": "gain",
+          "resource": "spice",
+          "amount": 1
+        },
         "description": "You gain 1 Spice."
       }
     }
@@ -1346,19 +2438,34 @@
   "bene_gesserit_sister": {
     "name": "Bene Gesserit Sister",
     "type": "Agent",
-    "agent_symbols": ["bene gesserit", "Landsraad"],
+    "agent_symbols": [
+      "bene gesserit",
+      "Landsraad"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 3}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 3
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "no agent effect."
     },
@@ -1366,12 +2473,22 @@
       "persuasion": 0,
       "swords": 0,
       "possible actions": {
-        "type": "choice",
-        "choose": 1,
-        "choice": [
-          { "type": "gain", "resource": "persuasion", "amount": 2 },
-          { "type": "gain", "resource": "swords", "amount": 2 }
-        ],
+        "action": {
+          "type": "choice",
+          "choose": 1,
+          "choice": [
+            {
+              "type": "gain",
+              "resource": "persuasion",
+              "amount": 2
+            },
+            {
+              "type": "gain",
+              "resource": "swords",
+              "amount": 2
+            }
+          ]
+        },
         "description": "You gain 2 Persuasion or 2 Swords."
       }
     }
@@ -1379,24 +2496,46 @@
   "the_voice": {
     "name": "The Voice",
     "type": "Agent",
-    "agent_symbols": ["populated areas", "CHOAM"],
+    "agent_symbols": [
+      "populated areas",
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 2}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 2
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "gain": [],
-      "description": "Choose any board space. Opponents can't send their next Agents there this round."
+      "description": "Choose any board space. Opponents can't send their next Agents there this round.",
+      "actions": [
+        {
+          "action": [
+            {
+              "type": "action",
+              "description": "Choose any board space. Opponents can't send their next Agents there this round."
+            }
+          ]
+        }
+      ]
     },
     "reveal_effect": {
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -1404,19 +2543,35 @@
   "the_spice_must_flow": {
     "name": "The Spice Must Flow",
     "type": "Agent",
-    "agent_symbols": ["none"],
+    "agent_symbols": [
+      "none"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 9}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 9
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "gain", "resource": "vp", "amount": 1}
+        {
+          "type": "gain",
+          "resource": "vp",
+          "amount": 1
+        }
       ],
       "description": "gain 1 victory point."
     },
     "agent_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "No agent effect."
     },
@@ -1424,6 +2579,9 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -1431,19 +2589,36 @@
   "guild_administrator": {
     "name": "Guild Administrator",
     "type": "Agent",
-    "agent_symbols": ["guild", "CHOAM"],
+    "agent_symbols": [
+      "guild",
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 2}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 2
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "destroy card", "resource": "card", "amount": 1 }
+        {
+          "action": [
+            {
+              "type": "destroy card",
+              "resource": "card",
+              "amount": 1
+            }
+          ]
+        }
       ],
       "description": "Trash a card."
     },
@@ -1451,6 +2626,9 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -1458,19 +2636,39 @@
   "foldspace": {
     "name": "Foldspace",
     "type": "Agent",
-    "agent_symbols": ["emperor", "guild", "bene gesserit", "fremen", "Landsraad", "populated areas", "CHOAM"],
+    "agent_symbols": [
+      "emperor",
+      "guild",
+      "bene gesserit",
+      "fremen",
+      "Landsraad",
+      "populated areas",
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "none" }
+      {
+        "type": "none"
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        {"type": "destroy this card", "resource": "card", "amount": 1 }
+        {
+          "action": [
+            {
+              "type": "destroy this card",
+              "resource": "card",
+              "amount": 1
+            }
+          ]
+        }
       ],
       "description": "Trash this card. "
     },
@@ -1478,6 +2676,9 @@
       "persuasion": 0,
       "swords": 0,
       "possible actions": {
+        "action": {
+          "type": "none"
+        },
         "description": "No more effects."
       }
     }
@@ -1485,19 +2686,34 @@
   "control_the_spice": {
     "name": "Control the Spice",
     "type": "Agent",
-    "agent_symbols": ["fremen", "CHOAM"],
+    "agent_symbols": [
+      "fremen",
+      "CHOAM"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 2}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 2
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "none"}
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "Fremen Bond: Gain 1 Spice."
     },
@@ -1505,8 +2721,16 @@
       "persuasion": 1,
       "swords": 1,
       "possible actions": {
-        "action": { "type": "requirement", "resource": "played another fremen card", "amount": 1 },
-        "action1": { "type": "gain", "resource": "spice", "amount": 1 },
+        "action": {
+          "type": "requirement",
+          "resource": "played another fremen card",
+          "amount": 1
+        },
+        "action1": {
+          "type": "gain",
+          "resource": "spice",
+          "amount": 1
+        },
         "description": "gain 1 spice if you played another fremen card before during this turn."
       }
     }
@@ -1514,19 +2738,34 @@
   "gun_thopter": {
     "name": "Gun Thopter",
     "type": "Agent",
-    "agent_symbols": ["CHOAM","populated areas"],
+    "agent_symbols": [
+      "CHOAM",
+      "populated areas"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 4}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 4
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
       "actions": [
-        { "type": "none" }
+        {
+          "action": [
+            {
+              "type": "none"
+            }
+          ]
+        }
       ],
       "description": "Each opponent loses one garrisoned troop. "
     },
@@ -1534,7 +2773,11 @@
       "persuasion": 0,
       "swords": 3,
       "possible actions": {
-        "description": "You may deploy a troop from your garrison to the Conflict.."
+        "action": {
+          "type": "action",
+          "description": "You may deploy a troop from your garrison to the Conflict."
+        },
+        "description": "You may deploy a troop from your garrison to the Conflict."
       }
     }
   }
