@@ -181,7 +181,7 @@
     ],
     "actions": [
       { 
-      "gain": { "type": "extra gain", "description": "take 2 persuasion points every turn" } 
+      "gain": { "type": "extra gain", "description": "take 2 persuasion points every turn and gain a place in the High Council" } 
       }
     ],
     "conflict": [

@@ -1,17 +1,579 @@
 {
-  "plot_twist": {
-    "name": "Plot Twist",
-    "type": "agent_turn",
-    "description": "At the start of your agent turn, gain 1 Solari and 1 Spice."
+  "learn_their_path": {
+    "name": "Learn Their Path",
+    "type": "conspiracy",
+    "actions": {
+      "gain": [
+        { "type": "resource", "resource": " fremen influence point", "amount": 1 }
+      ]
+    },
+    "description": "get 1 fremen influence point"
   },
+  "recruitment_mission": {
+    "name": "recruitment mission",
+    "type": "conspiracy",
+    "actions": {
+      "gain": [
+        { "type": "resource", "resource": "persuasion ", "amount": 1 }
+      ],
+      "action": [
+        { "type": "action", "description": "You may put bought cards on top of unplayed pile" }
+      ]
+  },
+    "description": "get 1 persuasion and may put bought cards on top of unplayed pile"
+  },
+
+  "occasion": {
+    "name": "occasion",
+    "type": "conspiracy",
+    "actions": {
+      "gain": [
+        { "type": "resource", "resource": "solari", "amount": 2 }
+      ]
+    },
+    "description": "get 2 solari "
+  },
+
+  "concentration": {
+    "name": "concentration",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        { "type": "action", "description": "mix your unplayed pile and discard pile into new unplayed pile and take card from the top" }
+      ]
+    },
+    "description": "mix your unplayed pile and discard pile into new unplayed pile and take card from the top"
+  },
+
+  "calculated_recruitment": {
+    "name": "calculated recruitment",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        {"pay": 
+          { "type": "resource", "resource": "Spice", "amount": 1 }
+        }
+        ,
+        { "type": "action", "description": " take your mentat from his station in Landsraad"}
+      ]
+         },
+    "description": "pay 1 Spice to take your mentat from his station in Landsraad"
+  },
+  "infiltration": {
+    "name": "infiltration",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        { "type": "action", "description": "you may send your next agent on already occupied location  " }
+      ]
+         },
+    "description": "you may send your next agent on already occupied location"
+  },
+  "poison_detector": {
+    "name": "poison detector",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        { "type": "action", "description": "check card from the top of your unplayed pile - take it or destroy it" }
+      ]
+         },
+    "description": "check card from the top of your unplayed pile - take it or destroy it"
+  },
+  "market_manopoly": {
+    "name": "market manopoly",
+    "type": "endgame",
+    "actions": {
+      "action1": [
+          {"type": "requirement","requirement": [
+              { "type": "resource", "resource": "The Spice Must Flow", "description": "at least 2" }
+            ]
+          },
+          {"gain":  
+            { "type": "resource", "resource": "VP", "amount": 1 } 
+          }      
+        ] ,
+
+        "action2": [
+          {"type": "requirement","requirement": [
+              { "type": "resource", "resource": "The Spice Must Flow", "description": "you are the person with the highest number of this cards (not execquo)" }
+            ]
+          },
+          { "type": "gain", "requirement": "vp", "amount": 1 }       
+        ] 
+      },
+      "description": "if you have at least 2 'The Spice Must Flow' cards, gain 1 VP, if you are the person with the highest number of this cards, gain 1 VP"
+    
+    },
+    "demand_for_an_alliance": {
+    "name": "demand for an alliance",
+    "type": "fight",
+    "actions": {
+      "action": [
+        {"type": "requirement","requirement": [
+            { "type": "action", "description": "win the conflict" }
+          ]
+        },
+
+        {"type": "choice","choice": [
+            {"gain": { "type": "resource", "resource": "VP", "amount": 1 } },
+            {"exchange":
+              [
+                {"pay":
+                  { "type": "resource", "resource": "Spice", "amount": 2 }
+                },
+                {"gain":
+                  { "type": "resource", "resource": "influence point", "amount": 2 }  
+                }
+              ]
+            }      
+          ],"choose": 1
+        }
+      ]
+         },
+    "description": "if you win the conflict you may gain one influence point or exchange 2 Spice for 2 influence points"
+  },
+
+  "master_tactitian": {
+    "name": "master of tactics",
+    "type": "fight",
+    "actions": {
+      "action": [
+        {"type": "choice","choice": [
+            {"gain": 
+              { "type": "resource", "resource": "fight points", "amount": 3 }
+            },
+            {"action": 
+              { "type": "action", "description": "withdraw up to 3 troops to your garnison from conflict" }
+            }
+          ],"choose": 1
+        }      
+      ]     
+    },
+    "description": "gain 3 faight points or withdraw up to 3 troops to your garnison from conflict  "
+  },
+  "consequences_of_victory": {
+    "name": "consequences of victory",
+    "type": "fight",
+    "actions": {
+      "action": [
+        {"type": "requirement","requirement": [
+            { "type": "action", "description": "win the conflict" }
+          ]
+        },
+        
+        {"gain": 
+          { "type": "resource", "resource": "Spice", "amount": 3 }
+        }
+      ]
+         },
+    "description": "if you win the conflict you may gain one influence point or exchange 2 Spice for 2 influence points"
+  },
+
+  "dispatching_an_envoy": {
+    "name": "dispatching an envoy",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        { "type": "action", "description": "change symbols (cancel actual and gain new ones) of your card on - emperor,guild,fremen and bene gesserit" }  
+      ]
+    },
+    "description": " change symbols (cancel actual ones and gain new ones) of your card on - emperor,guild,fremen and bene gesserit"
+  },
+  "bribery": {
+    "name": "bribery",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        {"exchange":
+          [
+            {"pay":
+              { "type": "resource", "resource": "solari", "amount": 2 }
+            },
+            {"gain":
+              { "type": "resource", "resource": "influence point", "amount": 1 }  
+            }
+          ]
+        }
+        ]
+    },
+    "description": " exchange 2 solari for 1 influence point"
+  },
+  "personal_army": {
+    "name": "personal army",
+    "type": "fight",
+    "actions": {
+      "action": [
+        {"exchange":
+          [
+            {"pay":
+              { "type": "resource", "resource": "Spice", "amount": 2 }
+            },
+            {"gain":
+              { "type": "resource", "resource": "fight points", "amount": 5 }  
+            }
+          ]
+        }
+        ]
+    },
+    "description": " exchange 2 Spice for 5 fight points"
+  },
+  "trick": {
+    "name": "trick",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        {"exchange":
+          [
+            {"pay":
+              { "type": "resource", "resource": "solari", "amount": 1 }
+            },
+            {"type":"action" , "description:":"player you choose lose 1 troops from conflict ( if he has any) and you send to conflict 1 troop from your garnison"  
+            }
+          ]
+        }
+        ]
+    },
+    "description": " player you choose lose 1 troops from conflict ( if he has any) and you send to conflict 1 troop from your garnison"
+  },
+  "sleeping_must_wake_up": {
+    "name": "sleeping must wake up",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        {"exchange":
+          [
+            {"pay":
+              { "type": "resource", "resource": "Spice", "amount": 4 }
+            },
+            {"gain":
+              { "type": "resource", "resource": "VP", "amount": 1 }  
+            }
+          ]
+        }
+        ]
+    },
+    "description": " exchange 4 Spice for 1 VP"
+  },
+
+  "favourite_subject": {
+    "name": "favourite subject",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        {"gain":
+          { "type": "resource", "resource": "emperor influence point", "amount": 1 }  
+        }
+      ]
+    },
+    "description": "gain 1 emperor influence point"
+  },
+  "support": {
+    "name": "support",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        {"exchange":
+          [
+            {"pay":
+              { "type": "resource", "resource": "solari", "amount": 3 }
+            },
+            {"gain":[
+                { "type": "resource", "resource": "troops", "amount": 3 },
+                { "type": "action", "description": "if you use this card during reaveal phase , you may send any of your troops to conflict immediatelly after playing this card"}  
+              ]
+            }
+
+            
+          ]
+        }
+        ]
+    },
+    "description": " exchange 3 solari for 3 troops and if you use this card during reaveal phase , you may send any of your troops to conflict immediatelly after playing this card"
+  },
+
+  "water of life": {
+    "name": "water of life",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        {"exchange":
+          [
+            {"pay":[
+                { "type": "resource", "resource": "Spice", "amount": 1 },
+                { "type": "resource", "resource": "water", "amount": 1 }
+              ]
+            },
+              
+            {"gain":
+              { "type": "action", "description":"take 3 card from your unplayed pile" }
+            }           
+          ]
+        }
+        ]
+    },
+    "description": " exchange 3 solari for 3 troops and if you use this card during reaveal phase , you may send any of your troops to conflict immediatelly after playing this card"
+  },
+
+   "agreement_from_high_council": {
+    "name": "agreement from high council",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        {"type": "requirement","requirement": [
+            { "type": "action", "description": "if you have a place in high council" }
+          ]
+        },
+        
+        {"gain": 
+          { "type": "resource", "resource": "Spice", "amount": 2 }
+        }
+      ]
+         },
+    "description": "if you have a place in high council you gain 2 Spice"
+  },
+  "khoam_shares": {
+    "name": "KHOAM Shares",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        {"exchange":
+          [
+            {"pay":
+              { "type": "resource", "resource": "solari", "amount": 7 }
+            },
+            {"gain":
+              { "type": "resource", "resource": "VP", "amount": 1 }
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Pay 7 Solari to gain 1 VP"
+  },
+  "bindu_lethargy": {
+    "name": "Bindu Lethargy",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        { "type": "action", "description": "At the start of your turn: take a card from unplayed pile and You may skip your turn (instead of an agent turn or reveal turn)." }
+      ]
+    },
+    "description": "At the start of your turn: take a card from unplayed pile and You may skip your turn (instead of an agent turn or reveal turn)."
+  },
+  "water_sellers_union": {
+    "name": "Water Sellers Union",
+    "type": "conspiracy",
+    "actions": {
+      "gain": [
+        { "type": "resource", "resource": "water", "amount": 1 }
+      ]
+    },
+    "description": "Gain 1 Water"
+  },
+
+  "plans_within_plans": {
+    "name": "Plans Within Plans",
+    "type": "endgame",
+    "actions": {
+      "action": [
+        {"type": "choice","choice": [
+            {"action1": [
+                {"type": "requirement","requirement": [
+                  { "type": "influence", "description": "at least 3 influence on 3 faction tracks" }
+                ]},
+                {"gain": 
+                  { "type": "resource", "resource": "VP", "amount": 1 }
+                }
+              ]
+            },
+            {"action2": [
+                {"type": "requirement","requirement": [
+                  { "type": "influence", "description": "at least 3 influence on 4 faction tracks" }
+                ]},
+                {"gain": 
+                  { "type": "resource", "resource": "VP", "amount": 2 }
+                }
+              ]
+            }
+              
+          ],"choose": 1
+        } 
+      ]
+      
+    },
+    "description": "If you have at least 3 influence on 3 faction tracks, gain 1 VP. —OR— If you have at least 3 influence on 4 faction tracks, gain 2 VP."
+  },
+  "secret_of_the_sisterhood": {
+    "name": "Secret of the Sisterhood",
+    "type": "conspiracy",
+    "actions": {
+      "gain": [
+        { "type": "resource", "resource": "bene gesserit influence point", "amount": 1 }
+      ]
+    },
+    "description": "gain 1 bene gesserit influence point"
+  },
+
+  "guild_authorization": {
+    "name": "Guild Authorization",
+    "type": "conspiracy",
+    "actions": {
+      "gain": [
+        { "type": "resource", "resource": "guild influence point", "amount": 1 }
+      ]
+    },
+    "description": "gain 1 guild influence point"
+  },
+
+  "bypass_protocol": {
+    "name": "Bypass Protocol",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        {"type": "choice","choice": [
+            {"action1":[
+                { "type": "action", "description": "Gain a card costing 3 or less" }
+              ]
+            },
+            
+            {"action2":[
+                {"pay": 
+                  { "type": "resource", "resource": "Spice", "amount": 2 }
+                },
+                { "type": "action", "description": "Gain a card costing 5 or less and put it on top of your unplayed pile" }
+            
+              ]
+            }
+          ],"choose": 1
+        }
+      ]
+    },
+    "description": " gain a card cost 3 persuasion or less.-OR- pay 2 spice to get a card costing 5 or less and put it on top of your unplayed pile."
+  },
+  "charisma": {
+    "name": "Charisma",
+    "type": "conspiracy",
+    "actions": {
+      "gain": [
+        { "type": "resource", "resource": "persuasion", "amount": 2 }
+      ]
+    },
+    "description": "Gain 2 persuasion on your reveal turn this round."
+  },
+
+  "sudden_mobilization": {
+    "name": "Sudden Mobilization",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        { "type": "action", "description": "Deploy to the conflict any number of troops from your garrison." }
+      ]
+    },
+    "description": "Deploy to the conflict any number of troops from your garrison."
+  },
+
+  "urgent_mission": {
+    "name": "Urgent Mission",
+    "type": "conspiracy",
+    "actions": {
+      "action": [
+        { "type": "action", "description": "Recall 1 of your agents." }
+      ]
+    },
+    "description": "Recall 1 of your agents."
+  },
+  
+
+  "allied_armada": {
+    "name": "Allied Armada",
+    "type": "fight",
+    "actions": {
+      "action": [
+        {"type": "requirement","requirement": [
+          { "type": "action", "description": "if you have any fraction token (alliance)" }
+        ]},
+        {"exchange":
+          [
+            {"pay":
+              { "type": "resource", "resource": "Spice", "amount": 2 }
+            },
+            {"gain":
+              { "type": "resource", "resource": "fight points", "amount": 7 }
+            }
+          ]
+        }
+      ]
+    },
+    "description": "If you have any faction alliance: Pay 2 Spice to gain 7 fight points."
+  },
+
   "ambush": {
     "name": "Ambush",
-    "type": "combat",
-    "description": "Reveal during combat: Add +5 Strength to your total."
+    "type": "fight",
+    "actions": {
+      "action": [
+        {"gain": 
+          { "type": "resource", "resource": "fight points", "amount": 4 }
+        }
+      ]
+    },
+    "description": "Gain 4 fight points."
   },
-  "diplomacy": {
-    "name": "Diplomacy",
-    "type": "agent_turn",
-    "description": "Allows you to place an agent on a location occupied by another player."
+
+  "tie_breaker": {
+    "name": "Tie Breaker",
+    "type": "fight / endgame",
+    "actions": {
+      "action":[
+        {"type": "choice","choice":[
+              {"action_fight": [
+                  {"gain": 
+                    { "type": "resource", "resource": "fight points", "amount": 2 }
+                  }
+                ]
+              },
+              {"action_endgame": [
+                  {"type": "requirement","requirement": [
+                    { "type": "resource", "resource": "Spice", "amount": 10 }
+                    ] 
+                  },
+                  {"gain": 
+                    { "type": "resource", "resource": "VP", "amount": 1 }
+                  }
+                ]
+              }
+        
+        ],"choose":1
+
+      }   
+      ]
+         
+    },
+    "description": "Fight: Gain 2 fight points. —OR— Endgame: If you have 10 or more Tech, gain 1 VP."
+  },
+
+  "feigned_incident": {
+    "name": "Feigned Incident",
+    "type": "fight",
+    "actions": {
+      "action": [
+        {"exchange":
+          [
+            {"pay":
+              { "type": "resource", "resource": "troops in conflict", "amount": 3 }
+            },
+            {"gain":
+              { "type": "resource", "resource": "VP", "amount": 1 }
+            }
+          ]
+        }
+      ]
+    },
+    "description": "Lose 3 of your troops in the conflict to gain 1 VP."
   }
+
+  
+
+  
+  
 }
