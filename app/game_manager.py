@@ -266,7 +266,6 @@ def apply_effects(player_state, actions_list, source_summary="Effect"):
     return ", ".join(summary_parts)
 
 
-# --- CAŁKOWICIE NOWA FUNKCJA `process_move` (ZASTĄP STARĄ) ---
 def process_move(game_state, locations_db, cards_db, leaders_db, player_name, card_id, location_id):
     """
     Przetwarza ruch ORAZ implementuje efekty agenta, lokacji i sygnetu.
@@ -357,8 +356,18 @@ def process_move(game_state, locations_db, cards_db, leaders_db, player_name, ca
     # --- 6. Zaktualizuj stan agentów gracza ---
     player_state["agents_placed"] = player_state.get("agents_placed", 0) + 1
     
+    # Lokacja MENTAT: Daje +1 agenta TYLKO w tej rundzie
+    # Osiągamy to przez cofnięcie licznika zużytych agentów o 1
     if location_id == "mentat": 
-        player_state["agents_total"] = 3
+        if player_state.get("agents_placed", 0) > 0:
+            player_state["agents_placed"] -= 1
+            move_summary += " (Gained 1 temporary agent)"
+
+    # Lokacja SWORDMASTER: Daje +1 agenta NA STAŁE
+    if location_id == "swordmaster":
+        if player_state.get("agents_total", 2) < 3: # Zapobiega wielokrotnemu dodawaniu
+            player_state["agents_total"] = 3
+            move_summary += " (Gained 1 permanent agent)"
     
     if "round_history" not in game_state:
         game_state["round_history"] = []
@@ -691,8 +700,6 @@ def perform_cleanup_and_new_round(game_state):
             player_data["has_passed"] = False 
             player_data["reveal_stats"] = {"total_persuasion": 0, "total_swords": 0}
             
-            if player_data.get("agents_total", 2) != 3:
-                player_data["agents_total"] = 2 
             
             player_data["draw_deck"] = player_data.get("draw_deck", []) + \
                                      player_data.get("hand", []) + \
