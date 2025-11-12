@@ -369,9 +369,7 @@ def process_move(game_state, locations_db, cards_db, leaders_db, player_name, ca
         "location": location_name,
         "summary": move_summary
     })
-    
-    game_state["currentPlayer"] = player_name
-    
+        
     return game_state
 
 
@@ -391,7 +389,6 @@ def process_pass_turn(game_state, player_name):
     if "round_history" not in game_state:
         game_state["round_history"] = []
     game_state["round_history"].append({"summary": summary})
-    game_state["currentPlayer"] = player_name
     
     return game_state, True, summary
 
@@ -416,7 +413,6 @@ def check_and_advance_phase(game_state, cards_db):
     if all_players_finished:
         game_state = calculate_and_store_reveal_stats(game_state, cards_db)
         game_state["current_phase"] = "REVEAL"
-        game_state["currentPlayer"] = "SYSTEM"
         
     return game_state
 
@@ -671,6 +667,49 @@ def perform_full_game_reset():
         return True, "Success! The game has been fully reset to Round 1."
     else:
         return False, "Error: Could not write to game_stat.json."
+
+
+def perform_cleanup_and_new_round(game_state):
+    """Resetuje planszę na kolejną rundę. (Automatyczne dobieranie)"""
+    if game_state:
+        if "locations_state" in game_state:
+            for loc_id in game_state["locations_state"]:
+                game_state["locations_state"][loc_id]["occupied_by"] = None
+        
+        game_state["round_history"] = []
+        game_state["current_phase"] = "AGENT_TURN" 
+        game_state["round"] = game_state.get("round", 0) + 1
+        
+        # Resetuj kartę konfliktu (zostanie ustawiona ręcznie)
+        game_state["current_conflict_card"] = { "name": "N/A", "rewards": {}, "rewards_text": [] }
+        
+        player_names = sorted(list(game_state.get("players", {}).keys()))
+        game_state["currentPlayer"] = player_names[0] 
+
+        for player_name, player_data in game_state.get("players", {}).items():
+            player_data["agents_placed"] = 0
+            player_data["has_passed"] = False 
+            player_data["reveal_stats"] = {"total_persuasion": 0, "total_swords": 0}
+            
+            if player_data.get("agents_total", 2) != 3:
+                player_data["agents_total"] = 2 
+            
+            player_data["draw_deck"] = player_data.get("draw_deck", []) + \
+                                     player_data.get("hand", []) + \
+                                     player_data.get("discard_pile", [])
+            player_data["hand"] = []
+            player_data["discard_pile"] = []
+            
+            player_data["draw_deck"] = list(player_data.get("deck_pool", []))
+            
+            random.shuffle(player_data["draw_deck"])
+            
+            for _ in range(5):
+                if len(player_data["draw_deck"]) > 0:
+                    card = player_data["draw_deck"].pop(0)
+                    player_data["hand"].append(card)
+            
+    return game_state
 
 
 def set_player_hand(game_state, player_name, card_ids_list, cards_db):

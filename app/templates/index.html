@@ -95,7 +95,7 @@
                         <option value="">-- Select Player --</option>
                         {% for name in player_names %}
                             {% set agent_info = player_agent_map.get(name) %}
-                            <option value="{{ name }}" {% if name == current_player %}selected{% endif %}>
+                            <option value="{{ name }}">
                                 {{ name }} (Agents: {{ agent_info.placed }}/{{ agent_info.total }}) (Deck: {{ agent_info.draw_deck_count }})
                                 {% if agent_info.has_passed %} (PASSED) {% endif %}
                             </option>

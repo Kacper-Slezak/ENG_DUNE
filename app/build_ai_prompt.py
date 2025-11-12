@@ -101,7 +101,10 @@ def generate_ai_prompt(game_state_data, cards_db):
         for player_name, player_data in game_state.get("players", {}).items():
             stats = player_data.get("reveal_stats", {})
             persuasion = stats.get("total_persuasion", 0)
-            swords = stats.get("total_swords", 0)
+            
+            base_swords = stats.get("base_swords", 0)
+            bonus_swords = player_data.get("active_effects", {}).get("fight_bonus_swords", 0)
+            swords = base_swords + bonus_swords 
             all_player_stats[player_name] = f"Persuasion: {persuasion}, Swords: {swords}"
             if player_name == AI_PLAYER_NAME:
                 ai_persuasion = persuasion
