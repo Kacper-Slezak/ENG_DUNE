@@ -13,7 +13,7 @@
 
     "conflict": [
       { "type": "isconflict" },
-      { "description": "If you control this location , you gain 1 solaris each time somebody stay here." }
+      { "description": "If you control this location , you gain 1 solari each time somebody stay here." }
     ]
   },
 
@@ -32,7 +32,7 @@
     ],
     "conflict": [
       { "type": "isconflict" },
-      { "description": "If you control this location , you gain 1 solaris each time somebody stay here." }
+      { "description": "If you control this location , you gain 1 ssolari each time somebody stay here." }
     ]
   },
 
@@ -133,19 +133,19 @@
       { 
       "exchange": {
         "pay": { "type": "resource", "resource": "spice", "amount": 2 },
-        "gain": { "type": "resource", "resource": "solaris", "amount": 6 }
+        "gain": { "type": "resource", "resource": "solari", "amount": 6 }
       },
       "exchange1": {
         "pay": { "type": "resource", "resource": "spice", "amount": 3 },
-        "gain": { "type": "resource", "resource": "solaris", "amount": 8 }
+        "gain": { "type": "resource", "resource": "solari", "amount": 8 }
       },
       "exchange2": {
         "pay": { "type": "resource", "resource": "spice", "amount": 4 },
-        "gain": { "type": "resource", "resource": "solaris", "amount": 10 }
+        "gain": { "type": "resource", "resource": "solari", "amount": 10 }
       },
       "exchange3": {
         "pay": { "type": "resource", "resource": "spice", "amount": 5 },
-        "gain": { "type": "resource", "resource": "solaris", "amount": 12 }
+        "gain": { "type": "resource", "resource": "solari", "amount": 12 }
       }
       
      }
@@ -164,7 +164,7 @@
     ],
     "actions": [
       { 
-      "gain": { "type": "resource", "resource": "solaris", "amount": 3 } 
+      "gain": { "type": "resource", "resource": "solari", "amount": 3 } 
       }
     ],
     "conflict": [
@@ -177,7 +177,7 @@
     "symbol_required": "Landsraad",
     "extra_requirement": "none",
     "cost": [
-      { "type": "resource", "resource": "solaris", "amount": 5 }
+      { "type": "resource", "resource": "solari", "amount": 5 }
     ],
     "actions": [
       { 
@@ -194,7 +194,7 @@
     "symbol_required": "Landsraad",
     "extra_requirement": "none",
     "cost": [
-      { "type": "resource", "resource": "solaris", "amount": 2 }
+      { "type": "resource", "resource": "solari", "amount": 2 }
     ],
     "actions": [
       { 
@@ -212,7 +212,7 @@
     "symbol_required": "Landsraad",
     "extra_requirement": "none",
     "cost": [
-      { "type": "resource", "resource": "solaris", "amount": 4 }
+      { "type": "resource", "resource": "solari", "amount": 4 }
     ],
     "actions": [
       { 
@@ -229,7 +229,7 @@
     "symbol_required": "Landsraad",
     "extra_requirement": "none",
     "cost": [
-      { "type": "resource", "resource": "solaris", "amount": 4 }
+      { "type": "resource", "resource": "solari", "amount": 0 }
     ],
     "actions": [
       { 
@@ -247,7 +247,7 @@
     "symbol_required": "Landsraad",
     "extra_requirement": "none",
     "cost": [
-      { "type": "resource", "resource": "solaris", "amount": 8 }
+      { "type": "resource", "resource": "solari", "amount": 8 }
     ],
     "actions": [
       { 
@@ -270,7 +270,7 @@
       { 
       "gain": { "type": "resource", "resource": "troops", "amount": 2 },
       "gain1": { "type": "resource", "resource": "intrigue card", "amount": 1 },
-      "gain2": { "type": "resource", "resource": "solaris", "amount": 5 },
+      "gain2": { "type": "resource", "resource": "solari", "amount": 5 },
       "gain3": { "type": "resource", "resource": "emperor influence point", "amount": 1 }
       }
     ],
@@ -288,7 +288,7 @@
     ],
     "actions": [
       { 
-      "gain": { "type": "resource", "resource": "solaris", "amount": 2 },
+      "gain": { "type": "resource", "resource": "solari", "amount": 2 },
       "gain1": { "type": "resource", "resource": "emperor influence point", "amount": 1 }
       }
     ],
