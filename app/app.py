@@ -237,7 +237,7 @@ def pass_turn():
 
 @app.route('/reveal')
 def reveal_phase():
-    game_state, _, cards_db, _, _, _ = load_game_data()
+    game_state, _, cards_db, intrigues_db, _, _ = load_game_data()
     
     current_phase = game_state.get("current_phase", "Unknown Phase")
     if current_phase != "REVEAL":
