@@ -218,9 +218,7 @@ def apply_effects(player_state, actions_list, source_summary="Effect"):
                 player_resources["troops_garrison"] = current_amount + resource_amount
                 summary_parts.append(f"gained {resource_amount} troops")
                 
-           elif resource_name == "intrigue":
-                # USUNIĘTO automatyczne dodawanie placeholdera.
-                # Teraz gracz musi ręcznie dodać kartę przez UI.
+            elif resource_name == "intrigue":
                 summary_parts.append(f"gained 1 intrigue (NEEDS MANUAL ADDITION)")
             
             elif "influence point" in str(resource_name):
