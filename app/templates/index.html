@@ -85,6 +85,34 @@
                 <button type="submit" id="intrigueButton" disabled>Play Intrigue</button>
             </fieldset>
         </form>
+
+        <form method="POST" action="/add_intrigue" id="addIntrigueForm">
+            <fieldset style="border-color: #ff9800;">
+                <legend style="color: #ff9800;">2.5 Manually Add Intrigue (After Drawing)</legend>
+                <p>Use this AFTER you gain an intrigue (e.g., from 'Secrets' or 'Carthag') to tell the app which card you drew.</p>
+                <p>
+                    <label for="add_intrigue_player">Which player drew the card?</label>
+                    <select id="add_intrigue_player" name="player_name" required>
+                        <option value="">-- Select Player --</option>
+                        {% for name in player_names %}
+                            <option value="{{ name }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </p>
+                <p>
+                    <label for="add_intrigue_id">Which card was drawn?</label>
+                    <select id="add_intrigue_id" name="intrigue_id" required>
+                        <option value="">-- Select Intrigue Card --</option>
+                        {% for intrigue_id, intrigue_data in all_intrigues.items() %}
+                            <option value="{{ intrigue_id }}">
+                                {{ intrigue_data.name }} ({{ intrigue_data.type }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </p>
+                <button type="submit" style="background-color: #ff9800;">Add Card to Hand</button>
+            </fieldset>
+        </form>
         
         <form method="POST" action="/" id="agentForm">
             <fieldset>

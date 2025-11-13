@@ -218,11 +218,10 @@ def apply_effects(player_state, actions_list, source_summary="Effect"):
                 player_resources["troops_garrison"] = current_amount + resource_amount
                 summary_parts.append(f"gained {resource_amount} troops")
                 
-            elif resource_name == "intrigue":
-                if "intrigue_hand" not in player_state:
-                    player_state["intrigue_hand"] = []
-                player_state["intrigue_hand"].append(f"Intrigue_Card_{random.randint(100,999)}")
-                summary_parts.append(f"gained 1 intrigue")
+           elif resource_name == "intrigue":
+                # USUNIĘTO automatyczne dodawanie placeholdera.
+                # Teraz gracz musi ręcznie dodać kartę przez UI.
+                summary_parts.append(f"gained 1 intrigue (NEEDS MANUAL ADDITION)")
             
             elif "influence point" in str(resource_name):
                 faction = resource_name.split(" ")[0] 
@@ -911,3 +910,25 @@ def save_json_file_from_text(text_data):
     except Exception as e:
         print(f"UNKNOWN SAVE ERROR: {e}")
         return False, f"Wystąpił nieznany błąd: {e}"
+    
+def manual_add_intrigue(game_state, player_name, intrigue_id, intrigues_db):
+    """Ręcznie dodaje konkretną kartę intrygi do ręki gracza."""
+    player_state = game_state.get("players", {}).get(player_name)
+    if not player_state:
+        return False, f"Player {player_name} not found."
+        
+    if not intrigue_id or intrigue_id not in intrigues_db:
+        return False, f"Intrigue ID '{intrigue_id}' not found in database."
+        
+    if "intrigue_hand" not in player_state:
+        player_state["intrigue_hand"] = []
+        
+    player_state["intrigue_hand"].append(intrigue_id)
+    card_name = intrigues_db[intrigue_id].get("name", intrigue_id)
+    
+    summary = f"Player {player_name} manually added intrigue: '{card_name}'."
+    if "round_history" not in game_state:
+        game_state["round_history"] = []
+    game_state["round_history"].append({"summary": summary})
+    
+    return True, summary
