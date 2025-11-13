@@ -82,12 +82,14 @@ def index():
         
         return redirect(url_for('index'))
 
-    # --- Logika GET ---
     current_player = game_state.get("currentPlayer", "Unknown Player")
     current_round = game_state.get("round", 1) 
     round_history = game_state.get("round_history", [])
     player_names = get_player_names(game_state)
     available_locations = get_available_locations(locations_db, game_state)
+    
+    # Przekaż listę wszystkich intryg do szablonu
+    all_intrigues = intrigues_db if intrigues_db else {}
     
     current_conflict = game_state.get("current_conflict_card", {"name": "N/A", "rewards_text": []})
     
@@ -137,7 +139,8 @@ def index():
         locations=available_locations,
         ai_player_name=AI_PLAYER_NAME,
         current_conflict=current_conflict,
-        all_conflicts=conflicts_db
+        all_conflicts=conflicts_db,
+        all_intrigues=all_intrigues
     )
 
 @app.route('/full_reset')
@@ -305,9 +308,6 @@ def resolve_conflict_auto():
         flash("Cannot resolve conflict: Not in REVEAL phase.", "error")
         return redirect(url_for('reveal_phase'))
 
-    # --- NOWA LOGIKA: OFICJALNE ZASADY REMISÓW W DUNE: IMPERIUM ---
-
-    # 1. Zbierz statystyki graczy i OBLICZ FINALNĄ SIŁĘ
     player_stats = []
     for player_name, player_data in game_state.get("players", {}).items():
         stats = player_data.get("reveal_stats", {})
@@ -562,6 +562,30 @@ def save_debug_json():
         flash(f"Błąd zapisu: {message}", "error")
         
     return redirect(url_for('debug_json'))
+
+
+@app.route('/add_intrigue', methods=['POST'])
+def add_intrigue():
+    game_state, _, _, intrigues_db, _, _ = load_game_data()
+
+    player_name_input = request.form.get('player_name')
+    intrigue_id_input = request.form.get('intrigue_id')
+    
+    if not player_name_input or not intrigue_id_input:
+        flash("Invalid input: Player or Intrigue card missing.", "error")
+        return redirect(url_for('index'))
+
+    is_valid, message = manual_add_intrigue(game_state, player_name_input, intrigue_id_input, intrigues_db)
+    
+    if is_valid:
+        if save_json_file(GAME_STATE_FILE, game_state):
+            flash(message, "success")
+        else:
+            flash("CRITICAL ERROR: Cannot save game state after adding intrigue.", "error")
+    else:
+        flash(f"Failed to add intrigue: {message}", "error")
+        
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
