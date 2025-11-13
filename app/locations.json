@@ -406,32 +406,6 @@
     "conflict": [
       { "type": "isconflict" }
       ]
-  },
-  "missionaria_protectiva": {
-    "name": "Missionaria Protectiva",
-    "type": "Agent",
-    "agent_symbols": ["populated areas"],
-    "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 1}
-    ],
-    "buy_effect": {
-      "gain": [
-        { "type": "none" }
-      ],
-      "description": "no buy effect."
-    },
-    "agent_effect": {
-      "actions": [
-        { "type": "none" }
-      ],
-      "description": "if you used already another bene gesserit card this turn, gain any 1 influence point."
-    },
-    "reveal_effect": {
-      "persuasion": 1,
-      "swords": 0,
-      "possible actions": {
-        "description": "No more effects."
-      }
-    }
   }
+  
 }
