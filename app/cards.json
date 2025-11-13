@@ -1513,7 +1513,7 @@
       }
     }
   },
-  "seek_allies": {
+  "seeking_alliance": {
     "name": "Seek Allies",
     "type": "Agent",
     "agent_symbols": [
@@ -2778,6 +2778,33 @@
           "description": "You may deploy a troop from your garrison to the Conflict."
         },
         "description": "You may deploy a troop from your garrison to the Conflict."
+      }
+    }
+  },
+  "missionaria_protectiva": {
+    "name": "Missionaria Protectiva",
+    "type": "Agent",
+    "agent_symbols": ["populated areas"],
+    "buy_cost": [
+      { "type": "pay", "resource": "persuasion", "amount": 1}
+    ],
+    "buy_effect": {
+      "gain": [
+        { "type": "none" }
+      ],
+      "description": "no buy effect."
+    },
+    "agent_effect": {
+      "actions": [
+        { "type": "none" }
+      ],
+      "description": "if you used already another bene gesserit card this turn, gain any 1 influence point."
+    },
+    "reveal_effect": {
+      "persuasion": 1,
+      "swords": 0,
+      "possible actions": {
+        "description": "No more effects."
       }
     }
   }
