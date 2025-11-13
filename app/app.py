@@ -16,7 +16,8 @@ from game_manager import (
     AI_PLAYER_NAME,
     process_conflict_set,
     process_conflict_resolve,
-    save_json_file_from_text
+    save_json_file_from_text,
+    manual_add_intrigue
 )
 
 from build_ai_prompt import generate_ai_prompt
