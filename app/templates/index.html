@@ -72,23 +72,11 @@
             </fieldset>
         </form>
 
-        <form method="POST" action="/play_intrigue" id="intrigueForm">
-            <fieldset>
-                <legend>2. Play Intrigue Card</legend>
-                <input type="hidden" id="intrigue_player_name" name="player_name" value="">
-                
-                <p><label for="intrigue_id">Select Intrigue Card (from Player's Hand)</label>
-                    <select id="intrigue_id" name="intrigue_id" required>
-                        <option value="">-- First select a player --</option>
-                    </select>
-                </p>
-                <button type="submit" id="intrigueButton" disabled>Play Intrigue</button>
-            </fieldset>
-        </form>
+        
 
         <form method="POST" action="/add_intrigue" id="addIntrigueForm">
             <fieldset style="border-color: #ff9800;">
-                <legend style="color: #ff9800;">2.5 Manually Add Intrigue (After Drawing)</legend>
+                <legend style="color: #ff9800;">2 Manually Add Intrigue (After Drawing)</legend>
                 <p>Use this AFTER you gain an intrigue (e.g., from 'Secrets' or 'Carthag') to tell the app which card you drew.</p>
                 <p>
                     <label for="add_intrigue_player">Which player drew the card?</label>
@@ -159,6 +147,20 @@
                 <button type="submit" id="passTurnButton" style="background-color: #f57c00;" disabled>
                     Pass Turn
                 </button>
+            </fieldset>
+        </form>
+
+        <form method="POST" action="/play_intrigue" id="intrigueForm">
+            <fieldset>
+                <legend>4. Play Intrigue Card</legend>
+                <input type="hidden" id="intrigue_player_name" name="player_name" value="">
+                
+                <p><label for="intrigue_id">Select Intrigue Card (from Player's Hand)</label>
+                    <select id="intrigue_id" name="intrigue_id" required>
+                        <option value="">-- First select a player --</option>
+                    </select>
+                </p>
+                <button type="submit" id="intrigueButton" disabled>Play Intrigue</button>
             </fieldset>
         </form>
         
