@@ -798,6 +798,51 @@ def execute_agent_move():
     return redirect(url_for('index'))
 
 
+
+from game_manager import process_manual_override
+
+@app.route('/manual_override', methods=['GET'])
+def manual_override():
+    """Wyświetla stronę do ręcznej korekty stanu gry."""
+    game_state, _, _, _, _, _ = load_game_data()
+    if not game_state:
+        flash("CRITICAL ERROR: Cannot load game state.", "error")
+        return redirect(url_for('index'))
+        
+    player_names = get_player_names(game_state)
+    
+    return render_template('manual_override.html',
+        player_names=player_names
+    )
+
+@app.route('/apply_override', methods=['POST'])
+def apply_override():
+    """Przetwarza formularz ręcznej korekty."""
+    game_state, _, _, _, _, _ = load_game_data()
+    if not game_state:
+        flash("CRITICAL ERROR: Cannot load game state.", "error")
+        return redirect(url_for('index'))
+
+    player_name = request.form.get('player_name')
+    if not player_name:
+        flash("Błąd: Nie wybrano gracza.", "error")
+        return redirect(url_for('manual_override'))
+        
+    # Przekaż cały słownik formularza do game_managera
+    is_valid, message = process_manual_override(game_state, player_name, request.form)
+
+    if is_valid:
+        if save_json_file(GAME_STATE_FILE, game_state):
+            flash(f"Zastosowano korektę dla {player_name}: {message}", "success")
+        else:
+            flash("CRITICAL ERROR: Cannot save game state after override.", "error")
+    else:
+        flash(f"Błąd korekty: {message}", "error")
+
+    # Przekieruj z powrotem do formularza korekty, aby można było wykonać więcej zmian
+    return redirect(url_for('manual_override'))
+
+
 if __name__ == '__main__':
     print("Starting server at http://0.0.0.0:5000")
     print("To access from other computers, use your computer's IP address, e.g., http://192.168.1.10:5000")

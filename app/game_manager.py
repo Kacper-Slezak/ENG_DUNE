@@ -1510,3 +1510,78 @@ def manual_add_intrigue(game_state, player_name, intrigue_id, intrigues_db):
     game_state["round_history"].append({"summary": summary})
     
     return True, summary
+
+
+def _safe_add_resource(player_dict, key, value_str):
+    """
+    Bezpiecznie próbuje dodać wartość (dodatnią lub ujemną) do klucza w słowniku.
+    Zwraca opis zmiany lub None jeśli błąd.
+    """
+    if not value_str: # Jeśli pole jest puste
+        return None
+    
+    try:
+        value = int(value_str)
+        if value == 0:
+            return None
+            
+        current_value = player_dict.get(key, 0)
+        # Zapobiegaj ujemnym zasobom (ale pozwól na ujemne wpływy, jeśli trzeba)
+        if (current_value + value) < 0 and key not in ["emperor", "guild", "fremen", "bene_gesserit"]:
+             player_dict[key] = 0 # Zeruj zamiast zejść poniżej 0
+             change_desc = f"zmieniono {key} o {value} (wynik {current_value + value}, ustawiono na 0)"
+        else:
+            player_dict[key] = current_value + value
+            change_desc = f"zmieniono {key} o {value} (nowa wartość: {player_dict[key]})"
+        
+        return change_desc
+        
+    except ValueError:
+        return f"błędna wartość dla {key} ('{value_str}')"
+    except Exception as e:
+        return f"błąd przy {key}: {e}"
+
+
+def process_manual_override(game_state, player_name, form_data):
+    """
+    Przetwarza ręczną korektę stanu gry dla wybranego gracza.
+    """
+    player_state = game_state.get("players", {}).get(player_name)
+    if not player_state:
+        return False, f"Nie znaleziono gracza {player_name}."
+
+    if "resources" not in player_state:
+        player_state["resources"] = {}
+    if "influence" not in player_state:
+        player_state["influence"] = {}
+        
+    player_res = player_state["resources"]
+    player_inf = player_state["influence"]
+    
+    changes_log = []
+
+    # 1. Zmiana Zasobów
+    res_keys = ["solari", "Spice", "water", "troops_garrison", "troops_in_conflict"]
+    for key in res_keys:
+        log = _safe_add_resource(player_res, key, form_data.get(key))
+        if log:
+            changes_log.append(log)
+
+    # 2. Zmiana Wpływów
+    inf_keys = {"faction_emperor": "emperor", "faction_guild": "guild", "faction_fremen": "fremen", "faction_bene_gesserit": "bene_gesserit"}
+    for form_key, state_key in inf_keys.items():
+        log = _safe_add_resource(player_inf, state_key, form_data.get(form_key))
+        if log:
+            changes_log.append(log)
+
+    if not changes_log:
+        return True, "Nie wprowadzono żadnych zmian."
+
+    summary = ", ".join(changes_log)
+    
+    # Zapisz również w historii głównej
+    if "round_history" not in game_state:
+        game_state["round_history"] = []
+    game_state["round_history"].append({"summary": f"[KOREKTA] {player_name}: {summary}"})
+
+    return True, summary

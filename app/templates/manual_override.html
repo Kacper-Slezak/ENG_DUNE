@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Ręczna Korekta Stanu Gry</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #d32f2f; }
+        fieldset { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; background: #f9f9f9; }
+        legend { font-size: 1.2em; font-weight: bold; padding: 0 10px; }
+        select, button, input {
+            padding: 10px; margin-top: 5px; border: 1px solid #ccc; 
+            border-radius: 4px; width: 100%; box-sizing: border-box; 
+        }
+        button { background-color: #d32f2f; color: white; cursor: pointer; font-size: 1.1em; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .full-width { grid-column: 1 / -1; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Ręczna Korekta Stanu Gry</h1>
+    <p>Użyj tego formularza, aby manualnie zastosować efekty kart (np. "Test Człowieczeństwa") lub skorygować błędy. Wprowadź tylko te wartości, które chcesz zmienić (np. '1' aby dodać 1, '-2' aby odjąć 2). Pozostaw puste pola, których nie zmieniasz.</p>
+    <p><a href="{{ url_for('index') }}">&larr; Wróć do Głównej Gry</a></p>
+
+    <form method="POST" action="{{ url_for('apply_override') }}">
+        <fieldset>
+            <legend>1. Wybierz Gracza</legend>
+            <select id="player_name" name="player_name" required>
+                <option value="">-- Wybierz Gracza --</option>
+                {% for name in player_names %}
+                    <option value="{{ name }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+        </fieldset>
+        
+        <fieldset>
+            <legend>2. Zmień Zasoby</legend>
+            <div class="grid">
+                <div>
+                    <label for="solari">Solari:</label>
+                    <input type="number" id="solari" name="solari" placeholder="np. 2 lub -1">
+                </div>
+                <div>
+                    <label for="Spice">Przyprawa (Spice):</label>
+                    <input type="number" id="Spice" name="Spice" placeholder="np. 2 lub -1">
+                </div>
+                <div>
+                    <label for="water">Woda:</label>
+                    <input type="number" id="water" name="water" placeholder="np. 2 lub -1">
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>3. Zmień Wojsko</legend>
+             <div class="grid">
+                <div>
+                    <label for="troops_garrison">Garnizon (Garrison):</label>
+                    <input type="number" id="troops_garrison" name="troops_garrison" placeholder="Dodaj lub odejmij">
+                </div>
+                <div>
+                    <label for="troops_in_conflict">W Konflikcie (Conflict):</label>
+                    <input type="number" id="troops_in_conflict" name="troops_in_conflict" placeholder="Dodaj lub odejmij">
+                </div>
+            </div>
+        </fieldset>
+        
+        <fieldset>
+            <legend>4. Zmień Wpływy (Frakcje)</legend>
+            <div class="grid">
+                <div>
+                    <label for="faction_emperor">Imperator:</label>
+                    <input type="number" id="faction_emperor" name="faction_emperor" placeholder="np. 1 lub -1">
+                </div>
+                 <div>
+                    <label for="faction_guild">Gildia:</label>
+                    <input type="number" id="faction_guild" name="faction_guild" placeholder="np. 1 lub -1">
+                </div>
+                 <div>
+                    <label for="faction_fremen">Fremeni:</label>
+                    <input type="number" id="faction_fremen" name="faction_fremen" placeholder="np. 1 lub -1">
+                </div>
+                 <div>
+                    <label for="faction_bene_gesserit">Bene Gesserit:</label>
+                    <input type="number" id="faction_bene_gesserit" name="faction_bene_gesserit" placeholder="np. 1 lub -1">
+                </div>
+            </div>
+        </fieldset>
+        
+        <button type="submit" onclick="return confirm('Czy na pewno chcesz ręcznie zmodyfikować stan gry?')">Zastosuj Korektę</button>
+    </form>
+</body>
+</html>

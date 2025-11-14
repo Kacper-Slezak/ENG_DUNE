@@ -213,17 +213,7 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "gain",
-              "resource": "troops",
-              "amount": 2
-            },
-            {
-              "type": "action",
-              "description": "Gain 2 troops."
-            }
-          ]
+          "gain": { "type": "resource", "resource": "troops", "amount": 2 }
         }
       ],
       "description": "Gain 2 troops."
@@ -669,19 +659,8 @@
     },
     "agent_effect": {
       "actions": [
-        {
-          "action": [
-            {
-              "type": "destroy this card",
-              "amount": 1
-            },
-            {
-              "type": "gain",
-              "resource": "intrigue",
-              "amount": 1
-            }
-          ]
-        }
+        { "type": "destroy this card", "amount": 1 },
+        { "gain": { "type": "resource", "resource": "intrigue", "amount": 1 } }
       ],
       "description": "Destroy this card and gain 1 intrigue."
     },
@@ -791,13 +770,7 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "gain",
-              "resource": "troops",
-              "amount": 2
-            }
-          ]
+          "gain": { "type": "resource", "resource": "troops", "amount": 2 }
         }
       ],
       "description": "Gain 2 troops."
@@ -963,13 +936,11 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "gain",
-              "resource": "intrigue",
-              "amount": 1
-            }
-          ]
+          "gain": {
+            "type": "resource",
+            "resource": "intrigue",
+            "amount": 1
+          }
         }
       ],
       "description": "Gain 1 intrigue."
@@ -1006,25 +977,12 @@
       ],
       "description": "no buy effect."
     },
-    "agent_effect": {
-      "actions": [
+    "actions": [
         {
-          "action": [
-            {
-              "type": "pay",
-              "resource": "water",
-              "amount": 1
-            },
-            {
-              "type": "gain",
-              "resource": "solari",
-              "amount": 1
-            },
-            {
-              "type": "gain",
-              "resource": "troops",
-              "amount": 1
-            }
+          "exchange": [
+            { "pay": { "type": "resource", "resource": "water", "amount": 1 } },
+            { "gain": { "type": "resource", "resource": "solari", "amount": 1 } },
+            { "gain": { "type": "resource", "resource": "troops", "amount": 1 } }
           ]
         }
       ],
@@ -1119,13 +1077,7 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "gain",
-              "resource": "spice",
-              "amount": 2
-            }
-          ]
+          "gain": { "type": "resource", "resource": "spice", "amount": 2 }
         }
       ],
       "description": "Gain 2 spice."
@@ -1393,13 +1345,7 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "gain",
-              "resource": "water",
-              "amount": 1
-            }
-          ]
+          "gain": { "type": "resource", "resource": "water", "amount": 1 }
         }
       ],
       "description": "Gain 1 water."
@@ -1782,19 +1728,11 @@
       "description": "no buy effect."
     },
     "agent_effect": {
-      "actions": [
+     "actions": [
         {
-          "action": [
-            {
-              "type": "pay",
-              "resource": "spice",
-              "amount": 2
-            },
-            {
-              "type": "gain",
-              "resource": "troops",
-              "amount": 3
-            }
+          "exchange": [
+            { "pay": { "type": "resource", "resource": "spice", "amount": 2 } },
+            { "gain": { "type": "resource", "resource": "troops", "amount": 3 } }
           ]
         }
       ],
@@ -1937,13 +1875,7 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "gain",
-              "resource": "solari",
-              "amount": 3
-            }
-          ]
+          "gain": { "type": "resource", "resource": "solari", "amount": 3 }
         }
       ],
       "description": "Gain 3 Solari. "
@@ -2150,15 +2082,14 @@
       "description": "no buy effect."
     },
     "agent_effect": {
+      "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "gain",
-              "resource": "troops",
-              "amount": 1
-            }
-          ]
+          "gain": {
+            "type": "resource",
+            "resource": "troops",
+            "amount": 1
+          }
         }
       ],
       "description": "Gain 1 Troop."
@@ -2297,13 +2228,7 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "gain",
-              "resource": "solari",
-              "amount": 1
-            }
-          ]
+          "gain": { "type": "resource", "resource": "solari", "amount": 1 }
         }
       ],
       "description": "Gain 1 solari."
