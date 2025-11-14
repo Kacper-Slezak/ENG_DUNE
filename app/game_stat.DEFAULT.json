@@ -4,7 +4,16 @@
   "current_phase": "AGENT_TURN",
   "round_history": [],
   "destroyed_pile": [],
-  "imperium_row": [],
+  "imperium_row": [
+    "dr_yueh",
+    "guild_administrator",
+    "spice_smugglers",
+    "gun_thopter",
+    "opulence",
+    "arrakis_liaison",
+    "the_spice_must_flow",
+    "foldspace"
+  ],
   "conflict_deck": [],
   "current_conflict_card": {
     "name": "N/A",
@@ -64,6 +73,18 @@
         "total_swords": 0,
         "cards_in_hand": [],
         "cards_played": []
+      },
+      "faction_bonus_claimed": {
+        "emperor": false,
+        "guild": false,
+        "fremen": false,
+        "bene_gesserit": false
+      },
+      "faction_vp_claimed_2pts": {
+        "emperor": false,
+        "guild": false,
+        "fremen": false,
+        "bene_gesserit": false
       }
     },
     "Helen": {
@@ -113,6 +134,18 @@
         "total_swords": 0,
         "cards_in_hand": [],
         "cards_played": []
+      },
+      "faction_bonus_claimed": {
+        "emperor": false,
+        "guild": false,
+        "fremen": false,
+        "bene_gesserit": false
+      },
+      "faction_vp_claimed_2pts": {
+        "emperor": false,
+        "guild": false,
+        "fremen": false,
+        "bene_gesserit": false
       }
     },
     "Paul": {
@@ -162,6 +195,18 @@
         "total_swords": 0,
         "cards_in_hand": [],
         "cards_played": []
+      },
+      "faction_bonus_claimed": {
+        "emperor": false,
+        "guild": false,
+        "fremen": false,
+        "bene_gesserit": false
+      },
+      "faction_vp_claimed_2pts": {
+        "emperor": false,
+        "guild": false,
+        "fremen": false,
+        "bene_gesserit": false
       }
     }
   },

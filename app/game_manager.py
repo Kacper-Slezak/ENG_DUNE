@@ -645,6 +645,43 @@ def _apply_gain(player_state, gain_data, log_summary, game_state, **kwargs):
                 player_state["influence"][faction] = player_state["influence"].get(faction, 0) + amount
                 log_summary.append(f"Zyskano {amount} wpływu {faction}.")
 
+                # Pobierz nowy stan wpływów
+                new_influence = player_state["influence"][faction]
+
+                # --- START NOWY KOD (Bonus 1 VP za 2 pkt) ---
+                if "faction_vp_claimed_2pts" not in player_state:
+                    player_state["faction_vp_claimed_2pts"] = {"emperor": False, "guild": False, "fremen": False, "bene_gesserit": False}
+
+                if new_influence >= 2 and not player_state["faction_vp_claimed_2pts"].get(faction, False):
+                    player_state["faction_vp_claimed_2pts"][faction] = True
+                    player_state["victory_points"] = player_state.get("victory_points", 0) + 1
+                    log_summary.append(f"Osiągnięto 2 pkt. wpływu w {faction}! Zyskano 1 VP (nowa mechanika).")
+                # --- KONIEC NOWEGO KODU ---
+
+
+                # --- START KOD (BONUS ZA 4 PKT) ---
+                if "faction_bonus_claimed" not in player_state:
+                    player_state["faction_bonus_claimed"] = {"emperor": False, "guild": False, "fremen": False, "bene_gesserit": False}
+                
+                # Sprawdź jednorazowy bonus za 4 punkty
+                if new_influence >= 4 and not player_state["faction_bonus_claimed"].get(faction, False):
+                    player_state["faction_bonus_claimed"][faction] = True
+                    log_summary.append(f"Osiągnięto 4 pkt. wpływu! Odbieranie jednorazowej nagrody...")
+                    
+                    bonus_reward = []
+                    if faction == "emperor":
+                        # Uwaga: Aplikacja nie wspiera "deploy". Dajemy wojsko do garnizonu.
+                        bonus_reward = [{"type": "resource", "resource": "troops_garrison", "amount": 2}]
+                    elif faction == "guild":
+                        bonus_reward = [{"type": "resource", "resource": "solari", "amount": 3}]
+                    elif faction == "fremen":
+                        bonus_reward = [{"type": "resource", "resource": "water", "amount": 1}]
+                    elif faction == "bene_gesserit":
+                        bonus_reward = [{"type": "resource", "resource": "intrigue", "amount": 1}]
+                    
+                    if bonus_reward:
+                        _apply_gain(player_state, bonus_reward, log_summary, game_state, **kwargs) 
+
                 check_and_update_alliances(player_state, game_state, faction, log_summary)
 
             elif resource == "vp":
@@ -665,6 +702,20 @@ def _apply_gain(player_state, gain_data, log_summary, game_state, **kwargs):
             elif resource in player_resources:
                 player_resources[resource] = player_resources.get(resource, 0) + amount
                 log_summary.append(f"Zyskano {amount} {resource}.")
+            # --- START POPRAWKI (TROOPS & INTRIGUE) ---
+            elif resource == "troops":
+                # Naprawia błąd (np. z Kartaginy), przekierowując wojsko do garnizonu
+                player_resources["troops_garrison"] = player_resources.get("troops_garrison", 0) + amount
+                log_summary.append(f"Zyskano {amount} troops (do garnizonu).")
+            
+            elif resource == "intrigue":
+                # Naprawia błąd (np. z Kartaginy, B.G.)
+                if "intrigue_hand" not in player_state:
+                    player_state["intrigue_hand"] = []
+                for _ in range(amount): # Użyj pętli, jeśli amount > 1
+                    player_state["intrigue_hand"].append(f"Intrigue_Card_{random.randint(100,999)}")
+                log_summary.append(f"Zyskano {amount} kartę Intrygi (placeholder).")
+            # --- KONIEC POPRAWKI ---
             else:
                 log_summary.append(f"Nieznany zasób: {resource}.")
         
@@ -692,9 +743,11 @@ def check_and_update_alliances(player_state, game_state, faction, log_summary):
 
     player_influence = player_state.get("influence", {}).get(faction, 0)
 
+    # --- START POPRAWKI (PRZYWRÓCENIE POPRAWNEGO PROGU) ---
     # Gracz musi mieć co najmniej 4 wpływy, aby kwalifikować się do sojuszu
     if player_influence < 4:
         return # Gracz nie ma wystarczająco wpływów
+    # --- KONIEC POPRAWKI ---
 
     if "alliances" not in game_state:
         game_state["alliances"] = {"emperor": None, "guild": None, "fremen": None, "bene_gesserit": None}
