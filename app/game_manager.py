@@ -1101,10 +1101,23 @@ def process_buy_card(game_state, player_name, card_id, cards_db):
     
     player_persuasion = player_state.get("reveal_stats", {}).get("total_persuasion", 0)
     
+    # === NOWA POPRAWKA: Oblicz perswazję na żywo ===
+    # Użyj funkcji, którą już mamy, aby pobrać Prawdziwą wartość
+    live_stats = calculate_reveal_stats(player_state, cards_db)
+    player_persuasion = live_stats.get("total_persuasion", 0)
+    # === KONIEC POPRAWKI ===
+    
     if player_persuasion < card_cost:
         return False, f"Player {player_name} does not have enough persuasion. Required: {card_cost}, Has: {player_persuasion}."
 
-    player_state["reveal_stats"]["total_persuasion"] -= card_cost
+    # === POPRAWKA 2: Zapisz zaktualizowaną wartość z powrotem do JSON ===
+    # Najpierw odejmij od prawdziwej wartości
+    new_persuasion_total = player_persuasion - card_cost
+    # A teraz zapisz tę nową, poprawną wartość w 'reveal_stats'
+    if "reveal_stats" not in player_state:
+        player_state["reveal_stats"] = {}
+    player_state["reveal_stats"]["total_persuasion"] = new_persuasion_total
+    # === KONIEC POPRAWKI ===
     
     if "discard_pile" not in player_state:
         player_state["discard_pile"] = []
