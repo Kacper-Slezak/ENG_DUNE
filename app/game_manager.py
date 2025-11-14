@@ -3,14 +3,17 @@ import json
 import os
 import random 
 
-LOCATIONS_DB_FILE = 'locations.json'
-CARDS_DB_FILE = 'cards.json'
-INTRIGUES_DB_FILE = 'intrigues.json'
-CONFLICTS_DB_FILE = 'conflicts.json' 
-LEADERS_DB_FILE = 'leaders.json'
-GAME_STATE_FILE = 'game_stat.json'
-GAME_STATE_DEFAULT_FILE = 'game_stat.DEFAULT.json' 
-AI_PLAYER_NAME = 'Peter' 
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+
+LOCATIONS_DB_FILE = os.path.join(APP_DIR, 'locations.json')
+CARDS_DB_FILE = os.path.join(APP_DIR, 'cards.json')
+INTRIGUES_DB_FILE = os.path.join(APP_DIR, 'intrigues.json')
+CONFLICTS_DB_FILE = os.path.join(APP_DIR, 'conflicts.json') 
+LEADERS_DB_FILE = os.path.join(APP_DIR, 'leaders.json')
+GAME_STATE_FILE = os.path.join(APP_DIR, 'game_stat.json')
+GAME_STATE_DEFAULT_FILE = os.path.join(APP_DIR, 'game_stat.DEFAULT.json')
+
+AI_PLAYER_NAME = 'Peter'
 
 def load_json_file(filename):
     """Wczytuje plik JSON i zwraca jego zawartość."""

@@ -977,7 +977,8 @@
       ],
       "description": "no buy effect."
     },
-    "actions": [
+    "agent_effect": {
+      "actions": [
         {
           "exchange": [
             { "pay": { "type": "resource", "resource": "water", "amount": 1 } },
@@ -2082,7 +2083,6 @@
       "description": "no buy effect."
     },
     "agent_effect": {
-      "agent_effect": {
       "actions": [
         {
           "gain": {

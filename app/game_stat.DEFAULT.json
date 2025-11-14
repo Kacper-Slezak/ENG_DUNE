@@ -27,7 +27,7 @@
 },
   "players": {
     "Peter": {
-      "leader": "paul_atreides", 
+      "leader": "duke_leto_atreides", 
       "victory_points": 0,
       "resources": {
         "solari": 0,
@@ -87,8 +87,8 @@
         "bene_gesserit": false
       }
     },
-    "Helen": {
-     "leader": "paul_atreides", 
+    "Tymon": {
+     "leader": "count_ilban_richese", 
       "victory_points": 0,
       "resources": {
         "solari": 0,
@@ -148,8 +148,8 @@
         "bene_gesserit": false
       }
     },
-    "Paul": {
-"leader": "paul_atreides", 
+    "Damian": {
+"leader": "countess_ariana_thorvald", 
       "victory_points": 0,
       "resources": {
         "solari": 0,
