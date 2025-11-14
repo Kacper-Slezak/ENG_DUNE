@@ -1061,7 +1061,6 @@ def calculate_reveal_stats(player_state, cards_db):
         if not card_data: continue
 
         agent_effect = card_data.get("agent_effect", {})
-        swords = card_data.get("reveal_effect", {}).get("swords", 0) 
         base_swords += swords
         
         cards_played_details.append({
