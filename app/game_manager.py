@@ -533,7 +533,6 @@ def check_and_advance_phase(game_state, cards_db):
             break 
 
     if all_players_finished:
-        game_state = calculate_and_store_reveal_stats(game_state, cards_db)
         game_state["current_phase"] = "REVEAL"
         
     return game_state
@@ -1062,7 +1061,7 @@ def calculate_reveal_stats(player_state, cards_db):
         if not card_data: continue
 
         agent_effect = card_data.get("agent_effect", {})
-        swords = agent_effect.get("swords", 0)
+        swords = card_data.get("reveal_effect", {}).get("swords", 0) 
         base_swords += swords
         
         cards_played_details.append({
@@ -1072,7 +1071,7 @@ def calculate_reveal_stats(player_state, cards_db):
         })
     
     committed_troops = player_state.get("resources", {}).get("troops_in_conflict", 0)
-    base_swords += committed_troops
+    base_swords += (committed_troops * 2)
     
     return {
         "total_persuasion": total_persuasion,

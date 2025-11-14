@@ -371,11 +371,10 @@ def reveal_phase():
                 })
     player_intrigue_map[player_name] = sorted(intrigue_list, key=lambda x: x['name'])
     for player_name, player_data in player_states.items():
-        stats = player_data.get("reveal_stats", {}) 
+        stats = calculate_reveal_stats(player_data, cards_db)
         stats["name"] = player_name
         stats["influence"] = player_data.get("influence", {}) 
         stats["vp"] = player_data.get("victory_points", 0)
-        stats["base_swords"] = stats.get("base_swords", 0) 
         stats["bonus_swords"] = player_data.get("active_effects", {}).get("fight_bonus_swords", 0)
         stats["troops_garrison"] = player_data.get("resources", {}).get("troops_garrison", 0)
         stats["troops_in_conflict"] = player_data.get("resources", {}).get("troops_in_conflict", 0)
