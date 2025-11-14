@@ -17,7 +17,8 @@ from game_manager import (
     process_conflict_set,
     process_conflict_resolve,
     save_json_file_from_text,
-    manual_add_intrigue
+    manual_add_intrigue,
+    get_intrigue_requirements
 )
 
 from build_ai_prompt import generate_ai_prompt
@@ -68,7 +69,7 @@ def index():
         card_id_input = request.form.get('card_id')
         location_id_input = request.form.get('location_id')
         
-        is_valid, message = is_move_valid(game_state, locations_db, cards_db, player_name_input, card_id_input, location_id_input) 
+        is_valid, message = is_move_valid(game_state, locations_db, cards_db, leaders_db, player_name_input, card_id_input, location_id_input) 
 
         if is_valid:
             new_game_state = process_move(game_state, locations_db, cards_db, leaders_db, player_name_input, card_id_input, location_id_input)
@@ -184,30 +185,119 @@ def set_conflict():
 def play_intrigue():
     game_state, _, _, intrigues_db, _, _ = load_game_data()
 
-    if game_state.get("current_phase") not in ["AGENT_TURN", "REVEAL"]:
+    current_phase = game_state.get("current_phase", "AGENT_TURN")
+    redirect_target = 'reveal_phase' if current_phase == "REVEAL" else 'index'
+
+    if current_phase not in ["AGENT_TURN", "REVEAL"]:
         flash(f"Cannot play intrigue: Not in AGENT_TURN or REVEAL phase.", "error")
-        
-        if game_state.get("current_phase") == "REVEAL":
-            return redirect(url_for('reveal_phase'))
-        return redirect(url_for('index'))
+        return redirect(url_for(redirect_target))
 
     player_name_input = request.form.get('player_name')
     intrigue_id_input = request.form.get('intrigue_id')
     
-    is_valid, message = process_intrigue(game_state, intrigues_db, player_name_input, intrigue_id_input)
+    # 1. Sprawdź, czy gracz w ogóle ma tę kartę
+    player_state = game_state.get("players", {}).get(player_name_input)
+    if not player_state or intrigue_id_input not in player_state.get("intrigue_hand", []):
+        flash(f"Invalid play: Player {player_name_input} does not have card {intrigue_id_input}.", "error")
+        return redirect(url_for(redirect_target))
+
+    # 2. Sprawdź, czy karta wymaga decyzji
+    requirements = get_intrigue_requirements(intrigue_id_input, intrigues_db)
     
-    if is_valid:
-        if save_json_file(GAME_STATE_FILE, game_state):
+    if requirements["type"] == "simple" or requirements["type"] == "not_found":
+        # Prosta karta -> wykonaj natychmiast bez dodatkowych decyzji
+        is_valid, message = process_intrigue(game_state, intrigues_db, player_name_input, intrigue_id_input)
+        
+        if is_valid:
+            save_json_file(GAME_STATE_FILE, game_state)
             flash(f"Intrigue played: {message}", "success")
         else:
-            flash("CRITICAL ERROR: Cannot save game state after playing intrigue.", "error")
-    else:
-        flash(f"Invalid intrigue play: {message}", "error")
+            flash(f"Invalid intrigue play: {message}", "error")
         
-    if game_state.get("current_phase") == "REVEAL":
-        return redirect(url_for('reveal_phase'))
+        return redirect(url_for(redirect_target))
+        
     else:
+        # Karta złożona -> Przekieruj do nowego widoku, aby podjąć decyzję
+        # Zapisz stan na wszelki wypadek (choć karta nie została jeszcze zagrana)
+        save_json_file(GAME_STATE_FILE, game_state)
+        return redirect(url_for('resolve_intrigue', 
+                                player_name=player_name_input, 
+                                intrigue_id=intrigue_id_input))
+
+
+# DODAJ TĘ NOWĄ TRASĘ (GET)
+@app.route('/resolve_intrigue/<string:player_name>/<string:intrigue_id>')
+def resolve_intrigue(player_name, intrigue_id):
+    """
+    Wyświetla stronę, na której gracz może podjąć decyzję 
+    dotyczącą złożonej karty intrygi.
+    """
+    game_state, _, _, intrigues_db, _, _ = load_game_data()
+    
+    card_data = intrigues_db.get(intrigue_id)
+    if not card_data:
+        flash(f"Error: Intrigue card {intrigue_id} not found.", "error")
         return redirect(url_for('index'))
+        
+    player_state = game_state.get("players", {}).get(player_name, {})
+    
+    # Pobierz wymagania (typ i dane)
+    requirements = get_intrigue_requirements(intrigue_id, intrigues_db)
+
+    return render_template('resolve_intrigue.html',
+        player_name=player_name,
+        player_resources=player_state.get("resources", {}),
+        card_id=intrigue_id,
+        card_data=card_data,
+        requirements=requirements
+    )
+
+
+# DODAJ TĘ NOWĄ TRASĘ (POST)
+@app.route('/execute_intrigue', methods=['POST'])
+def execute_intrigue():
+    """
+    Odbiera decyzję gracza z formularza i wywołuje 
+    "idealną" funkcję process_intrigue z odpowiednimi kwargs.
+    """
+    game_state, _, _, intrigues_db, _, _ = load_game_data()
+    
+    # Odczytaj dane z formularza
+    player_name = request.form.get('player_name')
+    intrigue_id = request.form.get('intrigue_id')
+    
+    # Przygotuj słownik kwargs dla decyzji
+    kwargs = {}
+    if 'pay_cost' in request.form:
+        kwargs['pay_cost'] = request.form['pay_cost'] == 'true'
+        
+    if 'choice_index' in request.form:
+        try:
+            kwargs['choice_index'] = int(request.form['choice_index'])
+        except ValueError:
+            flash("Invalid choice index received.", "error")
+            return redirect(url_for('index'))
+
+    # Wywołaj "idealny" silnik z zebranymi decyzjami
+    is_valid, message = process_intrigue(
+        game_state, 
+        intrigues_db, 
+        player_name, 
+        intrigue_id, 
+        **kwargs # Rozpakuj decyzje tutaj
+    )
+
+    if is_valid:
+        save_json_file(GAME_STATE_FILE, game_state)
+        flash(f"Intrigue executed: {message}", "success")
+    else:
+        save_json_file(GAME_STATE_FILE, game_state)
+        flash(f"Intrigue failed: {message}", "error")
+
+    current_phase = game_state.get("current_phase", "AGENT_TURN")
+    redirect_target = 'reveal_phase' if current_phase == "REVEAL" else 'index'
+    
+    return redirect(url_for(redirect_target))
 
 
 @app.route('/pass_turn', methods=['POST'])

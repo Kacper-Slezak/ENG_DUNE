@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Rozstrzygnij Intrygę</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #3f51b5; }
+        p { font-size: 1.1em; }
+        .card-name { font-weight: bold; font-size: 1.5em; }
+        .description { font-style: italic; color: #555; margin-bottom: 20px; }
+        fieldset { border: 1px solid #ccc; padding: 20px; margin-top: 20px; background: #f9f9f9; }
+        legend { font-size: 1.2em; font-weight: bold; padding: 0 10px; }
+        button { 
+            display: block;
+            width: 100%;
+            padding: 15px; 
+            font-size: 1.1em; 
+            cursor: pointer; 
+            color: white;
+            border: none;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .btn-confirm { background-color: #4CAF50; }
+        .btn-confirm:hover { background-color: #45a049; }
+        .btn-decline { background-color: #f44336; }
+        .btn-decline:hover { background-color: #d32f2f; }
+        .player-info { background: #fffde7; border: 1px solid #fff59d; padding: 10px; border-radius: 4px;}
+    </style>
+</head>
+<body>
+
+    <h1>Wymagana decyzja</h1>
+    <div class="player-info">
+        Gracz: <strong>{{ player_name }}</strong> |
+        Solari: {{ player_resources.solari | default(0) }} |
+        Woda: {{ player_resources.water | default(0) }} |
+        Przyprawa: {{ player_resources.Spice | default(0) }}
+    </div>
+
+    <fieldset>
+        <legend>Karta Intrygi</legend>
+        <div class="card-name">{{ card_data.name }}</div>
+        <p class="description">"{{ card_data.description }}"</p>
+
+        <form method="POST" action="{{ url_for('execute_intrigue') }}">
+            <input type="hidden" name="player_name" value="{{ player_name }}">
+            <input type="hidden" name="intrigue_id" value="{{ card_id }}">
+
+            {% if requirements.type == 'exchange' or requirements.type == 'conditional_pay' %}
+                <h3>Wymagana decyzja:</h3>
+                <p>Czy chcesz aktywować efekt karty?</p>
+                
+                <input type="hidden" name="pay_cost" id="pay_cost_input" value="">
+                
+                <button type="submit" class="btn-confirm" 
+                        onclick="document.getElementById('pay_cost_input').value = 'true';">
+                    Tak (Akceptuj koszt/wymianę)
+                </button>
+                
+                <button type="submit" class="btn-decline" 
+                        onclick="document.getElementById('pay_cost_input').value = 'false';">
+                    Nie (Odrzuć i odrzuć kartę)
+                </button>
+
+            {% elif requirements.type == 'choice' %}
+                <h3>Wymagany wybór:</h3>
+                <p>Wybierz jedną z poniższych opcji:</p>
+                
+                <input type="hidden" name="choice_index" id="choice_index_input" value="">
+
+                {% for choice_data in requirements.data %}
+                    {% set loop_index = loop.index0 %}
+                    {% set action_key = choice_data.keys() | first %} {% set action_list = choice_data[action_key] %}
+                    
+                    {% set btn_text = [] %}
+                    {% for item in action_list %}
+                        {% if 'gain' in item %}
+                            {% set gain = item.gain[0] if item.gain is sequence else item.gain %}
+                            {% set _ = btn_text.append("Zyskaj " + (gain.amount | string) + " " + gain.resource) %}
+                        {% elif 'pay' in item %}
+                            {% set pay = item.pay[0] if item.pay is sequence else item.pay %}
+                            {% set _ = btn_text.append("Zapłać " + (pay.amount | string) + " " + pay.resource) %}
+                        {% elif 'type' in item and item.type == 'action' %}
+                            {% set _ = btn_text.append(item.description) %}
+                        {% endif %}
+                    {% endfor %}
+
+                    <button type="submit" class="btn-confirm"
+                            style="background-color: #0288d1;"
+                            onclick="document.getElementById('choice_index_input').value = '{{ loop_index }}';">
+                        Opcja {{ loop.index }}: {{ btn_text | join(' i ') }}
+                    </button>
+                {% endfor %}
+                
+                <button type="submit" class="btn-decline" 
+                        onclick="document.getElementById('choice_index_input').value = '-1';">
+                    Anuluj (Odrzuć kartę bez efektu)
+                </button>
+
+            {% else %}
+                <p style="color: red;">Błąd: Nie rozpoznano typu wymagań dla tej karty. Skontaktuj się z administratorem.</p>
+                <a href="{{ url_for('index') }}"><button type="button">Wróć</button></a>
+            {% endif %}
+            
+        </form>
+    </fieldset>
+
+</body>
+</html>

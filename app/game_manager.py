@@ -90,7 +90,7 @@ def get_card_persuasion_cost(card_data):
     return 999 
 
 
-def is_move_valid(game_state, locations_db, cards_db, player_name, card_id, location_id):
+def is_move_valid(game_state, locations_db, leaders_db, cards_db, player_name, card_id, location_id):
     """Waliduje ruch (bez sprawdzania czyja tura)."""
     
     if game_state.get("current_phase") != "AGENT_TURN":
@@ -99,6 +99,10 @@ def is_move_valid(game_state, locations_db, cards_db, player_name, card_id, loca
     player_state = game_state.get("players", {}).get(player_name, {})
     if not player_state:
         return False, f"Player {player_name} not found."
+    
+    player_leader_id = player_state.get("leader")
+    leader_data = leaders_db.get(player_leader_id, {})
+    passive_ability_name = leader_data.get("ability_passive", {}).get("name")
     
     if player_state.get("agents_placed", 0) >= player_state.get("agents_total", 2):
         return False, f"Player {player_name} has no more agents to place this round."
@@ -116,14 +120,20 @@ def is_move_valid(game_state, locations_db, cards_db, player_name, card_id, loca
 
     location_state = game_state.get("locations_state", {}).get(location_id, {})
     if location_state.get("occupied_by") is not None:
-        return False, f"Location is already occupied by player {location_state['occupied_by']}."
+        # Sprawdź zdolność Heleny
+        if passive_ability_name == "Knows Everything":
+            location_symbol = location_data.get("symbol_required")
+            if location_symbol in ["populated areas", "Landsraad"]:
+                pass # Zdolność Heleny pozwala zignorować zajęte pole
+            else:
+                return False, f"Location is already occupied. (Helena's ability only works on 'populated areas' and 'Landsraad' spaces)."
+        else:
+            return False, f"Location is already occupied by player {location_state['occupied_by']}."
 
-    # --- ZUNIFIKOWANA KONTROLA RĘKI (WSZYSCY GRACZE) ---
     player_hand = player_state.get("hand", [])
     if card_id not in player_hand:
         card_name = card_data.get('name', card_id)
         return False, f"Player {player_name} does not have the card '{card_name}' in their hand."
-    # --- Koniec zmiany ---
             
     required_symbol = location_data.get("symbol_required")
     card_symbols = card_data.get("agent_symbols", [])
@@ -140,8 +150,14 @@ def is_move_valid(game_state, locations_db, cards_db, player_name, card_id, loca
             required_amount = cost_item.get("amount", 0)
             player_has = player_resources.get(resource_name, 0)
             
-            if player_has < required_amount:
-                return False, f"Player {player_name} does not have enough resources. Required: {required_amount} {resource_name}, Has: {player_has}."
+            effective_required_amount = required_amount
+            if passive_ability_name == "Popularity in Landsraad" and resource_name == "solari":
+                location_symbol = location_data.get("symbol_required")
+                if location_symbol == "Landsraad":
+                    effective_required_amount = max(0, required_amount - 1)
+            
+            if player_has < effective_required_amount:
+                return False, f"Player {player_name} does not have enough resources. Required: {effective_required_amount} {resource_name} (Original: {required_amount}), Has: {player_has}."
 
     extra_req = location_data.get("extra_requirement")
     
@@ -189,7 +205,6 @@ def draw_cards(player_state, amount_to_draw):
     
     return f"drew {len(cards_drawn_names)} card(s)"
 
-# --- NOWA FUNKCJA POMOCNICZA: STOSOWANIE EFEKTÓW ---
 def apply_effects(player_state, actions_list, source_summary="Effect"):
     """
     Uniwersalna funkcja do automatycznego stosowania efektów (z lokacji, kart, sygnetów).
@@ -201,12 +216,21 @@ def apply_effects(player_state, actions_list, source_summary="Effect"):
     player_resources = player_state.get("resources", {})
     summary_parts = []
 
+    if leader_data is None:
+        leader_data = {}
+    passive_ability_name = leader_data.get("ability_passive", {}).get("name")
+
     for item in actions_list:
         item_type = item.get("type")
         
         if item_type == "gain":
             resource_name = item.get("resource")
             resource_amount = item.get("amount", 0)
+
+            if passive_ability_name == "Spice Addiction" and resource_name == "Spice" and resource_amount > 0:
+                resource_amount = max(0, resource_amount - 1) # Zyskaj o 1 mniej Przyprawy
+                draw_summary = draw_cards(player_state, 1) # Dobierz 1 kartę
+                summary_parts.append(f"({draw_summary} due to Spice Addiction)")
             
             if resource_name in player_resources:
                 current_amount = player_resources.get(resource_name, 0)
@@ -276,6 +300,10 @@ def process_move(game_state, locations_db, cards_db, leaders_db, player_name, ca
     player_state = game_state.get("players", {}).get(player_name, {})
     player_resources = player_state.get("resources", {})
 
+    player_leader_id = player_state.get("leader")
+    leader_data = leaders_db.get(player_leader_id, {})
+    passive_ability_name = leader_data.get("ability_passive", {}).get("name")
+
     # --- 1. Ustawienie lokacji ---
     if location_id not in game_state["locations_state"]:
          game_state["locations_state"][location_id] = {}
@@ -289,27 +317,52 @@ def process_move(game_state, locations_db, cards_db, leaders_db, player_name, ca
         if cost_item.get("type") == "resource":
             resource_name = cost_item.get("resource")
             resource_amount = cost_item.get("amount", 0)
+            
+            # Oblicz efektywny koszt (Zdolność Leto)
+            effective_resource_amount = resource_amount
+            if passive_ability_name == "Popularity in Landsraad" and resource_name == "solari":
+                location_symbol = location_data.get("symbol_required")
+                if location_symbol == "Landsraad":
+                    effective_resource_amount = max(0, resource_amount - 1)
+            
+            # Zapłać koszt
             current_amount = player_resources.get(resource_name, 0)
-            player_resources[resource_name] = current_amount - resource_amount
-            move_summary += f" (Paid {resource_amount} {resource_name})"
+            player_resources[resource_name] = current_amount - effective_resource_amount
+            move_summary += f" (Paid {effective_resource_amount} {resource_name})"
+            
+            # Sprawdź zdolność Ilbana
+            if passive_ability_name == "Ruthless Negotiator" and resource_name == "solari" and effective_resource_amount > 0:
+                draw_summary = draw_cards(player_state, 1) # Użyj istniejącej funkcji pomocniczej
+                move_summary += f" | Ilban's Ability: {draw_summary}"
             
     # --- 3. Zastosuj efekty lokacji ---
     location_actions_list = location_data.get("actions", [])
-    effect_summary = apply_effects(player_state, location_actions_list, "Location")
+    # Zaktualizuj wywołanie, aby przekazać dane lidera (dla Ariany)
+    effect_summary = apply_effects(player_state, location_actions_list, "Location", leader_data=leader_data)
     move_summary += f" | Location: {effect_summary}"
+
+    # --- POCZĄTEK NOWEJ LOGIKI (EARL) ---
+    # Sprawdź zdolność Earla po zajęciu High Council
+    if passive_ability_name == "Connections" and location_id == "high_council":
+        # Ręcznie stwórz akcję "gain intrigue" i przetwórz ją
+        intrigue_action = [{"type": "gain", "resource": "intrigue", "amount": 1}]
+        intrigue_summary = apply_effects(player_state, intrigue_action, "Earl's Ability", leader_data=leader_data)
+        move_summary += f" | Earl's Ability: {intrigue_summary}"
+    # --- KONIEC NOWEJ LOGIKI ---
     
     # --- 4. Zastosuj efekty karty (Agent lub Signet) ---
     is_destroyed = False
     
     # === OBSŁUGA SIGNET RING ===
     if card_id == 'signet_ring':
-        player_leader_id = player_state.get("leader")
+        player_leader_id = player_state.get("leader") # To już mamy
         if player_leader_id and player_leader_id in leaders_db:
-            leader_data = leaders_db[player_leader_id]
-            signet_ability = leader_data.get("ability_signet", {})
+            leader_data_signet = leaders_db[player_leader_id] # Użyj innej zmiennej
+            signet_ability = leader_data_signet.get("ability_signet", {})
             signet_actions = signet_ability.get("action", [])
             
-            signet_summary = apply_effects(player_state, signet_actions, "Signet")
+            # Przekaż dane lidera również tutaj (na wypadek, gdyby sygnet dawał przyprawę Arianie)
+            signet_summary = apply_effects(player_state, signet_actions, "Signet", leader_data=leader_data)
             move_summary += f" | Signet ({signet_ability.get('name', 'Ability')}): {signet_summary}"
         else:
             move_summary += " | (ERROR: Player leader not found for Signet Ring)"
@@ -379,6 +432,57 @@ def process_move(game_state, locations_db, cards_db, leaders_db, player_name, ca
     return game_state
 
 
+def get_intrigue_requirements(intrigue_id, intrigues_db):
+    """
+    Sprawdza, czy karta intrygi wymaga interakcji z graczem (wyboru lub opłaty).
+    Zwraca słownik opisujący wymaganą decyzję.
+    """
+    card_data = intrigues_db.get(intrigue_id)
+    if not card_data:
+        return {"type": "not_found"}
+
+    actions = card_data.get("actions", {})
+    
+    # Proste karty, które nie wymagają decyzji (tylko 'gain' lub 'set_flag')
+    if "gain" in actions or "set_flag" in actions:
+        return {"type": "simple"} #
+
+    if "action" in actions:
+        action_list = actions["action"]
+        if not action_list or not isinstance(action_list, list):
+            return {"type": "simple"} # Karta ma pustą akcję lub jest tylko opisem
+
+        first_op = action_list[0]
+        
+        if "choice" in first_op:
+            # Karta wymaga wyboru (np. "master_tactitian", "bypass_protocol")
+            #
+            return {
+                "type": "choice",
+                "data": first_op["choice"] # Przekaż listę opcji do app.py
+            }
+            
+        if "exchange" in first_op:
+            # Karta wymaga wymiany (np. "bribery", "personal_army")
+            #
+            return {
+                "type": "exchange",
+                "data": first_op["exchange"] # Przekaż dane wymiany do app.py
+            }
+            
+        if "pay" in first_op:
+            # Karta wymaga opcjonalnej opłaty (np. "calculated_recruitment")
+            #
+            return {
+                "type": "conditional_pay",
+                "data": first_op["pay"] # Przekaż dane opłaty do app.py
+            }
+
+    # Domyślnie, jeśli struktura jest nieznana lub to tylko opis (np. "infiltration")
+    #
+    return {"type": "simple"}
+
+
 def process_pass_turn(game_state, player_name):
     """Oznacza gracza jako pasującego."""
     player_state = game_state.get("players", {}).get(player_name)
@@ -422,89 +526,303 @@ def check_and_advance_phase(game_state, cards_db):
         
     return game_state
 
-def process_intrigue(game_state, intrigues_db, player_name, intrigue_id):
+
+
+def _check_requirement(player_state, requirement_list, game_state):
+    """(Helper) Sprawdza, czy gracz spełnia wymagania."""
+    log_summary = []
+    all_met = True
+    
+    if not isinstance(requirement_list, list):
+        requirement_list = [requirement_list]
+
+    for req in requirement_list:
+        req_type = req.get("type")
+        
+        if req_type == "action" and "win the conflict" in req.get("description", ""):
+            # Wymagałoby to flagi ustawionej po rozwiązaniu konfliktu
+            if not player_state.get("active_effects", {}).get("won_conflict", False):
+                log_summary.append("Wymaganie 'wygrania konfliktu' niespełnione.")
+                all_met = False
+        
+        elif req_type == "resource" and req.get("resource") == "The Spice Must Flow":
+            # Dla "market_manopoly"
+            count = player_state.get("deck_pool", []).count("the_spice_must_flow")
+            min_amount = req.get("amount", 2) # Domyślnie 2 z opisu
+            if count < min_amount:
+                log_summary.append(f"Wymaganie 'min. {min_amount} The Spice Must Flow' niespełnione (Ma: {count}).")
+                all_met = False
+        
+        elif req_type == "influence":
+             # Dla "plans_within_plans"
+            influence = player_state.get("influence", {})
+            min_level = 3 # Z opisu
+            count = sum(1 for v in influence.values() if v >= min_level)
+            
+            if "3 influence on 3 faction tracks" in req.get("description", ""):
+                if count < 3:
+                    log_summary.append("Wymaganie 'min. 3 wpływu na 3 ścieżkach' niespełnione.")
+                    all_met = False
+            elif "3 influence on 4 faction tracks" in req.get("description", ""):
+                if count < 4:
+                    log_summary.append("Wymaganie 'min. 3 wpływu na 4 ścieżkach' niespełnione.")
+                    all_met = False
+                    
+        elif req_type == "action" and "place in high council" in req.get("description", ""):
+            # Dla "agreement_from_high_council"
+            # Zakładamy, że lokacja "high_council" jest zajęta przez gracza
+            if game_state.get("locations_state", {}).get("high_council", {}).get("occupied_by") != player_state.get("name", ""):
+                 log_summary.append("Wymaganie 'miejsce w High Council' niespełnione.")
+                 all_met = False
+
+        else:
+            log_summary.append(f"Wymaganie '{req.get('description', 'nieznane')}' sprawdzane manualnie (założono TRUE).")
+            
+    return all_met, " ".join(log_summary)
+
+def _apply_cost(player_state, pay_data, log_summary):
+    """(Helper) Próbuje pobrać koszt od gracza. Zwraca True/False."""
+    if not isinstance(pay_data, list):
+        pay_data = [pay_data]
+        
+    player_resources = player_state.get("resources", {})
+    
+    # Krok 1: Sprawdź, czy gracza stać
+    for cost in pay_data:
+        resource = cost.get("resource")
+        amount = cost.get("amount", 0)
+        
+        # Specjalna obsługa dla "feigned_incident"
+        if resource == "troops in conflict":
+            # To musiałoby być obsługiwane przez stan konfliktu, tu symulujemy
+            if player_state.get("troops_in_conflict", 0) < amount:
+                 log_summary.append(f"Niepowodzenie: brak {amount} wojsk w konflikcie.")
+                 return False
+        elif player_resources.get(resource, 0) < amount:
+            log_summary.append(f"Niepowodzenie: brak {amount} {resource}.")
+            return False
+            
+    # Krok 2: Pobierz zasoby
+    for cost in pay_data:
+        resource = cost.get("resource")
+        amount = cost.get("amount", 0)
+        
+        if resource == "troops in conflict":
+            player_state["troops_in_conflict"] = player_state.get("troops_in_conflict", 0) - amount
+            log_summary.append(f"Usunięto {amount} wojsk z konfliktu.")
+        else:
+            player_resources[resource] -= amount
+            log_summary.append(f"Zapłacono {amount} {resource}.")
+        
+    return True
+
+def _apply_gain(player_state, gain_data, log_summary, **kwargs):
+    """(Helper) Stosuje zysk dla gracza."""
+    if not isinstance(gain_data, list):
+        gain_data = [gain_data]
+
+    player_resources = player_state.get("resources", {})
+
+    for gain in gain_data:
+        gain_type = gain.get("type")
+        
+        if gain_type == "resource":
+            resource = gain.get("resource")
+            amount = gain.get("amount", 0)
+            
+            if "influence point" in resource:
+                faction = resource.split(" ")[0]
+                if "influence" not in player_state: player_state["influence"] = {}
+                player_state["influence"][faction] = player_state["influence"].get(faction, 0) + amount
+                log_summary.append(f"Zyskano {amount} wpływu {faction}.")
+            elif resource == "vp":
+                player_state["victory_points"] = player_state.get("victory_points", 0) + amount
+                log_summary.append(f"Zyskano {amount} VP!")
+            elif resource == "fight points":
+                # Dla "master_tactitian", "personal_army"
+                if "active_effects" not in player_state: player_state["active_effects"] = {}
+                current = player_state["active_effects"].get("fight_bonus_swords", 0)
+                player_state["active_effects"]["fight_bonus_swords"] = current + amount
+                log_summary.append(f"Zyskano {amount} punktów walki (miecza).")
+            elif resource == "persuasion":
+                 # Dla "charisma"
+                if "reveal_stats" not in player_state: player_state["reveal_stats"] = {}
+                current = player_state["reveal_stats"].get("total_persuasion", 0)
+                player_state["reveal_stats"]["total_persuasion"] = current + amount
+                log_summary.append(f"Zyskano {amount} perswazji (do Fazy Odkrycia).")
+            elif resource in player_resources:
+                player_resources[resource] = player_resources.get(resource, 0) + amount
+                log_summary.append(f"Zyskano {amount} {resource}.")
+            else:
+                log_summary.append(f"Nieznany zasób: {resource}.")
+        
+        elif gain_type == "action":
+            # Dla kart "trick", "concentration", "infiltration" itp.
+            # Te nadal wymagają ręcznej obsługi LUB dalszej rozbudowy logiki
+            log_summary.append(f"Efekt manualny: {gain.get('description')}")
+        
+        else:
+            log_summary.append(f"Manualny zysk: {gain.get('description', 'nieznany')}")
+
+def _process_action_list(player_state, action_list, log_summary, game_state, **kwargs):
+    """(Helper) Przetwarza złożoną listę akcji, wymagań, wyborów i wymian."""
+    
+    all_reqs_met = True
+    
+    for item in action_list:
+        if not all_reqs_met:
+            log_summary.append("Akcja przerwana z powodu niespełnienia wymagań.")
+            break
+        
+        if not item: continue
+        # Znajdź kluczowy typ operacji (np. "type", "exchange", "choice", "gain", "pay")
+        operation_key = list(item.keys())[0]
+
+        if operation_key == "type":
+            if item["type"] == "requirement":
+                all_reqs_met, req_log = _check_requirement(player_state, item["requirement"], game_state)
+                if req_log: log_summary.append(req_log)
+            elif item["type"] == "action":
+                _apply_gain(player_state, item, log_summary, **kwargs) # Przekazujemy do apply_gain
+            else:
+                log_summary.append(f"Nieznany typ operacji: {item['type']}")
+
+        elif operation_key == "gain":
+            _apply_gain(player_state, item["gain"], log_summary, **kwargs)
+
+        elif operation_key == "pay":
+            # Dla "calculated_recruitment"
+            if kwargs.get("pay_cost", False): # Wymaga jawnej zgody
+                if not _apply_cost(player_state, item["pay"], log_summary):
+                    all_reqs_met = False # Nie udało się zapłacić, zatrzymaj dalsze akcje
+            else:
+                log_summary.append("Gracz odrzucił opcjonalny koszt.")
+                all_reqs_met = False # Odrzucenie kosztu zatrzymuje łańcuch
+
+        elif operation_key == "exchange":
+            # Dla "bribery", "personal_army", "trick", "sleeping_must_wake_up", "khoam_shares"
+            exchange_data = item["exchange"]
+            pay_data = next((d for d in exchange_data if "pay" in d), {}).get("pay")
+            gain_data_list = [d for d in exchange_data if "pay" not in d] 
+            
+            if not pay_data or not gain_data_list:
+                log_summary.append("Błąd struktury wymiany.")
+                continue
+
+            if kwargs.get("pay_cost", False): # Wymaga jawnej zgody na wymianę
+                if _apply_cost(player_state, pay_data, log_summary):
+                    for gain_item in gain_data_list:
+                        if "gain" in gain_item:
+                             _apply_gain(player_state, gain_item["gain"], log_summary, **kwargs)
+                        elif "type" in gain_item and gain_item["type"] == "action":
+                             _apply_gain(player_state, gain_item, log_summary, **kwargs)
+                else:
+                    log_summary.append("Wymiana nieudana (brak środków).")
+            else:
+                log_summary.append("Gracz odrzucił opcjonalną wymianę.")
+                
+        elif operation_key == "choice":
+            # Dla "master_tactitian", "bypass_protocol", "demand_for_a_respect"
+            choice_index = kwargs.get("choice_index", -1)
+            choices = item["choice"]
+            
+            if choice_index < 0 or choice_index >= len(choices):
+                log_summary.append(f"Wymagany wybór (0-{len(choices)-1}), ale nie podano lub jest błędny. Karta odrzucona bez efektu.")
+                all_reqs_met = False
+            else:
+                log_summary.append(f"Wybrano opcję {choice_index + 1}.")
+                # Wybrana opcja to lista akcji (np. [{ "gain": ... }] lub [{ "pay": ... }, { "type": "action" ... }])
+                chosen_action_key = list(choices[choice_index].keys())[0] # np. "action1"
+                chosen_action_list = choices[choice_index][chosen_action_key]
+                _process_action_list(player_state, chosen_action_list, log_summary, game_state, **kwargs)
+        
+        else:
+             log_summary.append(f"Nieobsługiwany klucz operacji: {operation_key}")
+
+    return all_reqs_met
+
+# --- KONIEC SEKCJI POMOCNICZEJ ---
+
+
+def process_intrigue(game_state, intrigues_db, player_name, intrigue_id, **kwargs):
     """
-    Przetwarza zagranie intrygi z ręki i automatyzuje proste efekty 
-    używając nowej struktury JSON i funkcji apply_effects.
+    Przetwarza zagranie intrygi z ręki i automatyzuje wszystkie efekty
+    na podstawie struktury JSON i dodatkowych argumentów (decyzji gracza).
+    
+    Argumenty **kwargs:
+    - pay_cost (bool): True, jeśli gracz zgadza się na opcjonalny koszt/wymianę.
+    - choice_index (int): Indeks (0, 1, ...) wyboru dokonanego przez gracza.
     """
     player_state = game_state.get("players", {}).get(player_name)
     if not player_state:
-        return False, "Player not found."
+        return False, "Nie znaleziono gracza."
         
     if not intrigue_id:
-        return False, "No intrigue card selected."
+        return False, "Nie wybrano karty intrygi."
         
     if intrigue_id not in player_state.get("intrigue_hand", []):
-        return False, "Player does not have this intrigue card in hand."
+        return False, "Gracz nie ma tej karty intrygi w ręce."
         
     intrigue_data = intrigues_db.get(intrigue_id)
     if not intrigue_data:
-        intrigue_data = {"name": intrigue_id, "description": "No description found.", "actions": {}}
+        intrigue_data = {"name": intrigue_id, "description": "Nie znaleziono opisu.", "actions": {}}
 
-    # Usuń intrygę z ręki
+    # Usuń intrygę z ręki NATYCHMIAST
     player_state["intrigue_hand"].remove(intrigue_id)
     
-    summary = f"Player {player_name} played intrigue: '{intrigue_data.get('name')}'."
+    log_summary = [f"Gracz {player_name} zagrał intrygę: '{intrigue_data.get('name')}'."]
     
-    # --- NOWA AUTOMATYZACJA EFEKTÓW ---
     actions_object = intrigue_data.get("actions", {})
+    card_type = intrigue_data.get("type", "conspiracy")
+
+    # --- NOWA, SOLIDNA OBSŁUGA ---
     
-    # 1. Obsługa prostych zysków (np. "occasion", "learn_their_path")
     if "gain" in actions_object:
-        # Zakładamy, że masz już funkcję 'apply_effects' z poprzedniego kroku (obsługa sygnetów)
-        try:
-            gain_summary = apply_effects(player_state, actions_object["gain"], "Intrigue")
-            summary += f" | Effect: {gain_summary}"
-        except NameError:
-             summary += " | (ERROR: apply_effects function not found in game_manager.py)"
-             
+        # 1. Prosty GAIN (np. "occasion", "learn_their_path")
+        _apply_gain(player_state, actions_object["gain"], log_summary, **kwargs)
+        
     elif "set_flag" in actions_object:
+        # 2. Ustawienie FLAGI (np. "ambush")
         flag_data = actions_object["set_flag"]
         flag_name = flag_data.get("name")
         
-        if not flag_name:
-            summary += f" | (NEEDS MANUAL ACTION: {intrigue_data.get('description')})"
+        if "active_effects" not in player_state:
+            player_state["active_effects"] = {}
+        
+        if "value_add" in flag_data:
+            current_value = player_state["active_effects"].get(flag_name, 0)
+            added_value = flag_data.get("value_add", 0)
+            player_state["active_effects"][flag_name] = current_value + added_value
+            log_summary.append(f"Efekt: Zyskano bonus +{added_value} {flag_name}.")
         else:
-            if "active_effects" not in player_state:
-                player_state["active_effects"] = {}
+             value_to_set = flag_data.get("value", True) 
+             player_state["active_effects"][flag_name] = value_to_set
+             log_summary.append(f"Efekt: Zyskano tymczasową zdolność '{flag_name}'.")
 
-            if "value_add" in flag_data:
-                # To jest flaga numeryczna (np. +4 miecze z Ambush)
-                current_value = player_state["active_effects"].get(flag_name, 0)
-                added_value = flag_data.get("value_add", 0)
-                player_state["active_effects"][flag_name] = current_value + added_value
-                summary += f" | Effect: Gained bonus +{added_value} {flag_name}."
-            
-            else:
-                 # To jest flaga typu True/False (np. Infiltration)
-                 value_to_set = flag_data.get("value", True) 
-                 player_state["active_effects"][flag_name] = value_to_set
-                 summary += f" | Effect: Gained temporary ability '{flag_name}'."
-    # 2. Obsługa złożonych akcji (np. "infiltration", "trick")
     elif "action" in actions_object:
-         summary += f" | (NEEDS MANUAL ACTION: {intrigue_data.get('description')})"
-         
-    # 3. Obsługa efektów typu "exchange" (np. "bribery")
-    elif "exchange" in actions_object:
-         summary += f" | (NEEDS MANUAL ACTION: {intrigue_data.get('description')})"
-         
-    # 4. Obsługa efektów walki (np. "ambush", "master_tactitian")
-    elif intrigue_data.get("type") == "fight":
-        summary += f" | (COMBAT EFFECT: Apply manually during conflict)"
-        
-    # 5. Obsługa efektów końca gry (np. "market_manopoly")
-    elif intrigue_data.get("type") == "endgame":
-        summary += f" | (END GAME EFFECT: Apply manually at end of game)"
-        
+        # 3. Złożona lista AKCJI (np. "bribery", "master_tactitian", "plans_within_plans")
+        # Przekazujemy player_state, listę akcji, log, cały stan gry (dla _check_requirement) i decyzje
+        _process_action_list(player_state, actions_object["action"], log_summary, game_state, **kwargs)
+    
+    elif "action1" in actions_object:
+         # 4. Specjalny przypadek dla "market_manopoly"
+         # Ta karta ma dwie oddzielne, niezależne akcje
+        log_summary.append("Sprawdzanie efektów 'Market Manopoly':")
+        _process_action_list(player_state, [actions_object["action1"]], log_summary, game_state, **kwargs)
+        _process_action_list(player_state, [actions_object["action2"]], log_summary, game_state, **kwargs)
+
     else:
-        summary += f" | (Effect: {intrigue_data.get('description')}) - APPLY MANUALLY."
+        # 5. Fallback dla nieznanych struktur lub kart tylko z opisem
+        log_summary.append(f"Efekt manualny: {intrigue_data.get('description')}")
 
     
+    final_summary = " | ".join(log_summary)
+
     if "round_history" not in game_state:
         game_state["round_history"] = []
-    game_state["round_history"].append({"summary": summary})
+    game_state["round_history"].append({"summary": final_summary})
     
-    return True, summary
+    return True, final_summary
 
 
 def calculate_and_store_reveal_stats(game_state, cards_db):
@@ -521,7 +839,7 @@ def calculate_reveal_stats(player_state, cards_db):
     Celowo ignoruje bonusy z intryg (active_effects) oraz stare bonusy tekstowe.
     """
     total_persuasion = 0
-    base_swords = 0  # <--- Używamy siły bazowej
+    base_swords = 0  
     
     cards_in_hand_ids = player_state.get("hand", [])
     cards_played_ids = player_state.get("discard_pile", [])
@@ -554,8 +872,8 @@ def calculate_reveal_stats(player_state, cards_db):
         card_data = cards_db.get(card_id)
         if not card_data: continue
 
-        reveal_effect = card_data.get("reveal_effect", {})
-        swords = reveal_effect.get("swords", 0)
+        agent_effect = card_data.get("agent_effect", {})
+        swords = agent_effect.get("swords", 0)
         base_swords += swords
         
         cards_played_details.append({
@@ -669,6 +987,30 @@ def perform_full_game_reset():
     default_state = load_json_file(GAME_STATE_DEFAULT_FILE)
     if default_state is None:
         return False, f"Error: Default state file '{GAME_STATE_DEFAULT_FILE}' not found."
+    
+    leaders_db = load_json_file(LEADERS_DB_FILE)
+    if leaders_db and "players" in default_state:
+        print("Applying passive leader start bonuses...")
+        for player_name, player_data in default_state["players"].items():
+            leader_id = player_data.get("leader")
+            if not leader_id:
+                continue
+                
+            leader_data = leaders_db.get(leader_id, {})
+            passive_ability = leader_data.get("ability_passive", {})
+            
+            # Specjalna obsługa dla "Fief of Arrakis" Rabbana
+            if passive_ability.get("name") == "Fief of Arrakis":
+                start_bonus = passive_ability.get("gain", [])
+                player_resources = player_data.get("resources", {})
+                
+                for item in start_bonus:
+                    resource = item.get("resource")
+                    amount = item.get("amount", 0)
+                    if resource in player_resources:
+                        player_resources[resource] = player_resources.get(resource, 0) + amount
+                        print(f"Applied start bonus to {player_name}: +{amount} {resource}")
+
     if save_json_file(GAME_STATE_FILE, default_state):
         return True, "Success! The game has been fully reset to Round 1."
     else:
