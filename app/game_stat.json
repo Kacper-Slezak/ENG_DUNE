@@ -1,77 +1,25 @@
 {
-  "round": 2,
-  "currentPlayer": "Helen",
+  "round": 1,
+  "currentPlayer": "Peter",
   "current_phase": "AGENT_TURN",
-  "round_history": [
-    {
-      "summary": "Conflict set: greatt vision"
-    },
-    {
-      "summary": "Conflict set: greatt vision"
-    },
-    {
-      "summary": "Conflict set: battle for Imperial Basin"
-    },
-    {
-      "player": "Helen",
-      "card": "Reconnaissance",
-      "location": "Sietch Tabr",
-      "summary": "Helen played 'Reconnaissance' on 'Sietch Tabr'. (gained 1 troops to garrison)"
-    }
-  ],
+  "round_history": [],
   "destroyed_pile": [],
-  "imperium_row": [
-    "sietch_reverend_mother",
-    "liet_kynes",
-    "control_the_spice",
-    "imperial_spy",
-    "arrakis_liaison",
-    "the_spice_must_flow",
-    "sardaukar_infantry"
-  ],
+  "imperium_row": [],
   "conflict_deck": [],
   "current_conflict_card": {
-    "name": "battle for Imperial Basin",
-    "rewards": {
-      "1": [
-        {
-          "type": "vp",
-          "amount": 2
-        },
-        {
-          "type": "control",
-          "control": "Imperial Basin"
-        }
-      ],
-      "2": [
-        {
-          "type": "resource",
-          "resource": "Spice",
-          "amount": 5
-        }
-      ],
-      "3": [
-        {
-          "type": "resource",
-          "resource": "Spice",
-          "amount": 3
-        }
-      ]
-    },
-    "rewards_text": [
-      "1st: 2 VP",
-      "2st: 5 Spice",
-      "3st: 3 Spice"
-    ]
+    "name": "N/A",
+    "rewards_text": []
   },
   "players": {
     "Peter": {
+      "leader": "paul_atreides", 
       "victory_points": 0,
       "resources": {
         "solari": 0,
         "water": 1,
-        "Spice": 2,
-        "troops_garrison": 1
+        "Spice": 0,
+        "troops_garrison": 0,
+        "troops_in_conflict": 0
       },
       "influence": {
         "emperor": 0,
@@ -83,15 +31,20 @@
         "dagger",
         "dagger",
         "dune_the_desert_planet",
+        "dune_the_desert_planet",
         "reconnaissance",
-        "convincing_argument"
+        "convincing_argument",
+        "convincing_argument",
+        "seeking_alliance",
+        "signet_ring",
+        "diplomacy"
       ],
       "hand": [
         "dagger",
-        "reconnaissance",
-        "convincing_argument",
+        "dagger",
         "dune_the_desert_planet",
-        "dagger"
+        "reconnaissance",
+        "convincing_argument"
       ],
       "discard_pile": [],
       "draw_deck": [],
@@ -101,16 +54,20 @@
       "has_passed": false,
       "reveal_stats": {
         "total_persuasion": 0,
-        "total_swords": 0
+        "total_swords": 0,
+        "cards_in_hand": [],
+        "cards_played": []
       }
     },
     "Helen": {
+     "leader": "paul_atreides", 
       "victory_points": 0,
       "resources": {
         "solari": 0,
-        "water": 2,
+        "water": 1,
         "Spice": 0,
-        "troops_garrison": 3
+        "troops_garrison": 0,
+        "troops_in_conflict": 0
       },
       "influence": {
         "emperor": 0,
@@ -121,59 +78,21 @@
       "deck_pool": [
         "dagger",
         "dagger",
+        "dune_the_desert_planet",
         "dune_the_desert_planet",
         "reconnaissance",
         "convincing_argument",
-        "gene_manipulation"
+        "convincing_argument",
+        "seeking_alliance",
+        "signet_ring",
+        "diplomacy"
       ],
       "hand": [
-        "dagger",
-        "dune_the_desert_planet",
-        "convincing_argument",
-        "dagger"
-      ],
-      "discard_pile": [
-        "reconnaissance"
-      ],
-      "draw_deck": [
-        "gene_manipulation"
-      ],
-      "agents_total": 2,
-      "agents_placed": 1,
-      "intrigue_hand": [],
-      "has_passed": false,
-      "reveal_stats": {
-        "total_persuasion": 0,
-        "total_swords": 0
-      }
-    },
-    "Paul": {
-      "victory_points": 0,
-      "resources": {
-        "solari": 3,
-        "water": 0,
-        "Spice": 2,
-        "troops_garrison": 0
-      },
-      "influence": {
-        "emperor": 0,
-        "guild": 0,
-        "fremen": 0,
-        "bene_gesserit": 0
-      },
-      "deck_pool": [
         "dagger",
         "dagger",
         "dune_the_desert_planet",
         "reconnaissance",
         "convincing_argument"
-      ],
-      "hand": [
-        "dune_the_desert_planet",
-        "reconnaissance",
-        "convincing_argument",
-        "dagger",
-        "dagger"
       ],
       "discard_pile": [],
       "draw_deck": [],
@@ -183,7 +102,57 @@
       "has_passed": false,
       "reveal_stats": {
         "total_persuasion": 0,
-        "total_swords": 0
+        "total_swords": 0,
+        "cards_in_hand": [],
+        "cards_played": []
+      }
+    },
+    "Paul": {
+"leader": "paul_atreides", 
+      "victory_points": 0,
+      "resources": {
+        "solari": 0,
+        "water": 1,
+        "Spice": 0,
+        "troops_garrison": 0,
+        "troops_in_conflict": 0
+      },
+      "influence": {
+        "emperor": 0,
+        "guild": 0,
+        "fremen": 0,
+        "bene_gesserit": 0
+      },
+      "deck_pool": [
+        "dagger",
+        "dagger",
+        "dune_the_desert_planet",
+        "dune_the_desert_planet",
+        "reconnaissance",
+        "convincing_argument",
+        "convincing_argument",
+        "seeking_alliance",
+        "signet_ring",
+        "diplomacy"
+      ],
+      "hand": [
+        "dagger",
+        "dagger",
+        "dune_the_desert_planet",
+        "reconnaissance",
+        "convincing_argument"
+      ],
+      "discard_pile": [],
+      "draw_deck": [],
+      "agents_total": 2,
+      "agents_placed": 0,
+      "intrigue_hand": [],
+      "has_passed": false,
+      "reveal_stats": {
+        "total_persuasion": 0,
+        "total_swords": 0,
+        "cards_in_hand": [],
+        "cards_played": []
       }
     }
   },
@@ -198,7 +167,7 @@
       "occupied_by": null
     },
     "sietch_tabr": {
-      "occupied_by": "Helen"
+      "occupied_by": null
     },
     "the_greate_flat": {
       "occupied_by": null
