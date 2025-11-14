@@ -836,7 +836,7 @@ def calculate_and_store_reveal_stats(game_state, cards_db):
 def calculate_reveal_stats(player_state, cards_db):
     """
     Oblicza sumę Perswazji i BAZOWEJ Siły dla gracza.
-    Celowo ignoruje bonusy z intryg (active_effects) oraz stare bonusy tekstowe.
+    TERAZ OBSŁUGUJE KLUCZOWE EFEKTY WARUNKOWE.
     """
     total_persuasion = 0
     base_swords = 0  
@@ -847,15 +847,88 @@ def calculate_reveal_stats(player_state, cards_db):
     cards_in_hand_details = []
     cards_played_details = [] 
 
+    # --- Krok 0: Przygotuj dane do warunków ---
+    
+    # Zbuduj listę ID kart fremenów zagranych w tej rundzie (w discard_pile)
+    played_fremen_card_ids = []
+    for card_id in cards_played_ids:
+        card_data = cards_db.get(card_id, {})
+        # Sprawdzamy tagi "agent_symbols" LUB "type" (na wszelki wypadek)
+        if "fremen" in card_data.get("agent_symbols", []):
+            played_fremen_card_ids.append(card_id)
+    
+    # Sprawdź sojusz z Cesarzem (Uproszczenie: 4+ wpływu = sojusz. Pełna logika sojuszy to Krok 7)
+    player_influence = player_state.get("influence", {})
+    has_emperor_alliance = player_influence.get("emperor", 0) >= 4
+
     # --- Krok 1: Przetwórz karty W RĘCE (dają Perswazję i Siłę) ---
     for card_id in cards_in_hand_ids:
         card_data = cards_db.get(card_id)
         if not card_data: continue
             
         reveal_effect = card_data.get("reveal_effect", {})
+        
+        # --- Logika bazowa + warunkowa ---
         persuasion = reveal_effect.get("persuasion", 0)
         swords = reveal_effect.get("swords", 0)
+        description = reveal_effect.get("possible actions", {}).get("description", "No effect.")
         
+        # === POCZĄTEK NOWEJ LOGIKI WARUNKOWEJ ===
+        
+        # "Sietch Reverend Mother" (sietch_reverend_mother)
+        if card_id == "sietch_reverend_mother":
+            if len(played_fremen_card_ids) > 0:
+                persuasion += 3
+                # Bonus +1 Spice jest obsługiwany manualnie, tu liczymy tylko P/S
+                description = f"BONUS AKTYWOWANY: +3 Perswazji (za zagraną kartę Fremenów)."
+
+        # "Fedaykin Death Commando" (fedaykin_death_commando)
+        elif card_id == "fedaykin_death_commando":
+            if len(played_fremen_card_ids) > 0:
+                swords += 3
+                description = f"BONUS AKTYWOWANY: +3 Miecza (za zagraną kartę Fremenów)."
+
+        # "Firm Grip" (firm_grip)
+        elif card_id == "firm_grip":
+            if has_emperor_alliance:
+                persuasion += 4
+                description = f"BONUS AKTYWOWANY: +4 Perswazji (za sojusz z Cesarzem)."
+
+        # "Liet Kynes" (liet_kynes)
+        elif card_id == "liet_kynes":
+            # Ten efekt liczy karty Fremenów "w grze" (w ręce i zagrane)
+            # 1. Liczymy zagrane (z Kroku 0)
+            fremen_count = len(played_fremen_card_ids)
+            # 2. Liczymy te w ręce (ale nie liczymy samej Liet Kynes)
+            for hand_card_id in cards_in_hand_ids:
+                if hand_card_id == "liet_kynes": continue
+                hand_card_data = cards_db.get(hand_card_id, {})
+                if "fremen" in hand_card_data.get("agent_symbols", []):
+                    fremen_count += 1
+            
+            bonus_persuasion = fremen_count * 2
+            if bonus_persuasion > 0:
+                persuasion += bonus_persuasion
+                description = f"BONUS AKTYWOWANY: +{bonus_persuasion} Perswazji (2 za każdą z {fremen_count} kart Fremenów)."
+        
+        # "Control the Spice" (control_the_spice) - Fremen Bond
+        elif card_id == "control_the_spice":
+            if len(played_fremen_card_ids) > 0:
+                 # Bonus +1 Spice jest manualny
+                 description = f"BONUS (MANUALNY): Zyskaj 1 Przyprawę (za zagraną kartę Fremenów)."
+        
+        # "Spice Hunter" (spice_hunter) - Fremen Bond
+        elif card_id == "spice_hunter":
+            if len(played_fremen_card_ids) > 0:
+                 # Bonus +1 Spice jest manualny
+                 description = f"BONUS (MANUALNY): Zyskaj 1 Przyprawę (za zagraną kartę Fremenów)."
+
+        # Oznacz karty z manualną opcją (np. Gurney Halleck "You may pay...")
+        elif "You may pay" in description or " or " in description.lower():
+             description = f"[MANUAL ACTION NEEDED] {description}"
+        
+        # === KONIEC NOWEJ LOGIKI WARUNKOWEJ ===
+
         total_persuasion += persuasion
         base_swords += swords
         
@@ -864,7 +937,7 @@ def calculate_reveal_stats(player_state, cards_db):
             "name": card_data.get("name", card_id),
             "persuasion": persuasion,
             "swords": swords,
-            "description": reveal_effect.get("possible actions", {}).get("description", "No effect.")
+            "description": description # Zaktualizowany opis
         })
 
     # --- Krok 2: Przetwórz karty ZAGRANE (dają TYLKO Siłę) ---
@@ -882,22 +955,12 @@ def calculate_reveal_stats(player_state, cards_db):
             "swords": swords
         })
     
-    # --- Krok 3: (Opcjonalnie) Zastosuj bonusy warunkowe z KART ---
-    # (Ta sekcja jest teraz uproszczona, usuwamy zawodne bonusy tekstowe)
+    committed_troops = player_state.get("resources", {}).get("troops_in_conflict", 0)
+    base_swords += committed_troops
     
-    for card_detail in cards_in_hand_details:
-        description = card_detail["description"]
-        if "You may pay" in description or " or " in description.lower():
-            card_detail["description"] = f"[MANUAL ACTION NEEDED] {description}"
-
-    # --- Krok 4: Dodaj wojska z garnizonu do Siły ---
-    garrison_troops = player_state.get("resources", {}).get("troops_garrison", 0)
-    base_swords += garrison_troops
-    
-    # --- Krok 5: Zwróć siłę BAZOWĄ ---
     return {
         "total_persuasion": total_persuasion,
-        "base_swords": base_swords,  # <--- Zwracamy siłę bazową
+        "base_swords": base_swords,
         "cards_in_hand": cards_in_hand_details,
         "cards_played": cards_played_details
     }
@@ -982,6 +1045,49 @@ def add_card_to_market(game_state, card_id, cards_db):
     return True, f"Card '{card_data.get('name')}' has been added to the Imperium Row."
 
 
+def process_commit_troops(game_state, player_name, amount_to_commit_str):
+    """
+    Ustawia, ile wojsk gracz wysyła do konfliktu w Fazie Odkrycia.
+    Pozwala graczowi zmienić zdanie i dostosować liczbę w dowolnym momencie.
+    """
+    player_state = game_state.get("players", {}).get(player_name)
+    if not player_state:
+        return False, f"Player {player_name} not found."
+        
+    try:
+        amount_to_commit = int(amount_to_commit_str)
+    except (ValueError, TypeError):
+        return False, f"Invalid input: '{amount_to_commit_str}' is not a valid number."
+        
+    if amount_to_commit < 0:
+        return False, "Cannot commit a negative number of troops."
+        
+    player_resources = player_state.get("resources", {})
+    
+    # Pobierz bieżące wojska
+    current_garrison = player_resources.get("troops_garrison", 0)
+    current_in_conflict = player_resources.get("troops_in_conflict", 0)
+    
+    # Oblicz sumę wszystkich wojsk gracza
+    total_available_troops = current_garrison + current_in_conflict
+    
+    if amount_to_commit > total_available_troops:
+        return False, f"Invalid amount: Player only has {total_available_troops} troops in total (garrison + conflict). Cannot commit {amount_to_commit}."
+        
+    # Ustaw nowe wartości
+    player_resources["troops_in_conflict"] = amount_to_commit
+    player_resources["troops_garrison"] = total_available_troops - amount_to_commit
+    
+    summary = f"Player {player_name} committed {amount_to_commit} troops to the conflict. (Garrison: {player_resources['troops_garrison']})"
+    
+    # Zapiszmy to też w historii
+    if "round_history" not in game_state:
+        game_state["round_history"] = []
+    game_state["round_history"].append({"summary": summary})
+
+    return True, summary
+
+
 def perform_full_game_reset():
     """Kasuje game_stat.json i zastępuje go zawartością z game_stat.DEFAULT.json."""
     default_state = load_json_file(GAME_STATE_DEFAULT_FILE)
@@ -1038,6 +1144,9 @@ def perform_cleanup_and_new_round(game_state):
             player_data["agents_placed"] = 0
             player_data["has_passed"] = False 
             player_data["reveal_stats"] = {"total_persuasion": 0, "total_swords": 0}
+
+            if "resources" in player_data:
+                player_data["resources"]["troops_in_conflict"] = 0
             
             
             player_data["draw_deck"] = player_data.get("draw_deck", []) + \

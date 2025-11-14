@@ -18,7 +18,8 @@ from game_manager import (
     process_conflict_resolve,
     save_json_file_from_text,
     manual_add_intrigue,
-    get_intrigue_requirements
+    get_intrigue_requirements,
+    process_commit_troops
 )
 
 from build_ai_prompt import generate_ai_prompt
@@ -354,6 +355,9 @@ def reveal_phase():
         stats["vp"] = player_data.get("victory_points", 0)
         stats["base_swords"] = stats.get("base_swords", 0) 
         stats["bonus_swords"] = player_data.get("active_effects", {}).get("fight_bonus_swords", 0)
+        stats["troops_garrison"] = player_data.get("resources", {}).get("troops_garrison", 0)
+        stats["troops_in_conflict"] = player_data.get("resources", {}).get("troops_in_conflict", 0)
+
         all_player_stats.append(stats)
 
     market_cards_details = []
@@ -451,31 +455,28 @@ def resolve_conflict_auto():
             # A1: Czysty zwycięzca 2. miejsca
             second_place_list = players_score2
             
-            # Sprawdź 3. miejsce (tylko w grze na 4 graczy)
-            if num_players == 4:
-                if len(players_score3) == 1:
-                    # A1a: Czysty zwycięzca 3. miejsca
-                    third_place_list = players_score3
-                # else (remis o 3. miejsce): nikt nie dostaje 3. nagrody
+            # Sprawdź 3. miejsce
+            if len(players_score3) == 1:
+                # A1a: Czysty zwycięzca 3. miejsca
+                third_place_list = players_score3
+            # else (remis o 3. miejsce): nikt nie dostaje 3. nagrody
         
         elif len(players_score2) > 1:
             # A2: Remis o 2. miejsce
-            # Nikt nie dostaje 2. nagrody. Zremisowani dostają 3. (tylko w grze na 4 graczy)
-            if num_players == 4:
-                third_place_list = players_score2
+            # Nikt nie dostaje 2. nagrody. Zremisowani dostają 3. nagrodę.
+            third_place_list = players_score2
     
     elif len(players_score1) > 1:
         # --- Przypadek B: Remis o 1. miejsce ---
         # Nikt nie dostaje 1. nagrody. Zremisowani dostają 2. nagrodę.
         second_place_list = players_score1
         
-        # Sprawdź 3. miejsce (tylko w grze na 4 graczy)
+        # Sprawdź 3. miejsce
         # Następna grupa (players_score2) dostaje 3. nagrodę
-        if num_players == 4:
-            if len(players_score2) == 1:
-                # B1: Czysty "następny" gracz
-                third_place_list = players_score2
-            # else (remis o "następne" miejsce): nikt nie dostaje 3. nagrody
+        if len(players_score2) == 1:
+            # B1: Czysty "następny" gracz
+            third_place_list = players_score2
+        # else (remis o "następne" miejsce): nikt nie dostaje 3. nagrody
 
     # --- KONIEC NOWEJ LOGIKI ---
     
@@ -545,7 +546,29 @@ def add_to_market():
     return redirect(url_for('reveal_phase'))
 
 
-# --- ZAKTUALIZOWANA TRASA /ai_prompt ---
+@app.route('/commit_troops', methods=['POST'])
+def commit_troops():
+    game_state, _, _, _, _, _ = load_game_data()
+    if game_state.get("current_phase") != "REVEAL":
+        flash("Cannot commit troops: Not in REVEAL phase.", "error")
+        return redirect(url_for('reveal_phase'))
+
+    player_name = request.form.get('player_name')
+    troop_amount = request.form.get('troop_amount')
+
+    is_valid, message = process_commit_troops(game_state, player_name, troop_amount)
+
+    if is_valid:
+        if save_json_file(GAME_STATE_FILE, game_state):
+            flash(message, "success")
+        else:
+            flash("CRITICAL ERROR: Cannot save game state after committing troops.", "error")
+    else:
+        flash(f"Failed to commit troops: {message}", "error")
+
+    return redirect(url_for('reveal_phase'))
+
+
 @app.route('/ai_prompt')
 def ai_prompt():
     game_state, _, cards_db, _, _, _ = load_game_data()

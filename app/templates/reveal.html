@@ -54,11 +54,32 @@
                     <span class="swords">Base Swords (Cards + Troops): {{ player_stats.base_swords }}</span><br>
                     <span class="swords" style="color: #c00000;">+ Bonus Swords (Intrigue): {{ player_stats.bonus_swords }}</span><br>
                     <span class="swords" style="font-weight: bold; border-top: 1px solid #d81b60;">
-                        Total Swords: {{ player_stats.base_swords + player_stats.bonus_swords }}
-                    </span>
+                    Total Swords: {{ player_stats.base_swords + player_stats.bonus_swords }}
+                </span>
+
+                <hr style="border-color: #d81b60; margin: 10px 0;">
+                <form method="POST" action="{{ url_for('commit_troops') }}" style="margin-bottom: 0;">
+                    <input type="hidden" name="player_name" value="{{ player_stats.name }}">
+                    <label for="troop_amount_{{ player_stats.name }}" style="font-size: 0.9em; font-weight: bold;">
+                        Garrison: <span style="color: #555;">{{ player_stats.troops_garrison }}</span> | 
+                        In Conflict: <span style="color: #d81b60;">{{ player_stats.troops_in_conflict }}</span>
+                    </label>
+                    <div style="display: flex; gap: 5px; margin-top: 5px;">
+                        <input type="number" id="troop_amount_{{ player_stats.name }}" 
+                               name="troop_amount" 
+                               value="{{ player_stats.troops_in_conflict }}" 
+                               min="0" 
+                               max="{{ player_stats.troops_garrison + player_stats.troops_in_conflict }}"
+                               title="Total available: {{ player_stats.troops_garrison + player_stats.troops_in_conflict }}"
+                               style="width: 70px; padding: 8px; margin: 0; text-align: center;">
+                        <button type="submit" style="background-color: #d81b60; font-size: 0.9em; padding: 8px; margin: 0; width: 100%;">
+                            Commit Troops
+                        </button>
+                    </div>
+                </form>
                 </div>
-                
-                <div class="influence">
+
+            <div class="influence">
                     <hr>
                     **Influence:**
                     Emperor: {{ player_stats.influence.emperor | default(0) }} |
