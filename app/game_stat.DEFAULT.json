@@ -10,6 +10,12 @@
     "name": "N/A",
     "rewards_text": []
   },
+  "alliances": {
+  "emperor": null,
+  "guild": null,
+  "fremen": null,
+  "bene_gesserit": null
+},
   "players": {
     "Peter": {
       "leader": "paul_atreides", 
@@ -27,6 +33,7 @@
         "fremen": 0,
         "bene_gesserit": 0
       },
+      "control": [],
       "deck_pool": [
         "dagger",
         "dagger",
@@ -75,6 +82,7 @@
         "fremen": 0,
         "bene_gesserit": 0
       },
+      "control": [],
       "deck_pool": [
         "dagger",
         "dagger",
@@ -123,6 +131,7 @@
         "fremen": 0,
         "bene_gesserit": 0
       },
+      "control": [],
       "deck_pool": [
         "dagger",
         "dagger",

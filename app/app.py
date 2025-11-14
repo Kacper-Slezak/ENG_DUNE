@@ -19,6 +19,7 @@ from game_manager import (
     save_json_file_from_text,
     manual_add_intrigue,
     get_intrigue_requirements,
+    get_agent_move_requirements,
     process_commit_troops
 )
 
@@ -70,10 +71,23 @@ def index():
         card_id_input = request.form.get('card_id')
         location_id_input = request.form.get('location_id')
         
-        is_valid, message = is_move_valid(game_state, locations_db, cards_db, leaders_db, player_name_input, card_id_input, location_id_input) 
+        # 1. Podstawowa walidacja ruchu
+        is_valid, message = is_move_valid(game_state, locations_db, leaders_db, cards_db, player_name_input, card_id_input, location_id_input) 
 
-        if is_valid:
-            new_game_state = process_move(game_state, locations_db, cards_db, leaders_db, player_name_input, card_id_input, location_id_input)
+        if not is_valid:
+            flash(f"Invalid move: {message}", "error")
+            return redirect(url_for('index'))
+
+        # 2. (NOWA LOGIKA) Sprawdź, czy ruch wymaga decyzji
+        card_data = cards_db.get(card_id_input, {})
+        location_data = locations_db.get(location_id_input, {})
+        player_state = game_state.get("players", {}).get(player_name_input, {})
+        
+        requirements = get_agent_move_requirements(card_data, location_data, leaders_db, player_state)
+
+        if requirements["type"] == "simple":
+            # --- Ruch jest prosty, wykonaj natychmiast ---
+            new_game_state = process_move(game_state, locations_db, cards_db, leaders_db, player_name_input, card_id_input, location_id_input) # kwargs nie są potrzebne
             final_game_state = check_and_advance_phase(new_game_state, cards_db)
             
             if save_json_file(GAME_STATE_FILE, final_game_state):
@@ -81,7 +95,15 @@ def index():
             else:
                  flash("CRITICAL ERROR: Cannot save game state to disk.", "error")
         else:
-            flash(f"Invalid move: {message}", "error")
+            # --- Ruch jest złożony, wymaga decyzji ---
+            # Zapisz stan na wszelki wypadek
+            save_json_file(GAME_STATE_FILE, game_state)
+            flash(f"Move requires a decision for effect from: {requirements.get('source', 'Unknown')}", "success")
+            # Przekieruj do nowego widoku decyzji
+            return redirect(url_for('resolve_agent_move', 
+                                    player_name=player_name_input, 
+                                    card_id=card_id_input,
+                                    location_id=location_id_input))
         
         return redirect(url_for('index'))
 
@@ -699,6 +721,80 @@ def add_intrigue():
     else:
         flash(f"Failed to add intrigue: {message}", "error")
         
+    return redirect(url_for('index'))
+
+
+# === NOWE TRASY DLA ZŁOŻONYCH RUCHÓW AGENTA ===
+
+@app.route('/resolve_agent_move/<string:player_name>/<string:card_id>/<string:location_id>')
+def resolve_agent_move(player_name, card_id, location_id):
+    """
+    (NOWA TRASA) Wyświetla stronę, na której gracz podejmuje decyzję
+    dotyczącą złożonego ruchu agenta (karty lub lokacji).
+    """
+    game_state, locations_db, cards_db, intrigues_db, conflicts_db, leaders_db = load_game_data()
+    
+    card_data = cards_db.get(card_id)
+    location_data = locations_db.get(location_id)
+    player_state = game_state.get("players", {}).get(player_name, {})
+    
+    if not card_data or not location_data:
+        flash("Error: Card or Location data not found for decision.", "error")
+        return redirect(url_for('index'))
+        
+    # Ponownie sprawdzamy wymagania, aby uzyskać dane do wyświetlenia
+    requirements = get_agent_move_requirements(card_data, location_data, leaders_db, player_state)
+    
+    # Używamy tego samego szablonu co intrygi, ale przekazujemy dodatkowe dane
+    return render_template('resolve_intrigue.html',
+        player_name=player_name,
+        player_resources=player_state.get("resources", {}),
+        card_id=card_id,
+        card_data={"name": f"{card_data.get('name')} on {location_data.get('name')}", "description": f"Effect from {requirements.get('source', 'Unknown')}"},
+        requirements=requirements,
+        # Dodatkowe pola dla formularza
+        location_id=location_id 
+    )
+
+@app.route('/execute_agent_move', methods=['POST'])
+def execute_agent_move():
+    """
+    (NOWA TRASA) Odbiera decyzję gracza z formularza
+    i wywołuje process_move z odpowiednimi kwargs.
+    """
+    game_state, locations_db, cards_db, _, _, leaders_db = load_game_data()
+    
+    # Odczytaj wszystkie dane ruchu z formularza
+    player_name = request.form.get('player_name')
+    card_id = request.form.get('card_id')
+    location_id = request.form.get('location_id')
+    
+    # Przygotuj słownik kwargs dla decyzji
+    kwargs = {}
+    if 'pay_cost' in request.form:
+        kwargs['pay_cost'] = request.form['pay_cost'] == 'true'
+        
+    if 'choice_index' in request.form:
+        try:
+            kwargs['choice_index'] = int(request.form['choice_index'])
+        except ValueError:
+            flash("Invalid choice index received.", "error")
+            return redirect(url_for('index'))
+
+    # Wywołaj silnik ruchu agenta, przekazując zebrane decyzje
+    new_game_state = process_move(
+        game_state, locations_db, cards_db, leaders_db, 
+        player_name, card_id, location_id, 
+        **kwargs # Rozpakuj decyzje tutaj
+    )
+    
+    final_game_state = check_and_advance_phase(new_game_state, cards_db)
+    
+    if save_json_file(GAME_STATE_FILE, final_game_state):
+         flash(f"Success! Player {player_name}'s complex move has been executed.", "success")
+    else:
+         flash("CRITICAL ERROR: Cannot save game state after complex move.", "error")
+
     return redirect(url_for('index'))
 
 
