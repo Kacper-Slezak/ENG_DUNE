@@ -6,17 +6,15 @@
     "cost": [
       { "type": "none" }
     ],
-    "actions": [{
-       "gain": { "type": "resource", "resource": "troops", "amount": 1 },
-       "gain1": { "type": "resource", "resource": "card from unplayed pile", "amount": 1 }
-    }],
-
+    "actions": [
+      { "gain": { "type": "resource", "resource": "troops", "amount": 1 } },
+      { "gain": { "type": "resource", "resource": "card from unplayed pile", "amount": 1 } }
+    ],
     "conflict": [
       { "type": "isconflict" },
       { "description": "If you control this location , you gain 1 solari each time somebody stay here." }
     ]
   },
-
   "carthag": {
     "name": "Carthag",
     "symbol_required": "populated areas",
@@ -25,17 +23,14 @@
       { "type": "none" }
     ],
     "actions": [
-      { 
-       "gain": { "type": "resource", "resource": "troops", "amount": 1 } ,
-       "gain1": { "type": "resource", "resource": "intrigue", "amount": 1 } 
-      }
+      { "gain": { "type": "resource", "resource": "troops", "amount": 1 } },
+      { "gain": { "type": "resource", "resource": "intrigue", "amount": 1 } }
     ],
     "conflict": [
       { "type": "isconflict" },
       { "description": "If you control this location , you gain 1 ssolari each time somebody stay here." }
     ]
   },
-
   "research_station": {
     "name": "Research Station",
     "symbol_required": "populated areas",
@@ -43,14 +38,13 @@
     "cost": [
       { "type": "resource", "resource": "water", "amount": 2 }
     ],
-    "gain": [
-      { "type": "resource", "resource": "card from unplayed pile", "amount": 3 }
+    "actions": [
+      { "gain": { "type": "resource", "resource": "card from unplayed pile", "amount": 3 } }
     ],
     "conflict": [
       { "type": "isconflict" }
-      ]
+    ]
   },
-
   "sietch_tabr": {
     "name": "Sietch Tabr",
     "symbol_required": "populated areas",
@@ -59,16 +53,13 @@
       { "type": "none" }
     ],
     "actions": [
-      {
-        "gain": { "type": "resource", "resource": "water", "amount": 1 },
-        "gain1": { "type": "resource", "resource": "troops", "amount": 1 }
-      }
+      { "gain": { "type": "resource", "resource": "water", "amount": 1 } },
+      { "gain": { "type": "resource", "resource": "troops", "amount": 1 } }
     ],
     "conflict": [
       { "type": "isconflict" }
-      ]
+    ]
   },
-
   "the_greate_flat": {
     "name": "The Great Flat",
     "symbol_required": "CHOAM",
@@ -77,16 +68,13 @@
       { "type": "resource", "resource": "water", "amount": 2 }
     ],
     "actions": [
-      { 
-      "gain": { "type": "resource", "resource": "Spice", "amount": 3 } ,
-      "gain1": { "type": "extra gain", "description": "you take all extra Spice from this location" }
-     }
+      { "gain": { "type": "resource", "resource": "Spice", "amount": 3 } },
+      { "gain": { "type": "extra gain", "description": "you take all extra Spice from this location" } }
     ],
     "conflict": [
       { "type": "isconflict" }
-      ]
+    ]
   },
-
   "hagga_basin": {
     "name": "Hagga Basin",
     "symbol_required": "CHOAM",
@@ -96,13 +84,12 @@
     ],
     "actions": [
       { "gain": { "type": "resource", "resource": "Spice", "amount": 2 } },
-      { "gain1": { "type": "extra gain", "description": "you take all extra Spice from this location" } }
+      { "gain": { "type": "extra gain", "description": "you take all extra Spice from this location" } }
     ],
     "conflict": [
       { "type": "isconflict" }
-      ]
+    ]
   },
-
   "imperial_basin": {
     "name": "Imperial Basin",
     "symbol_required": "CHOAM",
@@ -111,17 +98,14 @@
       { "type": "none" }
     ],
     "actions": [
-      { 
-      "gain": { "type": "resource", "resource": "Spice", "amount": 2 } ,
-      "gain1": { "type": "extra gain", "description": "you take all extra Spice from this location" }
-     }
+      { "gain": { "type": "resource", "resource": "Spice", "amount": 2 } },
+      { "gain": { "type": "extra gain", "description": "you take all extra Spice from this location" } }
     ],
     "conflict": [
       { "type": "isconflict" },
       { "description": "If you control this location , you gain 1 Spice each time somebody stay here." }
-      ]
+    ]
   },
-
   "sell_melange": {
     "name": "Sell Melange",
     "symbol_required": "CHOAM",
@@ -130,31 +114,35 @@
       { "type": "none" }
     ],
     "actions": [
-      { 
-      "exchange": {
-        "pay": { "type": "resource", "resource": "spice", "amount": 2 },
-        "gain": { "type": "resource", "resource": "solari", "amount": 6 }
+      {
+        "exchange": {
+          "pay": { "type": "resource", "resource": "spice", "amount": 2 },
+          "gain": { "type": "resource", "resource": "solari", "amount": 6 }
+        }
       },
-      "exchange1": {
-        "pay": { "type": "resource", "resource": "Spice", "amount": 3 },
-        "gain": { "type": "resource", "resource": "solari", "amount": 8 }
+      {
+        "exchange": {
+          "pay": { "type": "resource", "resource": "Spice", "amount": 3 },
+          "gain": { "type": "resource", "resource": "solari", "amount": 8 }
+        }
       },
-      "exchange2": {
-        "pay": { "type": "resource", "resource": "Spice", "amount": 4 },
-        "gain": { "type": "resource", "resource": "solari", "amount": 10 }
+      {
+        "exchange": {
+          "pay": { "type": "resource", "resource": "Spice", "amount": 4 },
+          "gain": { "type": "resource", "resource": "solari", "amount": 10 }
+        }
       },
-      "exchange3": {
-        "pay": { "type": "resource", "resource": "Spice", "amount": 5 },
-        "gain": { "type": "resource", "resource": "solari", "amount": 12 }
+      {
+        "exchange": {
+          "pay": { "type": "resource", "resource": "Spice", "amount": 5 },
+          "gain": { "type": "resource", "resource": "solari", "amount": 12 }
+        }
       }
-      
-     }
     ],
     "conflict": [
       { "type": "notconflict" }
-      ]
+    ]
   },
-
   "secure_contract": {
     "name": "Secure Contract",
     "symbol_required": "CHOAM",
@@ -163,32 +151,26 @@
       { "type": "none" }
     ],
     "actions": [
-      { 
-      "gain": { "type": "resource", "resource": "solari", "amount": 3 } 
-      }
+      { "gain": { "type": "resource", "resource": "solari", "amount": 3 } }
     ],
     "conflict": [
       { "type": "notconflict" }
-      ]
+    ]
   },
-
   "high_council": {
-    "name": "High Council", 
+    "name": "High Council",
     "symbol_required": "Landsraad",
     "extra_requirement": "none",
     "cost": [
       { "type": "resource", "resource": "solari", "amount": 5 }
     ],
     "actions": [
-      { 
-      "gain": { "type": "extra gain", "description": "take 2 persuasion points every turn and gain a place in the High Council" } 
-      }
+      { "gain": { "type": "extra gain", "description": "take 2 persuasion points every turn and gain a place in the High Council" } }
     ],
     "conflict": [
       { "type": "notconflict" }
-      ]
+    ]
   },
-
   "mentat": {
     "name": "Mentat",
     "symbol_required": "Landsraad",
@@ -197,16 +179,13 @@
       { "type": "resource", "resource": "solari", "amount": 2 }
     ],
     "actions": [
-      { 
-      "gain": { "type": "extra gain", "description": "take extra agent for this round" } ,
-      "gain1": { "type": "resource", "resource": "card from unplayed pile", "amount": 1 }
-      }
+      { "gain": { "type": "extra gain", "description": "take extra agent for this round" } },
+      { "gain": { "type": "resource", "resource": "card from unplayed pile", "amount": 1 } }
     ],
     "conflict": [
       { "type": "notconflict" }
-      ]
+    ]
   },
-
   "rally_troops": {
     "name": "Rally Troops",
     "symbol_required": "Landsraad",
@@ -215,15 +194,12 @@
       { "type": "resource", "resource": "solari", "amount": 4 }
     ],
     "actions": [
-      { 
-      "gain": { "type": "resource", "resource": "troops", "amount": 4 }
-      }
+      { "gain": { "type": "resource", "resource": "troops", "amount": 4 } }
     ],
     "conflict": [
       { "type": "notconflict" }
-      ]
+    ]
   },
-
   "hall_of_oratory": {
     "name": "Hall of Oratory",
     "symbol_required": "Landsraad",
@@ -232,16 +208,13 @@
       { "type": "resource", "resource": "solari", "amount": 0 }
     ],
     "actions": [
-      { 
-      "gain": { "type": "resource", "resource": "troops", "amount": 1 },
-      "gain1": { "type": "resource", "resource": "persuasion", "amount": 1 }
-      }
+      { "gain": { "type": "resource", "resource": "troops", "amount": 1 } },
+      { "gain": { "type": "resource", "resource": "persuasion", "amount": 1 } }
     ],
     "conflict": [
       { "type": "notconflict" }
-      ]
+    ]
   },
-
   "swordmaster": {
     "name": "Swordmaster",
     "symbol_required": "Landsraad",
@@ -250,15 +223,12 @@
       { "type": "resource", "resource": "solari", "amount": 8 }
     ],
     "actions": [
-      { 
-      "gain": { "type": "extra gain", "description": "take extra agent for rest of game" }
-      }
+      { "gain": { "type": "extra gain", "description": "take extra agent for rest of game" } }
     ],
     "conflict": [
       { "type": "notconflict" }
-      ]
+    ]
   },
-
   "conspire": {
     "name": "Conspire",
     "symbol_required": "emperor",
@@ -267,18 +237,15 @@
       { "type": "resource", "resource": "Spice", "amount": 4 }
     ],
     "actions": [
-      { 
-      "gain": { "type": "resource", "resource": "troops", "amount": 2 },
-      "gain1": { "type": "resource", "resource": "intrigue", "amount": 1 },
-      "gain2": { "type": "resource", "resource": "solari", "amount": 5 },
-      "gain3": { "type": "resource", "resource": "emperor influence point", "amount": 1 }
-      }
+      { "gain": { "type": "resource", "resource": "troops", "amount": 2 } },
+      { "gain": { "type": "resource", "resource": "intrigue", "amount": 1 } },
+      { "gain": { "type": "resource", "resource": "solari", "amount": 5 } },
+      { "gain": { "type": "resource", "resource": "emperor influence point", "amount": 1 } }
     ],
     "conflict": [
       { "type": "notconflict" }
-      ]
+    ]
   },
-
   "wealth": {
     "name": "Wealth",
     "symbol_required": "emperor",
@@ -287,35 +254,29 @@
       { "type": "none" }
     ],
     "actions": [
-      { 
-      "gain": { "type": "resource", "resource": "solari", "amount": 2 },
-      "gain1": { "type": "resource", "resource": "emperor influence point", "amount": 1 }
-      }
+      { "gain": { "type": "resource", "resource": "solari", "amount": 2 } },
+      { "gain": { "type": "resource", "resource": "emperor influence point", "amount": 1 } }
     ],
     "conflict": [
       { "type": "notconflict" }
-      ]
+    ]
   },
-
   "highliner": {
     "name": "Highliner",
     "symbol_required": "guild",
     "extra_requirement": "none",
     "cost": [
-      { "type": "resource", "resource": "Spice", "amount": 6}
+      { "type": "resource", "resource": "Spice", "amount": 6 }
     ],
     "actions": [
-      { 
-      "gain": { "type": "resource", "resource": "water", "amount": 2 },
-      "gain1": { "type": "resource", "resource": "troops", "amount": 5 },
-      "gain2": { "type": "resource", "resource": "guild influence point", "amount": 1 }
-      }
+      { "gain": { "type": "resource", "resource": "water", "amount": 2 } },
+      { "gain": { "type": "resource", "resource": "troops", "amount": 5 } },
+      { "gain": { "type": "resource", "resource": "guild influence point", "amount": 1 } }
     ],
     "conflict": [
       { "type": "notconflict" }
-      ]
+    ]
   },
-
   "foldspace": {
     "name": "Foldspace",
     "symbol_required": "guild",
@@ -324,72 +285,60 @@
       { "type": "none" }
     ],
     "actions": [
-      { 
-      "gain": { "type": "extra gain", "description":"you gain foldspace card "},
-      "gain2": { "type": "resource", "resource": "guild influence point", "amount": 1 }
-      }
+      { "gain": { "type": "extra gain", "description": "you gain foldspace card " } },
+      { "gain": { "type": "resource", "resource": "guild influence point", "amount": 1 } }
     ],
     "conflict": [
       { "type": "notconflict" }
-      ]
+    ]
   },
-
   "selective_breeding": {
     "name": "Selective Breeding",
     "symbol_required": "bene gesserit",
     "extra_requirement": "none",
     "cost": [
-      { "type": "resource", "resource": "Spice", "amount":2 }
+      { "type": "resource", "resource": "Spice", "amount": 2 }
     ],
     "actions": [
-      { 
-      "destroy": { "type": "resource", "resource": "card", "amount": 1 },
-      "gain": { "type": "resource", "resource": "card from unplayed pile", "amount": 2 },
-      "gain1": { "type": "resource", "resource": "bene gesserit influence point", "amount": 1 }
-      }
+      { "destroy": { "type": "resource", "resource": "card", "amount": 1 } },
+      { "gain": { "type": "resource", "resource": "card from unplayed pile", "amount": 2 } },
+      { "gain": { "type": "resource", "resource": "bene gesserit influence point", "amount": 1 } }
     ],
     "conflict": [
       { "type": "notconflict" }
-      ]
+    ]
   },
-
   "secrets": {
     "name": "Secrets",
     "symbol_required": "bene gesserit",
     "extra_requirement": "none",
     "cost": [
-      { "type": "none"  }
+      { "type": "none" }
     ],
     "actions": [
-      { 
-      "gain": { "type": "resource", "resource": "intrigue", "amount": 1 },
-      "gain1": { "type": "resource", "resource": "bene gesserit influence point", "amount": 1 },
-      "gain2": { "type": "extra gain", "description": "every player with more than three intrigue cards gives you one of them - you choose it randomly" }
-      }
+      { "gain": { "type": "resource", "resource": "intrigue", "amount": 1 } },
+      { "gain": { "type": "resource", "resource": "bene gesserit influence point", "amount": 1 } },
+      { "gain": { "type": "extra gain", "description": "every player with more than three intrigue cards gives you one of them - you choose it randomly" } }
     ],
     "conflict": [
       { "type": "notconflict" }
-      ]
+    ]
   },
-
   "hardy_warriors": {
     "name": "Hardy Warriors",
     "symbol_required": "fremen",
     "extra_requirement": "none",
     "cost": [
-      { "type": "resource", "resource": "water", "amount":1 }
+      { "type": "resource", "resource": "water", "amount": 1 }
     ],
     "actions": [
-      { 
-      "gain": { "type": "resource", "resource": "troops", "amount": 2 },
-      "gain1": { "type": "resource", "resource": "fremen influence point", "amount": 1 }
-      }
+      { "gain": { "type": "resource", "resource": "troops", "amount": 2 } },
+      { "gain": { "type": "resource", "resource": "fremen influence point", "amount": 1 } }
     ],
     "conflict": [
       { "type": "isconflict" }
-      ]
+    ]
   },
-
   "stillsuits": {
     "name": "Stillsuits",
     "symbol_required": "fremen",
@@ -398,14 +347,11 @@
       { "type": "none" }
     ],
     "actions": [
-      { 
-      "gain": { "type": "resource", "resource": "water", "amount": 1 },
-      "gain1": { "type": "resource", "resource": "fremen influence point", "amount": 1 }
-      }
+      { "gain": { "type": "resource", "resource": "water", "amount": 1 } },
+      { "gain": { "type": "resource", "resource": "fremen influence point", "amount": 1 } }
     ],
     "conflict": [
       { "type": "isconflict" }
-      ]
+    ]
   }
-  
 }

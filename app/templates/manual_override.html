@@ -33,9 +33,19 @@
                 {% endfor %}
             </select>
         </fieldset>
-        
+
         <fieldset>
-            <legend>2. Zmień Zasoby</legend>
+            <legend>2. Zmień Punkty Zwycięstwa (VP)</legend>
+            <div class="grid">
+                <div>
+                    <label for="victory_points">Punkty Zwycięstwa:</label>
+                    <input type="number" id="victory_points" name="victory_points" placeholder="np. 1 lub -1">
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>3. Zmień Zasoby</legend>
             <div class="grid">
                 <div>
                     <label for="solari">Solari:</label>
@@ -53,7 +63,7 @@
         </fieldset>
 
         <fieldset>
-            <legend>3. Zmień Wojsko</legend>
+            <legend>4. Zmień Wojsko</legend>
              <div class="grid">
                 <div>
                     <label for="troops_garrison">Garnizon (Garrison):</label>
@@ -65,9 +75,9 @@
                 </div>
             </div>
         </fieldset>
-        
+
         <fieldset>
-            <legend>4. Zmień Wpływy (Frakcje)</legend>
+            <legend>5. Zmień Wpływy (Frakcje)</legend>
             <div class="grid">
                 <div>
                     <label for="faction_emperor">Imperator:</label>
@@ -87,7 +97,7 @@
                 </div>
             </div>
         </fieldset>
-        
+
         <button type="submit" onclick="return confirm('Czy na pewno chcesz ręcznie zmodyfikować stan gry?')">Zastosuj Korektę</button>
     </form>
 </body>

@@ -427,10 +427,20 @@ def resolve_conflict_auto():
     player_stats = []
     for player_name, player_data in game_state.get("players", {}).items():
         stats = player_data.get("reveal_stats", {})
-        base_swords = stats.get("base_swords", 0)
-        bonus_swords = player_data.get("active_effects", {}).get("fight_bonus_swords", 0)
-        final_swords = base_swords + bonus_swords
-        
+
+        # 1. Siła z kart (z calculate_reveal_stats)
+        base_swords_from_cards = stats.get("base_swords", 0)
+
+        # 2. Siła z intryg (np. Ambush)
+        bonus_swords_from_intrigues = player_data.get("active_effects", {}).get("fight_bonus_swords", 0)
+
+        # 3. (POPRAWKA) Siła z wysłanych wojsk (2 za jednostkę)
+        troops_committed = player_data.get("resources", {}).get("troops_in_conflict", 0)
+        swords_from_troops = troops_committed * 2
+
+        # 4. Finalna siła
+        final_swords = base_swords_from_cards + bonus_swords_from_intrigues + swords_from_troops
+
         player_stats.append({
             "name": player_name,
             "swords": final_swords

@@ -211,71 +211,36 @@
     }
   },
   "locations_state": {
-    "arrakeen": {
-      "occupied_by": null
-    },
-    "carthag": {
-      "occupied_by": null
-    },
-    "research_station": {
-      "occupied_by": null
-    },
-    "sietch_tabr": {
-      "occupied_by": null
-    },
-    "the_greate_flat": {
-      "occupied_by": null
-    },
-    "hagga_basin": {
-      "occupied_by": null
-    },
-    "imperial_basin": {
-      "occupied_by": null
-    },
-    "sell_melange": {
-      "occupied_by": null
-    },
-    "secure_contract": {
-      "occupied_by": null
-    },
-    "high_council": {
-      "occupied_by": null
-    },
-    "mentat": {
-      "occupied_by": null
-    },
-    "rally_troops": {
-      "occupied_by": null
-    },
-    "hall_of_oratory": {
-      "occupied_by": null
-    },
-    "swordmaster": {
-      "occupied_by": null
-    },
-    "conspire": {
-      "occupied_by": null
-    },
-    "wealth": {
-      "occupied_by": null
-    },
-    "highliner": {
-      "occupied_by": null
-    },
-    "foldspace": {
-      "occupied_by": null
-    },
-    "selective_breeding": {
-      "occupied_by": null
-    },
-    "secrets": {
-      "occupied_by": null
-    },
-    "hardy_warriors": {
-      "occupied_by": null
-    },
-    "stillsuits": {
-      "occupied_by": null
-    }
+  "arrakeen": { "occupied_by": null },
+  "carthag": { "occupied_by": null },
+  "research_station": { "occupied_by": null },
+  "sietch_tabr": { "occupied_by": null },
+  "the_greate_flat": {
+    "occupied_by": null,
+    "bonus_spice": 0
+  },
+  "hagga_basin": {
+    "occupied_by": null,
+    "bonus_spice": 0
+  },
+  "imperial_basin": {
+    "occupied_by": null,
+    "bonus_spice": 0
+  },
+  "sell_melange": { "occupied_by": null },
+  "secure_contract": { "occupied_by": null },
+  "high_council": { "occupied_by": null },
+  "mentat": { "occupied_by": null },
+  "rally_troops": { "occupied_by": null },
+  "hall_of_oratory": { "occupied_by": null },
+  "swordmaster": { "occupied_by": null },
+  "conspire": { "occupied_by": null },
+  "wealth": { "occupied_by": null },
+  "highliner": { "occupied_by": null },
+  "foldspace": { "occupied_by": null },
+  "selective_breeding": { "occupied_by": null },
+  "secrets": { "occupied_by": null },
+  "hardy_warriors": { "occupied_by": null },
+  "stillsuits": { "occupied_by": null }
   }
 }
