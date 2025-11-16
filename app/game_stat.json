@@ -1,34 +1,35 @@
 {
-  "round": 1,
-  "currentPlayer": "Peter",
+  "round": 5,
+  "currentPlayer": "Damian",
   "current_phase": "AGENT_TURN",
   "round_history": [],
   "destroyed_pile": [],
   "imperium_row": [
-    "dr_yueh",
-    "guild_administrator",
-    "spice_smugglers",
-    "gun_thopter",
-    "opulence",
-    "arrakis_liaison",
     "the_spice_must_flow",
-    "foldspace"
+    "foldspace",
+    "lady_jessica",
+    "choam_directorship",
+    "spice_smugglers",
+    "arrakis_liaison",
+    "stilgar",
+    "bene_gesserit_sister"
   ],
   "conflict_deck": [],
   "current_conflict_card": {
     "name": "N/A",
+    "rewards": {},
     "rewards_text": []
   },
   "alliances": {
-  "emperor": null,
-  "guild": null,
-  "fremen": null,
-  "bene_gesserit": null
-},
+    "emperor": null,
+    "guild": null,
+    "fremen": null,
+    "bene_gesserit": null
+  },
   "players": {
     "Peter": {
-      "leader": "paul_atreides", 
-      "victory_points": 0,
+      "leader": "duke_leto_atreides",
+      "victory_points": 2,
       "resources": {
         "solari": 0,
         "water": 1,
@@ -40,7 +41,7 @@
         "emperor": 0,
         "guild": 0,
         "fremen": 0,
-        "bene_gesserit": 0
+        "bene_gesserit": 2
       },
       "control": [],
       "deck_pool": [
@@ -53,26 +54,52 @@
         "convincing_argument",
         "seeking_alliance",
         "signet_ring",
-        "diplomacy"
+        "diplomacy",
+        "arrakis_liaison",
+        "dr_yueh",
+        "bene_gesserit_initiate",
+        "arrakis_liaison",
+        "arrakis_liaison",
+        "gun_thopter",
+        "arrakis_liaison",
+        "test_of_humanity"
       ],
       "hand": [
-        "dagger",
-        "dagger",
-        "dune_the_desert_planet",
+        "arrakis_liaison",
+        "dr_yueh",
+        "gun_thopter",
         "reconnaissance",
         "convincing_argument"
       ],
       "discard_pile": [],
-      "draw_deck": [],
+      "draw_deck": [
+        "diplomacy",
+        "dagger",
+        "arrakis_liaison",
+        "arrakis_liaison",
+        "seeking_alliance",
+        "convincing_argument",
+        "signet_ring",
+        "bene_gesserit_initiate",
+        "arrakis_liaison",
+        "dune_the_desert_planet",
+        "test_of_humanity",
+        "dagger",
+        "dune_the_desert_planet"
+      ],
       "agents_total": 2,
       "agents_placed": 0,
-      "intrigue_hand": [],
+      "intrigue_hand": [
+        "master_tactitian",
+        "water of life",
+        "sleeping_must_wake_up",
+        "feigned_incident",
+        "Intrigue_Card_749"
+      ],
       "has_passed": false,
       "reveal_stats": {
         "total_persuasion": 0,
-        "total_swords": 0,
-        "cards_in_hand": [],
-        "cards_played": []
+        "total_swords": 0
       },
       "faction_bonus_claimed": {
         "emperor": false,
@@ -87,20 +114,20 @@
         "bene_gesserit": false
       }
     },
-    "Helen": {
-     "leader": "paul_atreides", 
+    "Tymon": {
+      "leader": "count_ilban_richese",
       "victory_points": 0,
       "resources": {
-        "solari": 0,
-        "water": 1,
-        "Spice": 0,
-        "troops_garrison": 0,
+        "solari": 1,
+        "water": 2,
+        "Spice": 6,
+        "troops_garrison": 3,
         "troops_in_conflict": 0
       },
       "influence": {
         "emperor": 0,
         "guild": 0,
-        "fremen": 0,
+        "fremen": 1,
         "bene_gesserit": 0
       },
       "control": [],
@@ -114,26 +141,44 @@
         "convincing_argument",
         "seeking_alliance",
         "signet_ring",
-        "diplomacy"
+        "diplomacy",
+        "guild_administrator",
+        "assassination_mission",
+        "missionaria_protectiva",
+        "reverend_mother_mohiam",
+        "power_play",
+        "the_voice"
       ],
       "hand": [
+        "seeking_alliance",
+        "power_play",
+        "guild_administrator",
         "dagger",
-        "dagger",
-        "dune_the_desert_planet",
-        "reconnaissance",
         "convincing_argument"
       ],
       "discard_pile": [],
-      "draw_deck": [],
-      "agents_total": 2,
+      "draw_deck": [
+        "assassination_mission",
+        "signet_ring",
+        "the_voice",
+        "diplomacy",
+        "reverend_mother_mohiam",
+        "missionaria_protectiva",
+        "dagger",
+        "dune_the_desert_planet",
+        "convincing_argument",
+        "reconnaissance",
+        "dune_the_desert_planet"
+      ],
+      "agents_total": 3,
       "agents_placed": 0,
-      "intrigue_hand": [],
+      "intrigue_hand": [
+        "demand_for_a_respect"
+      ],
       "has_passed": false,
       "reveal_stats": {
         "total_persuasion": 0,
-        "total_swords": 0,
-        "cards_in_hand": [],
-        "cards_played": []
+        "total_swords": 0
       },
       "faction_bonus_claimed": {
         "emperor": false,
@@ -148,21 +193,21 @@
         "bene_gesserit": false
       }
     },
-    "Paul": {
-"leader": "paul_atreides", 
-      "victory_points": 0,
+    "Damian": {
+      "leader": "countess_ariana_thorvald",
+      "victory_points": 1,
       "resources": {
         "solari": 0,
         "water": 1,
-        "Spice": 0,
-        "troops_garrison": 0,
+        "Spice": 3,
+        "troops_garrison": 2,
         "troops_in_conflict": 0
       },
       "influence": {
-        "emperor": 0,
+        "emperor": 1,
         "guild": 0,
         "fremen": 0,
-        "bene_gesserit": 0
+        "bene_gesserit": 1
       },
       "control": [],
       "deck_pool": [
@@ -175,26 +220,44 @@
         "convincing_argument",
         "seeking_alliance",
         "signet_ring",
-        "diplomacy"
+        "diplomacy",
+        "spice_smugglers",
+        "imperial_spy",
+        "arrakis_recruiter",
+        "opulence",
+        "space_travel"
       ],
       "hand": [
-        "dagger",
-        "dagger",
+        "diplomacy",
+        "arrakis_recruiter",
+        "space_travel",
         "dune_the_desert_planet",
-        "reconnaissance",
-        "convincing_argument"
+        "imperial_spy"
       ],
       "discard_pile": [],
-      "draw_deck": [],
+      "draw_deck": [
+        "signet_ring",
+        "seeking_alliance",
+        "dune_the_desert_planet",
+        "convincing_argument",
+        "convincing_argument",
+        "dagger",
+        "opulence",
+        "dagger",
+        "spice_smugglers",
+        "reconnaissance"
+      ],
       "agents_total": 2,
       "agents_placed": 0,
-      "intrigue_hand": [],
+      "intrigue_hand": [
+        "Intrigue_Card_219",
+        "master_tactitian",
+        "dispatching_an_envoy"
+      ],
       "has_passed": false,
       "reveal_stats": {
         "total_persuasion": 0,
-        "total_swords": 0,
-        "cards_in_hand": [],
-        "cards_played": []
+        "total_swords": 0
       },
       "faction_bonus_claimed": {
         "emperor": false,
