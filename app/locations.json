@@ -112,7 +112,7 @@
     ],
     "actions": [
       { 
-      "gain": { "type": "resource", "resource": "Spice", "amount": 2 } ,
+      "gain": { "type": "resource", "resource": "Spice", "amount": 1 } ,
       "gain1": { "type": "extra gain", "description": "you take all extra Spice from this location" }
      }
     ],
