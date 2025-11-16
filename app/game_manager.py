@@ -2,6 +2,7 @@
 import json
 import os
 import random 
+import copy
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -175,40 +176,6 @@ def is_move_valid(game_state, locations_db, leaders_db, cards_db, player_name, c
     return True, "Move is valid."
 
 
-# --- NOWA FUNKCJA POMOCNICZA: DOBIERANIE KART ---
-def draw_cards(player_state, amount_to_draw):
-    """
-    Automatycznie dobiera karty dla gracza, tasując odrzucone karty, jeśli to konieczne.
-    """
-    draw_deck = player_state.get("draw_deck", [])
-    discard_pile = player_state.get("discard_pile", [])
-    hand = player_state.get("hand", [])
-    
-    cards_drawn_names = []
-
-    for _ in range(amount_to_draw):
-        if not draw_deck:
-            if not discard_pile:
-                # Nie ma więcej kart do dobrania
-                break
-            
-            # Przetasuj discard_pile aby stał się nowym draw_deck
-            random.shuffle(discard_pile)
-            draw_deck = discard_pile
-            discard_pile = []
-            
-        # Dobierz kartę
-        card_id = draw_deck.pop(0)
-        hand.append(card_id)
-        cards_drawn_names.append(card_id) # Można zamienić na nazwę karty dla lepszego logu
-
-    player_state["draw_deck"] = draw_deck
-    player_state["discard_pile"] = discard_pile
-    player_state["hand"] = hand
-    
-    return f"drew {len(cards_drawn_names)} card(s)"
-
-
 def process_move(game_state, locations_db, cards_db, leaders_db, player_name, card_id, location_id, **kwargs):    
     """
     Przetwarza ruch ORAZ implementuje efekty agenta, lokacji i sygnetu.
@@ -254,15 +221,17 @@ def process_move(game_state, locations_db, cards_db, leaders_db, player_name, ca
             
             # Sprawdź zdolność Ilbana
             if passive_ability_name == "Ruthless Negotiator" and resource_name == "solari" and effective_resource_amount > 0:
-                draw_summary = draw_cards(player_state, 1) # Użyj istniejącej funkcji pomocniczej
-                move_summary += f" | Ilban's Ability: {draw_summary}"
+                # Zamiast losowego dociągania, dodajemy instrukcję manualną
+                draw_summary_parts = []
+                _apply_gain(player_state, [{"type": "resource", "resource": "card from unplayed pile", "amount": 1}], draw_summary_parts, game_state)
+                move_summary += f" | Ilban's Ability: {', '.join(draw_summary_parts)}"
             
     # --- 3. Zastosuj efekty lokacji ---
     location_actions_list = location_data.get("actions", [])
     loc_summary_parts = [] # Lista na podsumowanie efektów lokacji
     
     # Wywołujemy "mądrą" funkcję, przekazując jej game_state
-    _process_action_list(player_state, location_actions_list, loc_summary_parts, game_state, **kwargs)    
+    _process_action_list(player_state, location_actions_list, loc_summary_parts, game_state, location_id=location_id, cards_db=cards_db, leaders_db=leaders_db, **kwargs)    
     if loc_summary_parts:
         move_summary += f" | Location: {', '.join(loc_summary_parts)}"
     else:
@@ -276,7 +245,7 @@ def process_move(game_state, locations_db, cards_db, leaders_db, player_name, ca
         intrigue_summary_parts = []
         
         # Używamy "mądrej" funkcji, przekazując kwargs na wypadek przyszłych zmian
-        _process_action_list(player_state, intrigue_action, intrigue_summary_parts, game_state, **kwargs) 
+        _process_action_list(player_state, intrigue_action, intrigue_summary_parts, game_state, cards_db=cards_db, location_id=location_id,leaders_db=leaders_db **kwargs) 
         
         if intrigue_summary_parts:
             move_summary += f" | Earl's Ability: {', '.join(intrigue_summary_parts)}"
@@ -295,7 +264,7 @@ def process_move(game_state, locations_db, cards_db, leaders_db, player_name, ca
             
             # Przekaż dane lidera również tutaj (na wypadek, gdyby sygnet dawał przyprawę Arianie)
             signet_summary_parts = []
-            _process_action_list(player_state, signet_actions, signet_summary_parts, game_state, **kwargs)
+            _process_action_list(player_state, signet_actions, signet_summary_parts, game_state, location_id=location_id, cards_db=cards_db,leaders_db=leaders_db, **kwargs)
             if signet_summary_parts:
                 move_summary += f" | Signet ({signet_ability.get('name', 'Ability')}): {', '.join(signet_summary_parts)}"
             else:
@@ -309,7 +278,7 @@ def process_move(game_state, locations_db, cards_db, leaders_db, player_name, ca
         agent_actions_list = agent_effect.get("actions", [])
         
         card_summary_parts = [] # Lista na podsumowanie efektów karty
-        _process_action_list(player_state, agent_actions_list, card_summary_parts, game_state, **kwargs)
+        _process_action_list(player_state, agent_actions_list, card_summary_parts, game_state, cards_db=cards_db, location_id=location_id,leaders_db=leaders_db, **kwargs)
         
         if card_summary_parts:
             move_summary += f" | Card: {', '.join(card_summary_parts)}"
@@ -432,31 +401,31 @@ def _find_decision_in_actions(actions_list):
         return {"type": "simple"}
 
     for item in actions_list:
-        if not item: continue
-        
-        # Klucz operacji to zazwyczaj pierwszy klucz w słowniku
-        operation_key = list(item.keys())[0]
+        if not item or not isinstance(item, dict):
+            continue
 
-        if operation_key == "choice":
+        # Poprawiona logika: Sprawdź, czy klucz istnieje w słowniku
+        if "choice" in item:
             return {
                 "type": "choice",
                 "data": item["choice"]
             }
-        
-        if operation_key == "exchange":
+
+        if "exchange" in item:
             return {
                 "type": "exchange",
                 "data": item["exchange"]
             }
 
-        if operation_key == "pay":
-             # Zakładamy, że "pay" na tym poziomie to opcjonalna opłata
+        if "pay" in item:
+            # Zakładamy, że "pay" na tym poziomie to opcjonalna opłata
             return {
                 "type": "conditional_pay",
                 "data": item["pay"]
             }
-    
+
     return {"type": "simple"}
+
 
 def get_agent_move_requirements(card_data, location_data, leaders_db, player_state):
     """
@@ -536,7 +505,6 @@ def check_and_advance_phase(game_state, cards_db):
         game_state["current_phase"] = "REVEAL"
         
     return game_state
-
 
 
 def _check_requirement(player_state, requirement_list, game_state):
@@ -627,30 +595,49 @@ def _apply_cost(player_state, pay_data, log_summary):
         
     return True
 
-def _apply_gain(player_state, gain_data, log_summary, game_state, **kwargs):
-    """(Helper) Stosuje zysk dla gracza."""
+
+def _apply_gain(player_state, gain_data, log_summary, game_state, location_id=None, leaders_db=None, **kwargs):
+    """(Helper) Stosuje zysk dla gracza, uwzględniając pasywne zdolności liderów."""
     if not isinstance(gain_data, list):
         gain_data = [gain_data]
 
     player_resources = player_state.get("resources", {})
 
+    # --- NOWA LOGIKA: Sprawdź pasywne zdolności Lidera ---
+    leader_id = player_state.get("leader")
+    leader_passive_name = ""
+    if leaders_db and leader_id:
+        leader_passive_name = leaders_db.get(leader_id, {}).get("ability_passive", {}).get("name", "")
+    # --- KONIEC NOWEJ LOGIKI ---
+
     for gain in gain_data:
         gain_type = gain.get("type")
-        
+
         if gain_type == "resource":
             resource = gain.get("resource")
             amount = gain.get("amount", 0)
-            
-            if "influence point" in resource:
+
+            # --- NOWA LOGIKA: Zdolność Pasywna Ariany ---
+            if resource == "Spice" and leader_passive_name == "Spice Addiction":
+                if amount > 0: # Zdolność działa tylko, gdy zbierasz przyprawę
+                    original_amount = amount
+                    amount = max(0, amount - 1) # Otrzymujesz o 1 mniej
+                    log_summary.append(f"Zdolność Ariany: Zmieniono {original_amount} Spice na {amount} Spice.")
+                    # I dociągasz kartę (używamy naszej logiki manualnej)
+                    _apply_gain(player_state, [{"type": "resource", "resource": "card from unplayed pile", "amount": 1}], log_summary, game_state, location_id, leaders_db, **kwargs)
+            # --- KONIEC NOWEJ LOGIKI ---
+
+            if resource == "card from unplayed pile":
+                log_summary.append(f"MANUAL ACTION: Draw {amount} card(s) (use 'Manage Hand')")
+
+            elif "influence point" in resource:
                 faction = resource.split(" ")[0]
                 if "influence" not in player_state: player_state["influence"] = {}
                 player_state["influence"][faction] = player_state["influence"].get(faction, 0) + amount
                 log_summary.append(f"Zyskano {amount} wpływu {faction}.")
 
-                # Pobierz nowy stan wpływów
                 new_influence = player_state["influence"][faction]
 
-                # --- START NOWY KOD (Bonus 1 VP za 2 pkt) ---
                 if "faction_vp_claimed_2pts" not in player_state:
                     player_state["faction_vp_claimed_2pts"] = {"emperor": False, "guild": False, "fremen": False, "bene_gesserit": False}
 
@@ -658,21 +645,16 @@ def _apply_gain(player_state, gain_data, log_summary, game_state, **kwargs):
                     player_state["faction_vp_claimed_2pts"][faction] = True
                     player_state["victory_points"] = player_state.get("victory_points", 0) + 1
                     log_summary.append(f"Osiągnięto 2 pkt. wpływu w {faction}! Zyskano 1 VP (nowa mechanika).")
-                # --- KONIEC NOWEGO KODU ---
 
-
-                # --- START KOD (BONUS ZA 4 PKT) ---
                 if "faction_bonus_claimed" not in player_state:
                     player_state["faction_bonus_claimed"] = {"emperor": False, "guild": False, "fremen": False, "bene_gesserit": False}
-                
-                # Sprawdź jednorazowy bonus za 4 punkty
+
                 if new_influence >= 4 and not player_state["faction_bonus_claimed"].get(faction, False):
                     player_state["faction_bonus_claimed"][faction] = True
                     log_summary.append(f"Osiągnięto 4 pkt. wpływu! Odbieranie jednorazowej nagrody...")
-                    
+
                     bonus_reward = []
                     if faction == "emperor":
-                        # Uwaga: Aplikacja nie wspiera "deploy". Dajemy wojsko do garnizonu.
                         bonus_reward = [{"type": "resource", "resource": "troops_garrison", "amount": 2}]
                     elif faction == "guild":
                         bonus_reward = [{"type": "resource", "resource": "solari", "amount": 3}]
@@ -680,9 +662,10 @@ def _apply_gain(player_state, gain_data, log_summary, game_state, **kwargs):
                         bonus_reward = [{"type": "resource", "resource": "water", "amount": 1}]
                     elif faction == "bene_gesserit":
                         bonus_reward = [{"type": "resource", "resource": "intrigue", "amount": 1}]
-                    
+
                     if bonus_reward:
-                        _apply_gain(player_state, bonus_reward, log_summary, game_state, **kwargs) 
+                        # Wywołujemy samych siebie, przekazując dalej leaders_db
+                        _apply_gain(player_state, bonus_reward, log_summary, game_state, location_id, leaders_db, **kwargs) 
 
                 check_and_update_alliances(player_state, game_state, faction, log_summary)
 
@@ -690,45 +673,57 @@ def _apply_gain(player_state, gain_data, log_summary, game_state, **kwargs):
                 player_state["victory_points"] = player_state.get("victory_points", 0) + amount
                 log_summary.append(f"Zyskano {amount} VP!")
             elif resource == "fight points":
-                # Dla "master_tactitian", "personal_army"
                 if "active_effects" not in player_state: player_state["active_effects"] = {}
                 current = player_state["active_effects"].get("fight_bonus_swords", 0)
                 player_state["active_effects"]["fight_bonus_swords"] = current + amount
                 log_summary.append(f"Zyskano {amount} punktów walki (miecza).")
             elif resource == "persuasion":
-                 # Dla "charisma"
                 if "reveal_stats" not in player_state: player_state["reveal_stats"] = {}
                 current = player_state["reveal_stats"].get("total_persuasion", 0)
                 player_state["reveal_stats"]["total_persuasion"] = current + amount
                 log_summary.append(f"Zyskano {amount} perswazji (do Fazy Odkrycia).")
+
+            # Ten blok MUSI być po logice Ariany
             elif resource in player_resources:
                 player_resources[resource] = player_resources.get(resource, 0) + amount
                 log_summary.append(f"Zyskano {amount} {resource}.")
-            # --- START POPRAWKI (TROOPS & INTRIGUE) ---
             elif resource == "troops":
-                # Naprawia błąd (np. z Kartaginy), przekierowując wojsko do garnizonu
                 player_resources["troops_garrison"] = player_resources.get("troops_garrison", 0) + amount
                 log_summary.append(f"Zyskano {amount} troops (do garnizonu).")
-            
             elif resource == "intrigue":
-                # Naprawia błąd (np. z Kartaginy, B.G.)
                 if "intrigue_hand" not in player_state:
                     player_state["intrigue_hand"] = []
-                for _ in range(amount): # Użyj pętli, jeśli amount > 1
+                for _ in range(amount):
                     player_state["intrigue_hand"].append(f"Intrigue_Card_{random.randint(100,999)}")
                 log_summary.append(f"Zyskano {amount} kartę Intrygi (placeholder).")
-            # --- KONIEC POPRAWKI ---
             else:
                 log_summary.append(f"Nieznany zasób: {resource}.")
-        
+
+        elif gain_type == "extra gain":
+            if location_id and location_id in game_state.get("locations_state", {}):
+                loc_state = game_state["locations_state"][location_id]
+                bonus_spice = loc_state.get("bonus_spice", 0)
+
+                # --- NOWA LOGIKA: Zdolność Pasywna Ariany (dla bonusu) ---
+                if bonus_spice > 0 and leader_passive_name == "Spice Addiction":
+                    original_bonus = bonus_spice
+                    bonus_spice = max(0, bonus_spice - 1)
+                    log_summary.append(f"Zdolność Ariany: Zmieniono {original_bonus} bonusowej Spice na {bonus_spice}.")
+                    _apply_gain(player_state, [{"type": "resource", "resource": "card from unplayed pile", "amount": 1}], log_summary, game_state, location_id, leaders_db, **kwargs)
+                # --- KONIEC NOWEJ LOGIKI ---
+
+                player_resources["Spice"] = player_resources.get("Spice", 0) + bonus_spice
+                loc_state["bonus_spice"] = 0 # Zresetuj bonus
+
+                log_summary.append(f"Zyskano {bonus_spice} bonusowej Przyprawy z lokacji (bonus zresetowany do 0).")
+            else:
+                log_summary.append(f"Efekt manualny: 'extra gain' (nie można było zidentyfikować location_id={location_id})")
+
         elif gain_type == "action":
-            # Dla kart "trick", "concentration", "infiltration" itp.
-            # Te nadal wymagają ręcznej obsługi LUB dalszej rozbudowy logiki
             log_summary.append(f"Efekt manualny: {gain.get('description')}")
-        
+
         else:
             log_summary.append(f"Manualny zysk: {gain.get('description', 'nieznany')}")
-
 
 def check_and_update_alliances(player_state, game_state, faction, log_summary):
     """
@@ -779,7 +774,7 @@ def check_and_update_alliances(player_state, game_state, faction, log_summary):
     log_summary.append(f"Gracz {player_name} zdobył sojusz z {faction} i zyskał 1 VP!")
     
 
-def _process_action_list(player_state, action_list, log_summary, game_state, **kwargs):
+def _process_action_list(player_state, action_list, log_summary, game_state, location_id=None, cards_db=None, leaders_db=None, **kwargs):
     """(Helper) Przetwarza złożoną listę akcji, wymagań, wyborów i wymian."""
     
     all_reqs_met = True
@@ -795,7 +790,7 @@ def _process_action_list(player_state, action_list, log_summary, game_state, **k
 
         if operation_key == "type":
             if item["type"] == "requirement":
-                all_reqs_met, req_log = _check_requirement(player_state, item["requirement"], game_state)
+                all_reqs_met, req_log = _check_requirement(player_state, item["requirement"], game_state, cards_db)
                 if req_log: log_summary.append(req_log)
             elif item["type"] == "action":
                 _apply_gain(player_state, item, log_summary, game_state, **kwargs)
@@ -803,7 +798,7 @@ def _process_action_list(player_state, action_list, log_summary, game_state, **k
                 log_summary.append(f"Nieznany typ operacji: {item['type']}")
 
         elif operation_key == "gain":
-            _apply_gain(player_state, item["gain"], log_summary, game_state, **kwargs)
+            _apply_gain(player_state, item["gain"], log_summary, game_state, location_id=location_id, leaders_db=leaders_db, **kwargs)
 
         elif operation_key == "pay":
             # Dla "calculated_recruitment"
@@ -828,28 +823,44 @@ def _process_action_list(player_state, action_list, log_summary, game_state, **k
                 if _apply_cost(player_state, pay_data, log_summary):
                     for gain_item in gain_data_list:
                         if "gain" in gain_item:
-                             _apply_gain(player_state, gain_item["gain"], log_summary, game_state, **kwargs)
+                             _apply_gain(player_state, gain_item["gain"], log_summary, game_state,location_id=location_id, leaders_db=leaders_db, **kwargs)
                         elif "type" in gain_item and gain_item["type"] == "action":
-                             _apply_gain(player_state, gain_item, log_summary, game_state, **kwargs)
+                             _apply_gain(player_state, gain_item, log_summary, game_state, location_id=location_id, leaders_db=leaders_db, **kwargs)
                 else:
                     log_summary.append("Wymiana nieudana (brak środków).")
             else:
                 log_summary.append("Gracz odrzucił opcjonalną wymianę.")
                 
         elif operation_key == "choice":
-            # Dla "master_tactitian", "bypass_protocol", "demand_for_a_respect"
+            # Dla "master_tactitian", "bypass_protocol", "demand_for_a_respect", "firm_grip"
             choice_index = kwargs.get("choice_index", -1)
             choices = item["choice"]
-            
+
             if choice_index < 0 or choice_index >= len(choices):
                 log_summary.append(f"Wymagany wybór (0-{len(choices)-1}), ale nie podano lub jest błędny. Karta odrzucona bez efektu.")
                 all_reqs_met = False
             else:
                 log_summary.append(f"Wybrano opcję {choice_index + 1}.")
-                # Wybrana opcja to lista akcji (np. [{ "gain": ... }] lub [{ "pay": ... }, { "type": "action" ... }])
-                chosen_action_key = list(choices[choice_index].keys())[0] # np. "action1"
-                chosen_action_list = choices[choice_index][chosen_action_key]
-                _process_action_list(player_state, chosen_action_list, log_summary, game_state, **kwargs)
+
+                # --- START POPRAWKI (Problem 1) ---
+                chosen_item = choices[choice_index] # To jest obiekt, np. {"action1": [...]} LUB {"gain": {...}}
+
+                # Sprawdź, czy to Struktura A (z kluczem "actionX")
+                first_key = list(chosen_item.keys())[0]
+
+                # Sprawdzamy, czy klucz zaczyna się od "action" (np. action1, action2, action_fight)
+                # LUB czy wartość pod tym kluczem JEST listą (co jest typowe dla Struktury A)
+                if first_key.startswith("action") or isinstance(chosen_item[first_key], list):
+                    # To jest Struktura A, np. z "plans_within_plans"
+                    chosen_action_list = chosen_item[first_key]
+                    _process_action_list(player_state, chosen_action_list, log_summary, game_state, location_id=location_id, cards_db=cards_db, leaders_db=leaders_db, **kwargs)
+                else:
+                    # To jest Struktura B (bezpośrednia), np. z "firm_grip"
+                    # Klucz to "gain", "pay", "exchange" itp.
+                    # Musimy przekazać sam obiekt jako listę jednoelementową
+                    chosen_action_list = [chosen_item] 
+                    _process_action_list(player_state, chosen_action_list, log_summary, game_state, location_id=location_id, cards_db=cards_db, leaders_db=leaders_db, **kwargs)
+                # --- KONIEC POPRAWKI ---
         
         else:
              log_summary.append(f"Nieobsługiwany klucz operacji: {operation_key}")
@@ -859,7 +870,7 @@ def _process_action_list(player_state, action_list, log_summary, game_state, **k
 # --- KONIEC SEKCJI POMOCNICZEJ ---
 
 
-def process_intrigue(game_state, intrigues_db, player_name, intrigue_id, **kwargs):
+def process_intrigue(game_state, intrigues_db, cards_db, leaders_db, player_name, intrigue_id, **kwargs):
     """
     Przetwarza zagranie intrygi z ręki i automatyzuje wszystkie efekty
     na podstawie struktury JSON i dodatkowych argumentów (decyzji gracza).
@@ -917,14 +928,14 @@ def process_intrigue(game_state, intrigues_db, player_name, intrigue_id, **kwarg
     elif "action" in actions_object:
         # 3. Złożona lista AKCJI (np. "bribery", "master_tactitian", "plans_within_plans")
         # Przekazujemy player_state, listę akcji, log, cały stan gry (dla _check_requirement) i decyzje
-        _process_action_list(player_state, actions_object["action"], log_summary, game_state, **kwargs)
+        _process_action_list(player_state, actions_object["action"], log_summary, game_state, leaders_db=leaders_db, cards_db=cards_db, **kwargs)
     
     elif "action1" in actions_object:
          # 4. Specjalny przypadek dla "market_manopoly"
          # Ta karta ma dwie oddzielne, niezależne akcje
         log_summary.append("Sprawdzanie efektów 'Market Manopoly':")
-        _process_action_list(player_state, [actions_object["action1"]], log_summary, game_state, **kwargs)
-        _process_action_list(player_state, [actions_object["action2"]], log_summary, game_state, **kwargs)
+        _process_action_list(player_state, [actions_object["action1"]], log_summary, game_state, leaders_db=leaders_db, cards_db=cards_db, **kwargs)
+        _process_action_list(player_state, [actions_object["action2"]], log_summary, game_state, leaders_db=leaders_db, cards_db=cards_db, **kwargs)
 
     else:
         # 5. Fallback dla nieznanych struktur lub kart tylko z opisem
@@ -942,13 +953,15 @@ def process_intrigue(game_state, intrigues_db, player_name, intrigue_id, **kwarg
 
 def calculate_and_store_reveal_stats(game_state, cards_db):
     """Oblicza i zapisuje statystyki Odkrycia dla wszystkich graczy."""
+    all_alliances = game_state.get("alliances", {}) # Pobierz stan sojuszy
     for player_name, player_data in game_state.get("players", {}).items():
-        stats = calculate_reveal_stats(player_data, cards_db)
+        # Przekaż player_name i all_alliances
+        stats = calculate_reveal_stats(player_data, cards_db, player_name, all_alliances) 
         player_data["reveal_stats"] = stats
     return game_state
 
 
-def calculate_reveal_stats(player_state, cards_db):
+def calculate_reveal_stats(player_state, cards_db, player_name, all_alliances):
     """
     Oblicza sumę Perswazji i BAZOWEJ Siły dla gracza.
     TERAZ OBSŁUGUJE KLUCZOWE EFEKTY WARUNKOWE.
@@ -972,9 +985,10 @@ def calculate_reveal_stats(player_state, cards_db):
         if "fremen" in card_data.get("agent_symbols", []):
             played_fremen_card_ids.append(card_id)
     
-    # Sprawdź sojusz z Cesarzem (Uproszczenie: 4+ wpływu = sojusz. Pełna logika sojuszy to Krok 7)
+    # Sprawdź sojusz z Cesarzem
+    # Sprawdź sojusz z Cesarzem (POPRAWIONA LOGIKA)
     player_influence = player_state.get("influence", {})
-    has_emperor_alliance = player_influence.get("emperor", 0) >= 4
+    has_emperor_alliance = (all_alliances.get("emperor") == player_name)
 
     # --- Krok 1: Przetwórz karty W RĘCE (dają Perswazję i Siłę) ---
     for card_id in cards_in_hand_ids:
@@ -983,38 +997,30 @@ def calculate_reveal_stats(player_state, cards_db):
             
         reveal_effect = card_data.get("reveal_effect", {})
         
-        # --- Logika bazowa + warunkowa ---
+        # --- Logika bazowa ---
         persuasion = reveal_effect.get("persuasion", 0)
         swords = reveal_effect.get("swords", 0)
+        
+        possible_actions = reveal_effect.get("possible actions", {}).get("actions", [])
         description = reveal_effect.get("possible actions", {}).get("description", "No effect.")
         
-        # === POCZĄTEK NOWEJ LOGIKI WARUNKOWEJ ===
+        # === POCZĄTEK NOWEJ LOGIKI WARUNKOWEJ (POPRAWKA 11) ===
         
-        # "Sietch Reverend Mother" (sietch_reverend_mother)
+        # --- A. Efekty warunkowe (automatyczne) ---
         if card_id == "sietch_reverend_mother":
             if len(played_fremen_card_ids) > 0:
                 persuasion += 3
-                # Bonus +1 Spice jest obsługiwany manualnie, tu liczymy tylko P/S
                 description = f"BONUS AKTYWOWANY: +3 Perswazji (za zagraną kartę Fremenów)."
-
-        # "Fedaykin Death Commando" (fedaykin_death_commando)
         elif card_id == "fedaykin_death_commando":
             if len(played_fremen_card_ids) > 0:
                 swords += 3
                 description = f"BONUS AKTYWOWANY: +3 Miecza (za zagraną kartę Fremenów)."
-
-        # "Firm Grip" (firm_grip)
         elif card_id == "firm_grip":
             if has_emperor_alliance:
                 persuasion += 4
                 description = f"BONUS AKTYWOWANY: +4 Perswazji (za sojusz z Cesarzem)."
-
-        # "Liet Kynes" (liet_kynes)
         elif card_id == "liet_kynes":
-            # Ten efekt liczy karty Fremenów "w grze" (w ręce i zagrane)
-            # 1. Liczymy zagrane (z Kroku 0)
             fremen_count = len(played_fremen_card_ids)
-            # 2. Liczymy te w ręce (ale nie liczymy samej Liet Kynes)
             for hand_card_id in cards_in_hand_ids:
                 if hand_card_id == "liet_kynes": continue
                 hand_card_data = cards_db.get(hand_card_id, {})
@@ -1026,21 +1032,24 @@ def calculate_reveal_stats(player_state, cards_db):
                 persuasion += bonus_persuasion
                 description = f"BONUS AKTYWOWANY: +{bonus_persuasion} Perswazji (2 za każdą z {fremen_count} kart Fremenów)."
         
-        # "Control the Spice" (control_the_spice) - Fremen Bond
-        elif card_id == "control_the_spice":
-            if len(played_fremen_card_ids) > 0:
-                 # Bonus +1 Spice jest manualny
-                 description = f"BONUS (MANUALNY): Zyskaj 1 Przyprawę (za zagraną kartę Fremenów)."
-        
-        # "Spice Hunter" (spice_hunter) - Fremen Bond
-        elif card_id == "spice_hunter":
-            if len(played_fremen_card_ids) > 0:
-                 # Bonus +1 Spice jest manualny
-                 description = f"BONUS (MANUALNY): Zyskaj 1 Przyprawę (za zagraną kartę Fremenów)."
+        # --- B. Obsługa CHOICE (automatyczne założenie) ---
+        elif card_id == "bene_gesserit_sister":
+            # Karta ma wybór: 2 Perswazji lub 2 Miecza.
+            # Automatycznie zakładamy wybór Perswazji, bo jest Faza Odkrycia (kupowanie).
+            persuasion += 2
+            description = "BONUS (Założono): +2 Perswazji (zamiast 2 Mieczy)."
 
-        # Oznacz karty z manualną opcją (np. Gurney Halleck "You may pay...")
-        elif "You may pay" in description or " or " in description.lower():
-             description = f"[MANUAL ACTION NEEDED] {description}"
+        # --- C. Obsługa PAY/EXCHANGE (instrukcje manualne) ---
+        elif card_id == "gurney_halleck":
+            description = f"[MANUAL ACTION] {description} (Użyj 'Ręczna Korekta', aby zapłacić 3 Solari i dodać 2 Wojska)."
+        elif card_id == "guild_ambassador":
+            description = f"[MANUAL ACTION] {description} (Użyj 'Ręczna Korekta', aby zapłacić 3 Przyprawy za 1 VP, jeśli masz sojusz)."
+        elif card_id == "opulence":
+            description = f"[MANUAL ACTION] {description} (Użyj 'Ręczna Korekta', aby zapłacić 6 Solari za 1 VP)."
+        
+        # --- D. Inne efekty manualne ---
+        elif "deploy" in description or "retreat" in description:
+            description = f"[MANUAL ACTION] {description} (Pamiętaj, aby dostosować wojsko w konflikcie)."
         
         # === KONIEC NOWEJ LOGIKI WARUNKOWEJ ===
 
@@ -1054,23 +1063,8 @@ def calculate_reveal_stats(player_state, cards_db):
             "swords": swords,
             "description": description # Zaktualizowany opis
         })
-
-    # --- Krok 2: Przetwórz karty ZAGRANE (dają TYLKO Siłę) ---
-    for card_id in cards_played_ids:
-        card_data = cards_db.get(card_id)
-        if not card_data: continue
-
-        agent_effect = card_data.get("agent_effect", {})
-        base_swords += swords
-        
-        cards_played_details.append({
-            "name": card_data.get("name", card_id),
-            "persuasion": 0,
-            "swords": swords
-        })
     
-    committed_troops = player_state.get("resources", {}).get("troops_in_conflict", 0)
-    base_swords += (committed_troops * 2)
+    # Usunęliśmy stąd logikę liczenia wojsk (przeniesiona do app.py, Poprawka 5)
     
     return {
         "total_persuasion": total_persuasion,
@@ -1100,9 +1094,10 @@ def process_buy_card(game_state, player_name, card_id, cards_db):
     
     player_persuasion = player_state.get("reveal_stats", {}).get("total_persuasion", 0)
     
-    # === NOWA POPRAWKA: Oblicz perswazję na żywo ===
+        # === NOWA POPRAWKA: Oblicz perswazję na żywo ===
     # Użyj funkcji, którą już mamy, aby pobrać Prawdziwą wartość
-    live_stats = calculate_reveal_stats(player_state, cards_db)
+    all_alliances = game_state.get("alliances", {}) # Pobierz stan sojuszy
+    live_stats = calculate_reveal_stats(player_state, cards_db, player_name, all_alliances)
     player_persuasion = live_stats.get("total_persuasion", 0)
     # === KONIEC POPRAWKI ===
     
@@ -1260,17 +1255,28 @@ def perform_full_game_reset():
 def perform_cleanup_and_new_round(game_state):
     """Resetuje planszę na kolejną rundę. (Automatyczne dobieranie)"""
     if game_state:
+
+        # --- NOWA LOGIKA: Akumulacja Przyprawy ---
+        spice_locations = ["the_greate_flat", "hagga_basin", "imperial_basin"]
+        if "locations_state" in game_state:
+            for loc_id in spice_locations:
+                if loc_id in game_state["locations_state"]:
+                    loc_state = game_state["locations_state"][loc_id]
+                    if loc_state.get("occupied_by") is None: # Jeśli nikt nie stanął
+                        loc_state["bonus_spice"] = loc_state.get("bonus_spice", 0) + 1
+        # --- KONIEC NOWEJ LOGIKI ---
+
         if "locations_state" in game_state:
             for loc_id in game_state["locations_state"]:
                 game_state["locations_state"][loc_id]["occupied_by"] = None
-        
+
         game_state["round_history"] = []
         game_state["current_phase"] = "AGENT_TURN" 
         game_state["round"] = game_state.get("round", 0) + 1
-        
+
         # Resetuj kartę konfliktu (zostanie ustawiona ręcznie)
         game_state["current_conflict_card"] = { "name": "N/A", "rewards": {}, "rewards_text": [] }
-        
+
         player_names = sorted(list(game_state.get("players", {}).keys()))
         game_state["currentPlayer"] = player_names[0] 
 
@@ -1281,23 +1287,23 @@ def perform_cleanup_and_new_round(game_state):
 
             if "resources" in player_data:
                 player_data["resources"]["troops_in_conflict"] = 0
-            
-            
+
+
             player_data["draw_deck"] = player_data.get("draw_deck", []) + \
                                      player_data.get("hand", []) + \
                                      player_data.get("discard_pile", [])
             player_data["hand"] = []
             player_data["discard_pile"] = []
-            
+
             player_data["draw_deck"] = list(player_data.get("deck_pool", []))
-            
+
             random.shuffle(player_data["draw_deck"])
-            
+
             for _ in range(5):
                 if len(player_data["draw_deck"]) > 0:
                     card = player_data["draw_deck"].pop(0)
                     player_data["hand"].append(card)
-            
+
     return game_state
 
 
@@ -1334,9 +1340,7 @@ def set_player_hand(game_state, player_name, card_ids_list, cards_db):
         if card in draw_deck_list:
             draw_deck_list.remove(card)
             
-    player_state["draw_deck"] = draw_deck_list
-    player_state["discard_pile"] = [] # Czyścimy też discard dla porządku
-    
+    player_state["draw_deck"] = draw_deck_list    
     # Zmieniona wiadomość sukcesu
     return True, f"Success! Set {len(card_ids_list)} card(s) for {player_name}."
 
@@ -1556,7 +1560,7 @@ def _safe_add_resource(player_dict, key, value_str):
         return f"błąd przy {key}: {e}"
 
 
-def process_manual_override(game_state, player_name, form_data):
+def process_manual_override(game_state, cards_db, player_name, form_data):
     """
     Przetwarza ręczną korektę stanu gry dla wybranego gracza.
     """
@@ -1568,32 +1572,111 @@ def process_manual_override(game_state, player_name, form_data):
         player_state["resources"] = {}
     if "influence" not in player_state:
         player_state["influence"] = {}
-        
+
     player_res = player_state["resources"]
     player_inf = player_state["influence"]
-    
+
     changes_log = []
 
-    # 1. Zmiana Zasobów
+    # --- 1. Zmiana Wartości (VP, Zasoby, Wpływy) ---
+    vp_log = _safe_add_resource(player_state, "victory_points", form_data.get("victory_points"))
+    if vp_log: changes_log.append(vp_log)
+
     res_keys = ["solari", "Spice", "water", "troops_garrison", "troops_in_conflict"]
     for key in res_keys:
         log = _safe_add_resource(player_res, key, form_data.get(key))
-        if log:
-            changes_log.append(log)
+        if log: changes_log.append(log)
 
-    # 2. Zmiana Wpływów
     inf_keys = {"faction_emperor": "emperor", "faction_guild": "guild", "faction_fremen": "fremen", "faction_bene_gesserit": "bene_gesserit"}
     for form_key, state_key in inf_keys.items():
         log = _safe_add_resource(player_inf, state_key, form_data.get(form_key))
-        if log:
-            changes_log.append(log)
+        if log: changes_log.append(log)
+
+    # --- 2. Dodaj Intrygę ---
+    intrigue_to_add = form_data.get("add_intrigue_id")
+    if intrigue_to_add:
+        if "intrigue_hand" not in player_state:
+            player_state["intrigue_hand"] = []
+        player_state["intrigue_hand"].append(intrigue_to_add)
+        changes_log.append(f"dodano intrygę '{intrigue_to_add}'")
+
+    # --- 3. Zmień Bonus Przyprawy (Globalnie) ---
+    locations_state = game_state.get("locations_state", {})
+    spice_fields = {
+        "bonus_the_greate_flat": "the_greate_flat",
+        "bonus_hagga_basin": "hagga_basin",
+        "bonus_imperial_basin": "imperial_basin"
+    }
+    for form_key, loc_id in spice_fields.items():
+        new_bonus_str = form_data.get(form_key)
+        if new_bonus_str: 
+            try:
+                new_bonus_val = int(new_bonus_str)
+                if new_bonus_val < 0: new_bonus_val = 0
+                if loc_id in locations_state and "bonus_spice" in locations_state[loc_id]:
+                    if locations_state[loc_id]["bonus_spice"] != new_bonus_val:
+                        locations_state[loc_id]["bonus_spice"] = new_bonus_val
+                        changes_log.append(f"ustawiono bonus {loc_id} na {new_bonus_val}")
+            except ValueError:
+                changes_log.append(f"błędna wartość dla {form_key} ('{new_bonus_str}')")
+
+    # --- 4. (NOWOŚĆ) Przetwarzanie i Walidacja Kart ---
+    # Używamy .get(key, "") aby obsłużyć puste pola
+    raw_hand = form_data.get("hand_cards", "").strip()
+    raw_discard = form_data.get("discard_pile_cards", "").strip()
+    raw_draw = form_data.get("draw_deck_cards", "").strip()
+    raw_pool = form_data.get("deck_pool_cards", "").strip()
+
+    # Konwertuj tekst na listy ID. Użyj filtra, aby usunąć puste stringi (np. z podwójnych przecinków)
+    new_hand = list(filter(None, [card.strip() for card in raw_hand.split(',')]))
+    new_discard = list(filter(None, [card.strip() for card in raw_discard.split(',')]))
+    new_draw = list(filter(None, [card.strip() for card in raw_draw.split(',')]))
+    new_pool = list(filter(None, [card.strip() for card in raw_pool.split(',')]))
+
+    # --- Walidacja ---
+    all_cards_in_play = new_hand + new_discard + new_draw
+    # Używamy 'copy' do policzenia, aby poprawnie obsłużyć duplikaty (np. 2x dagger)
+    temp_pool_for_validation = copy.copy(new_pool)
+
+    all_cards_accounted_for = True
+    missing_in_pool = []
+
+    for card_id in all_cards_in_play:
+        if card_id not in cards_db:
+            return False, f"Błąd Walidacji: Karta '{card_id}' nie istnieje w bazie danych (cards.json)."
+
+        if card_id in temp_pool_for_validation:
+            temp_pool_for_validation.remove(card_id) # "Odznacz" kartę
+        else:
+            all_cards_accounted_for = False
+            missing_in_pool.append(card_id)
+
+    if not all_cards_accounted_for:
+        return False, f"Błąd Walidacji: Próbujesz przypisać karty ({', '.join(missing_in_pool)}), które nie znajdują się w nowej liście 'Pełna Talia (deck_pool)'. Popraw listę deck_pool, aby zawierała WSZYSTKIE karty."
+
+    # Jeśli walidacja się powiodła, zapisz nowe listy
+    if (player_state.get("hand", []) != new_hand):
+        player_state["hand"] = new_hand
+        changes_log.append("zaktualizowano Rękę")
+
+    if (player_state.get("discard_pile", []) != new_discard):
+        player_state["discard_pile"] = new_discard
+        changes_log.append("zaktualizowano Stos Odrzuconych")
+
+    if (player_state.get("draw_deck", []) != new_draw):
+        player_state["draw_deck"] = new_draw
+        changes_log.append("zaktualizowano Talię do Dobrania")
+
+    if (player_state.get("deck_pool", []) != new_pool):
+        player_state["deck_pool"] = new_pool
+        changes_log.append("zaktualizowano Pełną Talię")
+    # --- Koniec Walidacji Kart ---
 
     if not changes_log:
         return True, "Nie wprowadzono żadnych zmian."
 
     summary = ", ".join(changes_log)
-    
-    # Zapisz również w historii głównej
+
     if "round_history" not in game_state:
         game_state["round_history"] = []
     game_state["round_history"].append({"summary": f"[KOREKTA] {player_name}: {summary}"})

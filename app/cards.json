@@ -19,24 +19,14 @@
       "description": "no agent effect."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "No agent effect."
     },
     "reveal_effect": {
       "persuasion": 0,
       "swords": 1,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -64,25 +54,19 @@
       "populated areas"
     ],
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "no agent effect."
     },
     "reveal_effect": {
       "persuasion": 1,
       "swords": 1,
       "possible actions": {
-        "action": {
-          "type": "action",
-          "description": "retreat up to two of your troops"
-        },
+        "actions": [
+          {
+            "type": "action",
+            "description": "retreat up to two of your troops"
+          }
+        ],
         "description": "retreat up to two of your troops"
       }
     }
@@ -107,24 +91,14 @@
       "CHOAM"
     ],
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "no agent effect."
     },
     "reveal_effect": {
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -153,27 +127,25 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "pay",
-              "resource": "Spice",
-              "amount": 2
-            },
-            {
-              "type": "gain",
-              "resource": "solari",
-              "amount": 3
-            },
-            {
-              "type": "gain",
-              "resource": "guild influence point",
-              "amount": 2
-            },
-            {
-              "type": "action",
-              "description": "pay 2 spice to gain 3 solari and 2 guild influence points."
-            }
-          ]
+          "pay": {
+            "type": "resource",
+            "resource": "Spice",
+            "amount": 2
+          }
+        },
+        {
+          "gain": {
+            "type": "resource",
+            "resource": "solari",
+            "amount": 3
+          }
+        },
+        {
+          "gain": {
+            "type": "resource",
+            "resource": "guild influence point",
+            "amount": 2
+          }
         }
       ],
       "description": "pay 2 spice to gain 3 solari and 2 guild influence points."
@@ -182,9 +154,7 @@
       "persuasion": 1,
       "swords": 1,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -213,7 +183,11 @@
     "agent_effect": {
       "actions": [
         {
-          "gain": { "type": "resource", "resource": "troops", "amount": 2 }
+          "gain": {
+            "type": "resource",
+            "resource": "troops",
+            "amount": 2
+          }
         }
       ],
       "description": "Gain 2 troops."
@@ -222,24 +196,30 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "requirement": {
-          "type": "condition",
-          "description": "You may pay 3 solari"
-        },
-        "action": {
-          "type": "pay",
-          "resource": "solari",
-          "amount": 3
-        },
-        "action2": {
-          "type": "gain",
-          "resource": "troops",
-          "amount": 2
-        },
-        "action3": {
-          "type": "action",
-          "description": "You may pay 3 solari to gain 2 additional troops which you could deploy to the conflict."
-        },
+        "actions": [
+          {
+            "exchange": [
+              {
+                "pay": {
+                  "type": "resource",
+                  "resource": "solari",
+                  "amount": 3
+                }
+              },
+              {
+                "gain": {
+                  "type": "resource",
+                  "resource": "troops",
+                  "amount": 2
+                }
+              },
+              {
+                "type": "action",
+                "description": "which you could deploy to the conflict."
+              }
+            ]
+          }
+        ],
         "description": "You may pay 3 solari to gain 2 additional troops which you could deploy to the conflict."
       }
     }
@@ -264,23 +244,14 @@
       "populated areas"
     ],
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ]
+      "actions": [],
+      "description": "no agent effect."
     },
     "reveal_effect": {
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -312,27 +283,25 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "pay",
-              "resource": "Spice",
-              "amount": 2
-            },
-            {
-              "type": "gain",
-              "resource": "solari",
-              "amount": 3
-            },
-            {
-              "type": "gain",
-              "resource": "guild influence point",
-              "amount": 2
-            },
-            {
-              "type": "action",
-              "description": "pay 2 spice to gain 3 solari and 2 guild influence points."
-            }
-          ]
+          "pay": {
+            "type": "resource",
+            "resource": "Spice",
+            "amount": 2
+          }
+        },
+        {
+          "gain": {
+            "type": "resource",
+            "resource": "solari",
+            "amount": 3
+          }
+        },
+        {
+          "gain": {
+            "type": "resource",
+            "resource": "guild influence point",
+            "amount": 2
+          }
         }
       ],
       "description": "pay 2 spice to gain 3 solari and 2 guild influence points."
@@ -341,14 +310,7 @@
       "persuasion": 2,
       "swords": 1,
       "possible actions": {
-        "requirement": {
-          "type": "condition",
-          "description": "for each fremen card you have in play"
-        },
-        "action": {
-          "type": "action",
-          "description": "you achieve 2 persuasive for each fremen card you have in play."
-        },
+        "actions": [],
         "description": "you achieve 2 persuasive for each fremen card you have in play."
       }
     }
@@ -373,24 +335,14 @@
       "description": "no buy effect."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "no agent effect."
     },
     "reveal_effect": {
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -420,36 +372,34 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
+          "pay": {
+            "type": "resource",
+            "resource": "solari",
+            "amount": 2
+          }
+        },
+        {
+          "choice": [
             {
-              "type": "pay",
-              "resource": "solari",
-              "amount": 2
+              "gain": {
+                "type": "resource",
+                "resource": "guild influence point",
+                "amount": 1
+              }
             },
             {
-              "type": "choice",
-              "choice": [
-                {
-                  "type": "gain",
-                  "resource": "guild influence point",
-                  "amount": 1
-                },
-                {
-                  "type": "gain",
-                  "resource": "emperor influence point",
-                  "amount": 1
-                },
-                {
-                  "type": "gain",
-                  "resource": "fremen influence point",
-                  "amount": 1
-                }
-              ],
-              "choose": 1
+              "gain": {
+                "type": "resource",
+                "resource": "emperor influence point",
+                "amount": 1
+              }
             },
             {
-              "type": "action",
-              "description": " pay 2 solari to gain 1 guild influence point or emperor influence point or fremen influence point."
+              "gain": {
+                "type": "resource",
+                "resource": "fremen influence point",
+                "amount": 1
+              }
             }
           ]
         }
@@ -460,19 +410,7 @@
       "persuasion": 0,
       "swords": 0,
       "possible actions": {
-        "requirement": {
-          "type": "condition",
-          "description": "if you have emperor token"
-        },
-        "action": {
-          "type": "action",
-          "description": "if you have emperor token you gain 4 persuasion."
-        },
-        "action1": {
-          "type": "gain",
-          "resource": "persuasion",
-          "amount": 4
-        },
+        "actions": [],
         "description": "if you have emperor token you gain 4 persuasion."
       }
     }
@@ -499,24 +437,14 @@
       "description": "no buy effect."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "no agent effect."
     },
     "reveal_effect": {
       "persuasion": 1,
       "swords": 2,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -546,14 +474,10 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "destroy",
-              "resource": "card",
-              "amount": 1,
-              "description": "Destroy card from unplayed pile or hand."
-            }
-          ]
+          "type": "destroy",
+          "resource": "card",
+          "amount": 1,
+          "description": "Destroy card from unplayed pile or hand."
         }
       ],
       "description": "Destroy one of your cards."
@@ -562,29 +486,7 @@
       "persuasion": 0,
       "swords": 0,
       "possible actions": {
-        "action": [
-          {
-            "type": "requirement",
-            "requirement": {
-              "type": "condition",
-              "description": "if you already have a fremen card in play"
-            }
-          },
-          {
-            "gain": {
-              "type": "resource",
-              "resource": "persuasion",
-              "amount": 3
-            }
-          },
-          {
-            "gain": {
-              "type": "resource",
-              "resource": "spice",
-              "amount": 1
-            }
-          }
-        ],
+        "actions": [],
         "description": "if you already have a fremen card in play, you gain 3 persuasion and 1 spice."
       }
     }
@@ -614,24 +516,14 @@
       "description": "no buy effect."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "no agent effect."
     },
     "reveal_effect": {
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -659,8 +551,17 @@
     },
     "agent_effect": {
       "actions": [
-        { "type": "destroy this card", "amount": 1 },
-        { "gain": { "type": "resource", "resource": "intrigue", "amount": 1 } }
+        {
+          "type": "destroy this card",
+          "amount": 1
+        },
+        {
+          "gain": {
+            "type": "resource",
+            "resource": "intrigue",
+            "amount": 1
+          }
+        }
       ],
       "description": "Destroy this card and gain 1 intrigue."
     },
@@ -668,9 +569,7 @@
       "persuasion": 1,
       "swords": 1,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -702,32 +601,34 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
+          "choice": [
             {
-              "type": "choice",
-              "choose": 1,
-              "choice": [
-                {
-                  "type": "gain",
-                  "resource": "guild influence point",
-                  "amount": 1
-                },
-                {
-                  "type": "gain",
-                  "resource": "emperor influence point",
-                  "amount": 1
-                },
-                {
-                  "type": "gain",
-                  "resource": "fremen influence point",
-                  "amount": 1
-                },
-                {
-                  "type": "gain",
-                  "resource": "bene gesserit influence point",
-                  "amount": 1
-                }
-              ]
+              "gain": {
+                "type": "resource",
+                "resource": "guild influence point",
+                "amount": 1
+              }
+            },
+            {
+              "gain": {
+                "type": "resource",
+                "resource": "emperor influence point",
+                "amount": 1
+              }
+            },
+            {
+              "gain": {
+                "type": "resource",
+                "resource": "fremen influence point",
+                "amount": 1
+              }
+            },
+            {
+              "gain": {
+                "type": "resource",
+                "resource": "bene gesserit influence point",
+                "amount": 1
+              }
             }
           ]
         }
@@ -738,9 +639,7 @@
       "persuasion": 1,
       "swords": 1,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -770,7 +669,11 @@
     "agent_effect": {
       "actions": [
         {
-          "gain": { "type": "resource", "resource": "troops", "amount": 2 }
+          "gain": {
+            "type": "resource",
+            "resource": "troops",
+            "amount": 2
+          }
         }
       ],
       "description": "Gain 2 troops."
@@ -779,10 +682,12 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "action",
-          "description": "deploy up to 3 troops from your garrison to the conflict."
-        },
+        "actions": [
+          {
+            "type": "action",
+            "description": "deploy up to 3 troops from your garrison to the conflict."
+          }
+        ],
         "description": "deploy up to 3 troops from your garrison to the conflict."
       }
     }
@@ -812,20 +717,14 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
+          "choice": [
             {
-              "type": "choice",
-              "choose": 1,
-              "choice": [
-                {
-                  "type": "action",
-                  "description": "Gain 1 card from unplayed pile"
-                },
-                {
-                  "type": "action",
-                  "description": "Draw a Bene Gesserit card from your discard pile"
-                }
-              ]
+              "type": "action",
+              "description": "Gain 1 card from unplayed pile"
+            },
+            {
+              "type": "action",
+              "description": "Draw a Bene Gesserit card from your discard pile"
             }
           ]
         }
@@ -836,9 +735,7 @@
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -868,32 +765,34 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
+          "choice": [
             {
-              "type": "choice",
-              "choose": 2,
-              "choice": [
-                {
-                  "type": "gain",
-                  "resource": "guild influence point",
-                  "amount": 1
-                },
-                {
-                  "type": "gain",
-                  "resource": "emperor influence point",
-                  "amount": 1
-                },
-                {
-                  "type": "gain",
-                  "resource": "fremen influence point",
-                  "amount": 1
-                },
-                {
-                  "type": "gain",
-                  "resource": "bene gesserit influence point",
-                  "amount": 1
-                }
-              ]
+              "gain": {
+                "type": "resource",
+                "resource": "guild influence point",
+                "amount": 1
+              }
+            },
+            {
+              "gain": {
+                "type": "resource",
+                "resource": "emperor influence point",
+                "amount": 1
+              }
+            },
+            {
+              "gain": {
+                "type": "resource",
+                "resource": "fremen influence point",
+                "amount": 1
+              }
+            },
+            {
+              "gain": {
+                "type": "resource",
+                "resource": "bene gesserit influence point",
+                "amount": 1
+              }
             }
           ]
         }
@@ -904,9 +803,7 @@
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -949,9 +846,7 @@
       "persuasion": 3,
       "swords": 1,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -981,9 +876,27 @@
       "actions": [
         {
           "exchange": [
-            { "pay": { "type": "resource", "resource": "water", "amount": 1 } },
-            { "gain": { "type": "resource", "resource": "solari", "amount": 1 } },
-            { "gain": { "type": "resource", "resource": "troops", "amount": 1 } }
+            {
+              "pay": {
+                "type": "resource",
+                "resource": "water",
+                "amount": 1
+              }
+            },
+            {
+              "gain": {
+                "type": "resource",
+                "resource": "solari",
+                "amount": 1
+              }
+            },
+            {
+              "gain": {
+                "type": "resource",
+                "resource": "troops",
+                "amount": 1
+              }
+            }
           ]
         }
       ],
@@ -993,9 +906,7 @@
       "water": 1,
       "swords": 2,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -1029,13 +940,11 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "gain",
-              "resource": "card from unplayed pile",
-              "amount": 1
-            }
-          ]
+          "gain": {
+            "type": "resource",
+            "resource": "card from unplayed pile",
+            "amount": 1
+          }
         }
       ],
       "description": "Gain 1 card from unplayed pile."
@@ -1044,11 +953,15 @@
       "water": 1,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "gain",
-          "resource": "intrigue",
-          "amount": 1
-        },
+        "actions": [
+          {
+            "gain": {
+              "type": "resource",
+              "resource": "intrigue",
+              "amount": 1
+            }
+          }
+        ],
         "description": "Gain 1 intrigue."
       }
     }
@@ -1078,7 +991,11 @@
     "agent_effect": {
       "actions": [
         {
-          "gain": { "type": "resource", "resource": "spice", "amount": 2 }
+          "gain": {
+            "type": "resource",
+            "resource": "spice",
+            "amount": 2
+          }
         }
       ],
       "description": "Gain 2 spice."
@@ -1087,24 +1004,7 @@
       "persuasion": 0,
       "swords": 4,
       "possible actions": {
-        "requirement": {
-          "type": "condition",
-          "description": "if you have 2 fremen influence points"
-        },
-        "action": {
-          "type": "gain",
-          "resource": "troops",
-          "amount": 4
-        },
-        "requirement2": {
-          "type": "condition",
-          "description": "if you have fremen token points"
-        },
-        "action2": {
-          "type": "gain",
-          "resource": "troops",
-          "amount": 6
-        },
+        "actions": [],
         "description": "if you have 2 fremen influence points you gain 4 troops, if you have fremen token points you gain 6 troops."
       }
     }
@@ -1133,13 +1033,11 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "gain",
-              "resource": "card from unplayed pile",
-              "amount": 1
-            }
-          ]
+          "gain": {
+            "type": "resource",
+            "resource": "card from unplayed pile",
+            "amount": 1
+          }
         }
       ],
       "description": "Gain 1 card from unplayed pile."
@@ -1148,9 +1046,7 @@
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -1205,13 +1101,11 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "gain",
-              "resource": "card from unplayed pile",
-              "amount": 2
-            }
-          ]
+          "gain": {
+            "type": "resource",
+            "resource": "card from unplayed pile",
+            "amount": 2
+          }
         }
       ],
       "description": "Gain 2 cards from unplayed pile."
@@ -1220,9 +1114,7 @@
       "persuasion": 3,
       "swords": 1,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -1250,26 +1142,22 @@
       "description": "no buy effect."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "If you have another Bene Gesserit card in play, each opponent discards two cards."
     },
     "reveal_effect": {
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "gain",
-          "resource": "spice",
-          "amount": 2
-        },
+        "actions": [
+          {
+            "gain": {
+              "type": "resource",
+              "resource": "spice",
+              "amount": 2
+            }
+          }
+        ],
         "description": "you gain 2 Spice "
       }
     }
@@ -1298,24 +1186,14 @@
       "description": "no buy effect."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "Each opponent chooses: Discard a card -OR- lose a displayed troop."
     },
     "reveal_effect": {
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -1346,7 +1224,11 @@
     "agent_effect": {
       "actions": [
         {
-          "gain": { "type": "resource", "resource": "water", "amount": 1 }
+          "gain": {
+            "type": "resource",
+            "resource": "water",
+            "amount": 1
+          }
         }
       ],
       "description": "Gain 1 water."
@@ -1355,9 +1237,7 @@
       "persuasion": 2,
       "swords": 3,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -1384,25 +1264,14 @@
       "description": "no buy effect."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "use signet effect of your player card",
-              "amount": 1
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "use signet effect of your player card."
     },
     "reveal_effect": {
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -1431,18 +1300,16 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "requirement",
-              "resource": "guild influence point",
-              "amount": 2
-            },
-            {
-              "type": "gain",
-              "resource": "card from unplayed pile",
-              "amount": 2
-            }
-          ]
+          "type": "requirement",
+          "resource": "guild influence point",
+          "amount": 2
+        },
+        {
+          "gain": {
+            "type": "resource",
+            "resource": "card from unplayed pile",
+            "amount": 2
+          }
         }
       ],
       "description": "Gain 2 cards from the unplayed pile. if you have at least 2 guild influence points."
@@ -1451,11 +1318,15 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "gain",
-          "resource": "solari",
-          "amount": 1
-        },
+        "actions": [
+          {
+            "gain": {
+              "type": "resource",
+              "resource": "solari",
+              "amount": 1
+            }
+          }
+        ],
         "description": "You gain 1 Solari."
       }
     }
@@ -1485,12 +1356,8 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "destroy this card",
-              "amount": 1
-            }
-          ]
+          "type": "destroy this card",
+          "amount": 1
         }
       ],
       "description": "Trash this card."
@@ -1499,9 +1366,7 @@
       "persuasion": 0,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -1530,25 +1395,14 @@
       "description": "no buy effect."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "no agent effect."
     },
     "reveal_effect": {
       "persuasion": 0,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "effect",
-          "description": "the 'spice must flow' card costs 3 persuasion less to acquire this turn."
-        },
+        "actions": [],
         "description": "the 'spice must flow' card costs 3 persuasion less to acquire this turn."
       }
     }
@@ -1576,30 +1430,14 @@
       "description": "no buy effect."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "no agent effect."
     },
     "reveal_effect": {
       "persuasion": 1,
       "swords": 1,
       "possible actions": {
-        "requirement": {
-          "type": "condition",
-          "description": "Fremen Bond"
-        },
-        "action": {
-          "type": "gain",
-          "resource": "spice",
-          "amount": 1
-        },
+        "actions": [],
         "description": "Fremen Bond: Gain 1 Spice"
       }
     }
@@ -1629,23 +1467,21 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "destroy card",
-              "resource": "card",
-              "amount": 1
-            },
-            {
-              "type": "requirement",
-              "resource": "bene gesserit",
-              "amount": 1
-            },
-            {
-              "type": "gain",
-              "resource": "spice",
-              "amount": 2
-            }
-          ]
+          "type": "destroy card",
+          "resource": "card",
+          "amount": 1
+        },
+        {
+          "type": "requirement",
+          "resource": "bene gesserit",
+          "amount": 1
+        },
+        {
+          "gain": {
+            "type": "resource",
+            "resource": "spice",
+            "amount": 2
+          }
         }
       ],
       "description": "Destroy one of your cards and if you have another Bene Gesserit card in play: Gain 2 Spice."
@@ -1654,9 +1490,7 @@
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -1685,13 +1519,11 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "gain",
-              "resource": "card from unplayed pile",
-              "amount": 1
-            }
-          ]
+          "gain": {
+            "type": "resource",
+            "resource": "card from unplayed pile",
+            "amount": 1
+          }
         }
       ],
       "description": "Gain 1 card from unplayed pile."
@@ -1700,9 +1532,7 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -1729,11 +1559,23 @@
       "description": "no buy effect."
     },
     "agent_effect": {
-     "actions": [
+      "actions": [
         {
           "exchange": [
-            { "pay": { "type": "resource", "resource": "spice", "amount": 2 } },
-            { "gain": { "type": "resource", "resource": "troops", "amount": 3 } }
+            {
+              "pay": {
+                "type": "resource",
+                "resource": "spice",
+                "amount": 2
+              }
+            },
+            {
+              "gain": {
+                "type": "resource",
+                "resource": "troops",
+                "amount": 3
+              }
+            }
           ]
         }
       ],
@@ -1743,9 +1585,7 @@
       "persuasion": 2,
       "swords": 1,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -1776,25 +1616,19 @@
       "description": "Gain 1 water on buy."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "no agent effect."
     },
     "reveal_effect": {
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "action",
-          "description": "retreat any number of your troops"
-        },
+        "actions": [
+          {
+            "type": "action",
+            "description": "retreat any number of your troops"
+          }
+        ],
         "description": "retreat any number of your troops"
       }
     }
@@ -1824,13 +1658,9 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "destroy card",
-              "resource": "card",
-              "amount": 1
-            }
-          ]
+          "type": "destroy card",
+          "resource": "card",
+          "amount": 1
         }
       ],
       "description": "Destroy 1 card."
@@ -1839,15 +1669,7 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "requirement": {
-          "type": "condition",
-          "description": "if you have any other fremen cards in play"
-        },
-        "action": {
-          "type": "gain",
-          "resource": "swords",
-          "amount": 3
-        },
+        "actions": [],
         "description": " if you have any other fremen cards in play: Gain 3 swords."
       }
     }
@@ -1876,7 +1698,11 @@
     "agent_effect": {
       "actions": [
         {
-          "gain": { "type": "resource", "resource": "solari", "amount": 3 }
+          "gain": {
+            "type": "resource",
+            "resource": "solari",
+            "amount": 3
+          }
         }
       ],
       "description": "Gain 3 Solari. "
@@ -1885,16 +1711,26 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "pay",
-          "resource": "solari",
-          "amount": 6
-        },
-        "action1": {
-          "type": "gain",
-          "resource": "vp",
-          "amount": 1
-        },
+        "actions": [
+          {
+            "exchange": [
+              {
+                "pay": {
+                  "type": "resource",
+                  "resource": "solari",
+                  "amount": 6
+                }
+              },
+              {
+                "gain": {
+                  "type": "resource",
+                  "resource": "vp",
+                  "amount": 1
+                }
+              }
+            ]
+          }
+        ],
         "description": "pay 6 Solari to gain 1 Victory Point."
       }
     }
@@ -1921,25 +1757,19 @@
       "description": "no buy effect."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "no agent effect."
     },
     "reveal_effect": {
       "persuasion": 0,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "action",
-          "description": "Send one of your Agents from anywhere to ANY board space (even if occupied)."
-        },
+        "actions": [
+          {
+            "type": "action",
+            "description": "Send one of your Agents from anywhere to ANY board space (even if occupied)."
+          }
+        ],
         "description": "Send one of your Agents from anywhere to ANY board space (even if occupied)."
       }
     }
@@ -1968,22 +1798,20 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
+          "choice": [
             {
-              "type": "choice",
-              "choose": 1,
-              "choice": [
-                {
-                  "type": "gain",
-                  "resource": "guild influence point",
-                  "amount": 1
-                },
-                {
-                  "type": "gain",
-                  "resource": "spice",
-                  "amount": 2
-                }
-              ]
+              "gain": {
+                "type": "resource",
+                "resource": "guild influence point",
+                "amount": 1
+              }
+            },
+            {
+              "gain": {
+                "type": "resource",
+                "resource": "spice",
+                "amount": 2
+              }
             }
           ]
         }
@@ -1994,21 +1822,30 @@
       "persuasion": 0,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "requirement",
-          "resource": "guild token",
-          "amount": 1
-        },
-        "action1": {
-          "type": "pay",
-          "resource": "spice",
-          "amount": 3
-        },
-        "action2": {
-          "type": "gain",
-          "resource": "vp",
-          "amount": 1
-        },
+        "actions": [
+          {
+            "type": "requirement",
+            "description": "if you have guild token (alliance)"
+          },
+          {
+            "exchange": [
+              {
+                "pay": {
+                  "type": "resource",
+                  "resource": "spice",
+                  "amount": 3
+                }
+              },
+              {
+                "gain": {
+                  "type": "resource",
+                  "resource": "vp",
+                  "amount": 1
+                }
+              }
+            ]
+          }
+        ],
         "description": "You may pay 3 Spice to gain 1 Victory Point."
       }
     }
@@ -2039,13 +1876,11 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "gain",
-              "resource": "card from unplayed pile",
-              "amount": 1
-            }
-          ]
+          "gain": {
+            "type": "resource",
+            "resource": "card from unplayed pile",
+            "amount": 1
+          }
         }
       ],
       "description": "Gain 1 card from the unplayed pile."
@@ -2054,9 +1889,7 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -2098,9 +1931,7 @@
       "persuasion": 1,
       "swords": 1,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -2125,35 +1956,14 @@
       "description": "no buy effect."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "No agent effect."
     },
     "reveal_effect": {
       "persuasion": 1,
       "swords": 1,
       "possible actions": {
-        "requirement": {
-          "type": "condition",
-          "description": "When this card is trashed"
-        },
-        "action": {
-          "type": "requirement",
-          "resource": "played another card with destroy ability before",
-          "amount": 1
-        },
-        "action1": {
-          "type": "gain",
-          "resource": "solari",
-          "amount": 4
-        },
+        "actions": [],
         "description": "When this card is trashed: 4 solari."
       }
     }
@@ -2181,24 +1991,14 @@
       "description": "no buy effect."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "No agent effect."
     },
     "reveal_effect": {
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -2228,7 +2028,11 @@
     "agent_effect": {
       "actions": [
         {
-          "gain": { "type": "resource", "resource": "solari", "amount": 1 }
+          "gain": {
+            "type": "resource",
+            "resource": "solari",
+            "amount": 1
+          }
         }
       ],
       "description": "Gain 1 solari."
@@ -2237,16 +2041,19 @@
       "persuasion": 0,
       "swords": 1,
       "possible actions": {
-        "action": {
-          "type": "requirement",
-          "resource": "played fremen card",
-          "amount": 1
-        },
-        "action1": {
-          "type": "gain",
-          "resource": "fremen influence point",
-          "amount": 1
-        },
+        "actions": [
+          {
+            "type": "requirement",
+            "description": "If you have a played Fremen card"
+          },
+          {
+            "gain": {
+              "type": "resource",
+              "resource": "fremen influence point",
+              "amount": 1
+            }
+          }
+        ],
         "description": "If you have a played Fremen card: Gain 1 Fremen Influence Point."
       }
     }
@@ -2290,26 +2097,22 @@
       "description": "Gain 1 influence point with all 4 factions."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "No agent effect."
     },
     "reveal_effect": {
       "persuasion": 0,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "gain",
-          "resource": "solari",
-          "amount": 3
-        },
+        "actions": [
+          {
+            "gain": {
+              "type": "resource",
+              "resource": "solari",
+              "amount": 3
+            }
+          }
+        ],
         "description": "No more effects."
       }
     }
@@ -2336,26 +2139,22 @@
       "description": "no buy effect."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "Double the base (not bonus) spice you harvest with this Agent."
     },
     "reveal_effect": {
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "gain",
-          "resource": "spice",
-          "amount": 1
-        },
+        "actions": [
+          {
+            "gain": {
+              "type": "resource",
+              "resource": "spice",
+              "amount": 1
+            }
+          }
+        ],
         "description": "You gain 1 Spice."
       }
     }
@@ -2383,37 +2182,33 @@
       "description": "no buy effect."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "no agent effect."
     },
     "reveal_effect": {
       "persuasion": 0,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "choice",
-          "choose": 1,
-          "choice": [
-            {
-              "type": "gain",
-              "resource": "persuasion",
-              "amount": 2
-            },
-            {
-              "type": "gain",
-              "resource": "swords",
-              "amount": 2
-            }
-          ]
-        },
+        "actions": [
+          {
+            "choice": [
+              {
+                "gain": {
+                  "type": "resource",
+                  "resource": "persuasion",
+                  "amount": 2
+                }
+              },
+              {
+                "gain": {
+                  "type": "resource",
+                  "resource": "swords",
+                  "amount": 2
+                }
+              }
+            ]
+          }
+        ],
         "description": "You gain 2 Persuasion or 2 Swords."
       }
     }
@@ -2445,12 +2240,8 @@
       "description": "Choose any board space. Opponents can't send their next Agents there this round.",
       "actions": [
         {
-          "action": [
-            {
-              "type": "action",
-              "description": "Choose any board space. Opponents can't send their next Agents there this round."
-            }
-          ]
+          "type": "action",
+          "description": "Choose any board space. Opponents can't send their next Agents there this round."
         }
       ]
     },
@@ -2458,9 +2249,7 @@
       "persuasion": 2,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -2489,24 +2278,14 @@
       "description": "gain 1 victory point."
     },
     "agent_effect": {
-      "actions": [
-        {
-          "action": [
-            {
-              "type": "none"
-            }
-          ]
-        }
-      ],
+      "actions": [],
       "description": "No agent effect."
     },
     "reveal_effect": {
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -2536,13 +2315,9 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "destroy card",
-              "resource": "card",
-              "amount": 1
-            }
-          ]
+          "type": "destroy card",
+          "resource": "card",
+          "amount": 1
         }
       ],
       "description": "Trash a card."
@@ -2551,9 +2326,7 @@
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -2586,13 +2359,9 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "destroy this card",
-              "resource": "card",
-              "amount": 1
-            }
-          ]
+          "type": "destroy this card",
+          "resource": "card",
+          "amount": 1
         }
       ],
       "description": "Trash this card. "
@@ -2601,9 +2370,7 @@
       "persuasion": 0,
       "swords": 0,
       "possible actions": {
-        "action": {
-          "type": "none"
-        },
+        "actions": [],
         "description": "No more effects."
       }
     }
@@ -2633,11 +2400,8 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "action","description": "Fremen Bond: Gain 1 Spice."
-            }
-          ]
+          "type": "action",
+          "description": "Fremen Bond: Gain 1 Spice."
         }
       ],
       "description": "Fremen Bond: Gain 1 Spice."
@@ -2646,16 +2410,7 @@
       "persuasion": 1,
       "swords": 1,
       "possible actions": {
-        "action": {
-          "type": "requirement",
-          "resource": "played another fremen card",
-          "amount": 1
-        },
-        "action1": {
-          "type": "gain",
-          "resource": "spice",
-          "amount": 1
-        },
+        "actions": [],
         "description": "gain 1 spice if you played another fremen card before during this turn."
       }
     }
@@ -2685,11 +2440,8 @@
     "agent_effect": {
       "actions": [
         {
-          "action": [
-            {
-              "type": "action","description": "Each opponent loses one garrisoned troop. "
-            }
-          ]
+          "type": "action",
+          "description": "Each opponent loses one garrisoned troop. "
         }
       ],
       "description": "Each opponent loses one garrisoned troop. "
@@ -2698,10 +2450,12 @@
       "persuasion": 0,
       "swords": 3,
       "possible actions": {
-        "action": {
-          "type": "action",
-          "description": "You may deploy a troop from your garrison to the Conflict."
-        },
+        "actions": [
+          {
+            "type": "action",
+            "description": "You may deploy a troop from your garrison to the Conflict."
+          }
+        ],
         "description": "You may deploy a troop from your garrison to the Conflict."
       }
     }
@@ -2709,26 +2463,33 @@
   "missionaria_protectiva": {
     "name": "Missionaria Protectiva",
     "type": "Agent",
-    "agent_symbols": ["populated areas"],
+    "agent_symbols": [
+      "populated areas"
+    ],
     "buy_cost": [
-      { "type": "pay", "resource": "persuasion", "amount": 1}
+      {
+        "type": "pay",
+        "resource": "persuasion",
+        "amount": 1
+      }
     ],
     "buy_effect": {
       "gain": [
-        { "type": "none" }
+        {
+          "type": "none"
+        }
       ],
       "description": "no buy effect."
     },
     "agent_effect": {
-      "actions": [
-        { "type": "none" }
-      ],
+      "actions": [],
       "description": "if you used already another bene gesserit card this turn, gain any 1 influence point."
     },
     "reveal_effect": {
       "persuasion": 1,
       "swords": 0,
       "possible actions": {
+        "actions": [],
         "description": "No more effects."
       }
     }

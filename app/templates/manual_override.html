@@ -4,91 +4,172 @@
     <meta charset="UTF-8">
     <title>Ręczna Korekta Stanu Gry</title>
     <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        body { font-family: sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
         h1 { color: #d32f2f; }
         fieldset { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; background: #f9f9f9; }
         legend { font-size: 1.2em; font-weight: bold; padding: 0 10px; }
-        select, button, input {
+        select, button, input, textarea {
             padding: 10px; margin-top: 5px; border: 1px solid #ccc; 
             border-radius: 4px; width: 100%; box-sizing: border-box; 
         }
+        textarea {
+            font-family: monospace;
+            font-size: 0.9em;
+            height: 100px;
+            background: #fff;
+        }
         button { background-color: #d32f2f; color: white; cursor: pointer; font-size: 1.1em; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
         .full-width { grid-column: 1 / -1; }
         label { font-weight: bold; display: block; margin-bottom: 5px; }
+
+        .container { display: flex; gap: 20px; }
+        .main-form { flex: 2; }
+        .sidebar-legend { flex: 1; background: #f0f0f0; padding: 15px; border-radius: 5px; }
+        .sidebar-legend h3 { margin-top: 0; }
+        .sidebar-legend ul { padding-left: 20px; font-family: monospace; font-size: 0.9em; }
     </style>
 </head>
 <body>
     <h1>Ręczna Korekta Stanu Gry</h1>
-    <p>Użyj tego formularza, aby manualnie zastosować efekty kart (np. "Test Człowieczeństwa") lub skorygować błędy. Wprowadź tylko te wartości, które chcesz zmienić (np. '1' aby dodać 1, '-2' aby odjąć 2). Pozostaw puste pola, których nie zmieniasz.</p>
+    <p>Użyj tego formularza, aby manualnie zastosować efekty kart lub skorygować błędy. Wprowadź tylko te wartości, które chcesz zmienić.</p>
     <p><a href="{{ url_for('index') }}">&larr; Wróć do Głównej Gry</a></p>
 
-    <form method="POST" action="{{ url_for('apply_override') }}">
-        <fieldset>
-            <legend>1. Wybierz Gracza</legend>
-            <select id="player_name" name="player_name" required>
-                <option value="">-- Wybierz Gracza --</option>
-                {% for name in player_names %}
-                    <option value="{{ name }}">{{ name }}</option>
-                {% endfor %}
-            </select>
-        </fieldset>
-        
-        <fieldset>
-            <legend>2. Zmień Zasoby</legend>
-            <div class="grid">
-                <div>
-                    <label for="solari">Solari:</label>
-                    <input type="number" id="solari" name="solari" placeholder="np. 2 lub -1">
-                </div>
-                <div>
-                    <label for="Spice">Przyprawa (Spice):</label>
-                    <input type="number" id="Spice" name="Spice" placeholder="np. 2 lub -1">
-                </div>
-                <div>
-                    <label for="water">Woda:</label>
-                    <input type="number" id="water" name="water" placeholder="np. 2 lub -1">
-                </div>
-            </div>
-        </fieldset>
+    <fieldset>
+        <legend>1. Wybierz Gracza (Wymagane)</legend>
+        <p>Wybór gracza odświeży stronę i załaduje jego aktualne dane.</p>
+        <select id="player_name_selector" name="player_name_selector">
+            <option value="">-- Wybierz Gracza --</option>
+            {% for name in player_names %}
+                <option value="{{ name }}" {% if name == selected_player_name %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+        </select>
+    </fieldset>
 
-        <fieldset>
-            <legend>3. Zmień Wojsko</legend>
-             <div class="grid">
-                <div>
-                    <label for="troops_garrison">Garnizon (Garrison):</label>
-                    <input type="number" id="troops_garrison" name="troops_garrison" placeholder="Dodaj lub odejmij">
-                </div>
-                <div>
-                    <label for="troops_in_conflict">W Konflikcie (Conflict):</label>
-                    <input type="number" id="troops_in_conflict" name="troops_in_conflict" placeholder="Dodaj lub odejmij">
-                </div>
-            </div>
-        </fieldset>
-        
-        <fieldset>
-            <legend>4. Zmień Wpływy (Frakcje)</legend>
-            <div class="grid">
-                <div>
-                    <label for="faction_emperor">Imperator:</label>
-                    <input type="number" id="faction_emperor" name="faction_emperor" placeholder="np. 1 lub -1">
-                </div>
-                 <div>
-                    <label for="faction_guild">Gildia:</label>
-                    <input type="number" id="faction_guild" name="faction_guild" placeholder="np. 1 lub -1">
-                </div>
-                 <div>
-                    <label for="faction_fremen">Fremeni:</label>
-                    <input type="number" id="faction_fremen" name="faction_fremen" placeholder="np. 1 lub -1">
-                </div>
-                 <div>
-                    <label for="faction_bene_gesserit">Bene Gesserit:</label>
-                    <input type="number" id="faction_bene_gesserit" name="faction_bene_gesserit" placeholder="np. 1 lub -1">
-                </div>
-            </div>
-        </fieldset>
-        
-        <button type="submit" onclick="return confirm('Czy na pewno chcesz ręcznie zmodyfikować stan gry?')">Zastosuj Korektę</button>
-    </form>
+    {% if selected_player_name %}
+    <div class="container">
+        <div class="main-form">
+            <form method="POST" action="{{ url_for('apply_override') }}">
+                <input type="hidden" name="player_name" value="{{ selected_player_name }}">
+
+                <fieldset>
+                    <legend>2. Zmień Wartości (Gracz: {{ selected_player_name }})</legend>
+                    <div class="grid-3">
+                        <div>
+                            <label for="victory_points">Punkty Zwycięstwa:</label>
+                            <input type="number" id="victory_points" name="victory_points" placeholder="np. 1 lub -1">
+                        </div>
+                        <div>
+                            <label for="solari">Solari:</label>
+                            <input type="number" id="solari" name="solari" placeholder="np. 2 lub -1">
+                        </div>
+                        <div>
+                            <label for="Spice">Przyprawa (Spice):</label>
+                            <input type="number" id="Spice" name="Spice" placeholder="np. 2 lub -1">
+                        </div>
+                        <div>
+                            <label for="water">Woda:</label>
+                            <input type="number" id="water" name="water" placeholder="np. 2 lub -1">
+                        </div>
+                        <div>
+                            <label for="troops_garrison">Garnizon:</label>
+                            <input type="number" id="troops_garrison" name="troops_garrison" placeholder="np. 2 lub -1">
+                        </div>
+                        <div>
+                            <label for="troops_in_conflict">W Konflikcie:</label>
+                            <input type="number" id="troops_in_conflict" name="troops_in_conflict" placeholder="np. 2 lub -1">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>3. Edytuj Karty (Gracz: {{ selected_player_name }})</legend>
+                    <p>Ostrożnie edytuj listy ID kart, oddzielając je przecinkiem i spacją (np. `dagger, dagger, reconnaissance`). Błędy mogą uszkodzić stan gry.</p>
+
+                    <label for="hand_cards">Ręka (`hand`):</label>
+                    <textarea id="hand_cards" name="hand_cards">{{ selected_player_data.hand }}</textarea>
+
+                    <label for="discard_pile_cards">Odrzucone (`discard_pile`):</label>
+                    <textarea id="discard_pile_cards" name="discard_pile_cards">{{ selected_player_data.discard_pile }}</textarea>
+
+                    <label for="draw_deck_cards">Do Dobrania (`draw_deck`):</label>
+                    <textarea id="draw_deck_cards" name="draw_deck_cards">{{ selected_player_data.draw_deck }}</textarea>
+
+                    <hr style="margin: 15px 0;">
+                    <label for="deck_pool_cards">Pełna Talia (`deck_pool`) - NAJWAŻNIEJSZE:</label>
+                    <p style="font-size: 0.8em; color: #555;">To jest "matka" wszystkich kart. Każda karta w `hand`, `discard` i `draw` MUSI znajdować się na tej liście.</p>
+                    <textarea id="deck_pool_cards" name="deck_pool_cards">{{ selected_player_data.deck_pool }}</textarea>
+                </fieldset>
+
+                <fieldset>
+                    <legend>4. Zmień Wpływy (Gracz: {{ selected_player_name }})</legend>
+                    <div class="grid">
+                        <div><label for="faction_emperor">Imperator:</label><input type="number" id="faction_emperor" name="faction_emperor" placeholder="np. 1 lub -1"></div>
+                        <div><label for="faction_guild">Gildia:</label><input type="number" id="faction_guild" name="faction_guild" placeholder="np. 1 lub -1"></div>
+                        <div><label for="faction_fremen">Fremeni:</label><input type="number" id="faction_fremen" name="faction_fremen" placeholder="np. 1 lub -1"></div>
+                        <div><label for="faction_bene_gesserit">Bene Gesserit:</label><input type="number" id="faction_bene_gesserit" name="faction_bene_gesserit" placeholder="np. 1 lub -1"></div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>5. Dodaj Intrygę (Gracz: {{ selected_player_name }})</legend>
+                    <label for="add_intrigue_id">Dodaj Intrygę:</label>
+                    <select id="add_intrigue_id" name="add_intrigue_id">
+                        <option value="">-- Wybierz, by dodać --</option>
+                        {% for intrigue_id, intrigue_data in all_intrigues.items() %}
+                            <option value="{{ intrigue_id }}">{{ intrigue_data.name }} ({{ intrigue_data.type }})</option>
+                        {% endfor %}
+                    </select>
+                </fieldset>
+
+                <fieldset>
+                    <legend>6. Ustaw Bonus Przyprawy (Globalne)</legend>
+                    <div class="grid-3">
+                        <div>
+                            <label for="bonus_the_greate_flat">The Great Flat:</label>
+                            <input type="number" id="bonus_the_greate_flat" name="bonus_the_greate_flat" value="{{ current_bonuses.the_greate_flat }}" min="0">
+                        </div>
+                        <div>
+                            <label for="bonus_hagga_basin">Hagga Basin:</label>
+                            <input type="number" id="bonus_hagga_basin" name="bonus_hagga_basin" value="{{ current_bonuses.hagga_basin }}" min="0">
+                        </div>
+                        <div>
+                            <label for="bonus_imperial_basin">Imperial Basin:</label>
+                            <input type="number" id="bonus_imperial_basin" name="bonus_imperial_basin" value="{{ current_bonuses.imperial_basin }}" min="0">
+                        </div>
+                    </div>
+                </fieldset>
+
+                <button type="submit" onclick="return confirm('Czy na pewno chcesz ręcznie zmodyfikować stan gry?')">Zastosuj Korektę</button>
+            </form>
+        </div>
+
+        <aside class="sidebar-legend">
+            <h3>Legenda Kart ({{ selected_player_name }})</h3>
+            <p>Użyj tych ID podczas edycji pól kart:</p>
+            <ul>
+                {% for id, name in deck_pool_legend.items() %}
+                    <li><strong>{{ id }}</strong> = {{ name }}</li>
+                {% else %}
+                    <li>Brak kart w talii.</li>
+                {% endfor %}
+            </ul>
+        </aside>
+    </div>
+    {% endif %}
+
+    <script>
+        // Skrypt do przeładowania strony z wybranym graczem
+        document.getElementById('player_name_selector').addEventListener('change', function() {
+            const selectedPlayer = this.value;
+            if (selectedPlayer) {
+                // Zbuduj nowy URL z parametrem ?player_name=...
+                const url = new URL(window.location.href);
+                url.searchParams.set('player_name', selectedPlayer);
+                window.location.href = url.href;
+            }
+        });
+    </script>
 </body>
 </html>
