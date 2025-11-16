@@ -98,7 +98,7 @@
       { "type": "none" }
     ],
     "actions": [
-      { "gain": { "type": "resource", "resource": "Spice", "amount": 2 } },
+      { "gain": { "type": "resource", "resource": "Spice", "amount": 1 } },
       { "gain": { "type": "extra gain", "description": "you take all extra Spice from this location" } }
     ],
     "conflict": [
