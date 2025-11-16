@@ -230,7 +230,7 @@ def process_move(game_state, locations_db, cards_db, leaders_db, player_name, ca
     loc_summary_parts = [] # Lista na podsumowanie efektów lokacji
     
     # Wywołujemy "mądrą" funkcję, przekazując jej game_state
-    _process_action_list(player_state, location_actions_list, loc_summary_parts, game_state, location_id=location_id, **kwargs)    
+    _process_action_list(player_state, location_actions_list, loc_summary_parts, game_state, location_id=location_id, cards_db=cards_db, **kwargs)    
     if loc_summary_parts:
         move_summary += f" | Location: {', '.join(loc_summary_parts)}"
     else:
@@ -244,7 +244,7 @@ def process_move(game_state, locations_db, cards_db, leaders_db, player_name, ca
         intrigue_summary_parts = []
         
         # Używamy "mądrej" funkcji, przekazując kwargs na wypadek przyszłych zmian
-        _process_action_list(player_state, intrigue_action, intrigue_summary_parts, game_state, **kwargs) 
+        _process_action_list(player_state, intrigue_action, intrigue_summary_parts, game_state, cards_db=cards_db, location_id=location_id, **kwargs) 
         
         if intrigue_summary_parts:
             move_summary += f" | Earl's Ability: {', '.join(intrigue_summary_parts)}"
@@ -263,7 +263,7 @@ def process_move(game_state, locations_db, cards_db, leaders_db, player_name, ca
             
             # Przekaż dane lidera również tutaj (na wypadek, gdyby sygnet dawał przyprawę Arianie)
             signet_summary_parts = []
-            _process_action_list(player_state, signet_actions, signet_summary_parts, game_state, **kwargs)
+            _process_action_list(player_state, signet_actions, signet_summary_parts, game_state, location_id=location_id, cards_db=cards_db, **kwargs)
             if signet_summary_parts:
                 move_summary += f" | Signet ({signet_ability.get('name', 'Ability')}): {', '.join(signet_summary_parts)}"
             else:
@@ -277,7 +277,7 @@ def process_move(game_state, locations_db, cards_db, leaders_db, player_name, ca
         agent_actions_list = agent_effect.get("actions", [])
         
         card_summary_parts = [] # Lista na podsumowanie efektów karty
-        _process_action_list(player_state, agent_actions_list, card_summary_parts, game_state, **kwargs)
+        _process_action_list(player_state, agent_actions_list, card_summary_parts, game_state, cards_db=cards_db, location_id=location_id, **kwargs)
         
         if card_summary_parts:
             move_summary += f" | Card: {', '.join(card_summary_parts)}"
@@ -400,31 +400,31 @@ def _find_decision_in_actions(actions_list):
         return {"type": "simple"}
 
     for item in actions_list:
-        if not item: continue
-        
-        # Klucz operacji to zazwyczaj pierwszy klucz w słowniku
-        operation_key = list(item.keys())[0]
+        if not item or not isinstance(item, dict):
+            continue
 
-        if operation_key == "choice":
+        # Poprawiona logika: Sprawdź, czy klucz istnieje w słowniku
+        if "choice" in item:
             return {
                 "type": "choice",
                 "data": item["choice"]
             }
-        
-        if operation_key == "exchange":
+
+        if "exchange" in item:
             return {
                 "type": "exchange",
                 "data": item["exchange"]
             }
 
-        if operation_key == "pay":
-             # Zakładamy, że "pay" na tym poziomie to opcjonalna opłata
+        if "pay" in item:
+            # Zakładamy, że "pay" na tym poziomie to opcjonalna opłata
             return {
                 "type": "conditional_pay",
                 "data": item["pay"]
             }
-    
+
     return {"type": "simple"}
+
 
 def get_agent_move_requirements(card_data, location_data, leaders_db, player_state):
     """
@@ -506,7 +506,6 @@ def check_and_advance_phase(game_state, cards_db):
     return game_state
 
 
-
 def _check_requirement(player_state, requirement_list, game_state):
     """(Helper) Sprawdza, czy gracz spełnia wymagania."""
     log_summary = []
@@ -558,6 +557,42 @@ def _check_requirement(player_state, requirement_list, game_state):
             log_summary.append(f"Wymaganie '{req.get('description', 'nieznane')}' sprawdzane manualnie (założono TRUE).")
             
     return all_met, " ".join(log_summary)
+
+def _apply_cost(player_state, pay_data, log_summary):
+    """(Helper) Próbuje pobrać koszt od gracza. Zwraca True/False."""
+    if not isinstance(pay_data, list):
+        pay_data = [pay_data]
+        
+    player_resources = player_state.get("resources", {})
+    
+    # Krok 1: Sprawdź, czy gracza stać
+    for cost in pay_data:
+        resource = cost.get("resource")
+        amount = cost.get("amount", 0)
+        
+        # Specjalna obsługa dla "feigned_incident"
+        if resource == "troops in conflict":
+            # To musiałoby być obsługiwane przez stan konfliktu, tu symulujemy
+            if player_state.get("troops_in_conflict", 0) < amount:
+                 log_summary.append(f"Niepowodzenie: brak {amount} wojsk w konflikcie.")
+                 return False
+        elif player_resources.get(resource, 0) < amount:
+            log_summary.append(f"Niepowodzenie: brak {amount} {resource}.")
+            return False
+            
+    # Krok 2: Pobierz zasoby
+    for cost in pay_data:
+        resource = cost.get("resource")
+        amount = cost.get("amount", 0)
+        
+        if resource == "troops in conflict":
+            player_state["troops_in_conflict"] = player_state.get("troops_in_conflict", 0) - amount
+            log_summary.append(f"Usunięto {amount} wojsk z konfliktu.")
+        else:
+            player_resources[resource] -= amount
+            log_summary.append(f"Zapłacono {amount} {resource}.")
+        
+    return True
 
 def _apply_cost(player_state, pay_data, log_summary):
     """(Helper) Próbuje pobrać koszt od gracza. Zwraca True/False."""
@@ -751,7 +786,7 @@ def check_and_update_alliances(player_state, game_state, faction, log_summary):
     log_summary.append(f"Gracz {player_name} zdobył sojusz z {faction} i zyskał 1 VP!")
     
 
-def _process_action_list(player_state, action_list, log_summary, game_state, location_id=None, **kwargs):
+def _process_action_list(player_state, action_list, log_summary, game_state, location_id=None, cards_db=None, **kwargs):
     """(Helper) Przetwarza złożoną listę akcji, wymagań, wyborów i wymian."""
     
     all_reqs_met = True
@@ -767,7 +802,7 @@ def _process_action_list(player_state, action_list, log_summary, game_state, loc
 
         if operation_key == "type":
             if item["type"] == "requirement":
-                all_reqs_met, req_log = _check_requirement(player_state, item["requirement"], game_state)
+                all_reqs_met, req_log = _check_requirement(player_state, item["requirement"], game_state, cards_db)
                 if req_log: log_summary.append(req_log)
             elif item["type"] == "action":
                 _apply_gain(player_state, item, log_summary, game_state, **kwargs)
@@ -809,19 +844,35 @@ def _process_action_list(player_state, action_list, log_summary, game_state, loc
                 log_summary.append("Gracz odrzucił opcjonalną wymianę.")
                 
         elif operation_key == "choice":
-            # Dla "master_tactitian", "bypass_protocol", "demand_for_a_respect"
+            # Dla "master_tactitian", "bypass_protocol", "demand_for_a_respect", "firm_grip"
             choice_index = kwargs.get("choice_index", -1)
             choices = item["choice"]
-            
+
             if choice_index < 0 or choice_index >= len(choices):
                 log_summary.append(f"Wymagany wybór (0-{len(choices)-1}), ale nie podano lub jest błędny. Karta odrzucona bez efektu.")
                 all_reqs_met = False
             else:
                 log_summary.append(f"Wybrano opcję {choice_index + 1}.")
-                # Wybrana opcja to lista akcji (np. [{ "gain": ... }] lub [{ "pay": ... }, { "type": "action" ... }])
-                chosen_action_key = list(choices[choice_index].keys())[0] # np. "action1"
-                chosen_action_list = choices[choice_index][chosen_action_key]
-                _process_action_list(player_state, chosen_action_list, log_summary, game_state, location_id=location_id, **kwargs)
+
+                # --- START POPRAWKI (Problem 1) ---
+                chosen_item = choices[choice_index] # To jest obiekt, np. {"action1": [...]} LUB {"gain": {...}}
+
+                # Sprawdź, czy to Struktura A (z kluczem "actionX")
+                first_key = list(chosen_item.keys())[0]
+
+                # Sprawdzamy, czy klucz zaczyna się od "action" (np. action1, action2, action_fight)
+                # LUB czy wartość pod tym kluczem JEST listą (co jest typowe dla Struktury A)
+                if first_key.startswith("action") or isinstance(chosen_item[first_key], list):
+                    # To jest Struktura A, np. z "plans_within_plans"
+                    chosen_action_list = chosen_item[first_key]
+                    _process_action_list(player_state, chosen_action_list, log_summary, game_state, location_id=location_id, cards_db=cards_db, **kwargs)
+                else:
+                    # To jest Struktura B (bezpośrednia), np. z "firm_grip"
+                    # Klucz to "gain", "pay", "exchange" itp.
+                    # Musimy przekazać sam obiekt jako listę jednoelementową
+                    chosen_action_list = [chosen_item] 
+                    _process_action_list(player_state, chosen_action_list, log_summary, game_state, location_id=location_id, cards_db=cards_db, **kwargs)
+                # --- KONIEC POPRAWKI ---
         
         else:
              log_summary.append(f"Nieobsługiwany klucz operacji: {operation_key}")
@@ -831,7 +882,7 @@ def _process_action_list(player_state, action_list, log_summary, game_state, loc
 # --- KONIEC SEKCJI POMOCNICZEJ ---
 
 
-def process_intrigue(game_state, intrigues_db, player_name, intrigue_id, **kwargs):
+def process_intrigue(game_state, intrigues_db, cards_db, player_name, intrigue_id, location_id=None, **kwargs):
     """
     Przetwarza zagranie intrygi z ręki i automatyzuje wszystkie efekty
     na podstawie struktury JSON i dodatkowych argumentów (decyzji gracza).
@@ -889,14 +940,14 @@ def process_intrigue(game_state, intrigues_db, player_name, intrigue_id, **kwarg
     elif "action" in actions_object:
         # 3. Złożona lista AKCJI (np. "bribery", "master_tactitian", "plans_within_plans")
         # Przekazujemy player_state, listę akcji, log, cały stan gry (dla _check_requirement) i decyzje
-        _process_action_list(player_state, actions_object["action"], log_summary, game_state, **kwargs)
+        _process_action_list(player_state, actions_object["action"], log_summary, game_state, location_id=location_id, cards_db=cards_db, **kwargs)
     
     elif "action1" in actions_object:
          # 4. Specjalny przypadek dla "market_manopoly"
          # Ta karta ma dwie oddzielne, niezależne akcje
         log_summary.append("Sprawdzanie efektów 'Market Manopoly':")
-        _process_action_list(player_state, [actions_object["action1"]], log_summary, game_state, **kwargs)
-        _process_action_list(player_state, [actions_object["action2"]], log_summary, game_state, **kwargs)
+        _process_action_list(player_state, [actions_object["action1"]], log_summary, game_state, location_id=location_id, cards_db=cards_db, **kwargs)
+        _process_action_list(player_state, [actions_object["action2"]], log_summary, game_state, location_id=location_id, cards_db=cards_db, **kwargs)
 
     else:
         # 5. Fallback dla nieznanych struktur lub kart tylko z opisem
@@ -944,8 +995,10 @@ def calculate_reveal_stats(player_state, cards_db):
         if "fremen" in card_data.get("agent_symbols", []):
             played_fremen_card_ids.append(card_id)
     
-    # Sprawdź sojusz z Cesarzem (Uproszczenie: 4+ wpływu = sojusz. Pełna logika sojuszy to Krok 7)
+    # Sprawdź sojusz z Cesarzem
     player_influence = player_state.get("influence", {})
+    # Używamy pełnej logiki sprawdzania sojuszu (czy nazwa gracza jest w game_state.alliances)
+    # Ale dla uproszczenia tutaj, trzymamy się logiki 4+
     has_emperor_alliance = player_influence.get("emperor", 0) >= 4
 
     # --- Krok 1: Przetwórz karty W RĘCE (dają Perswazję i Siłę) ---
@@ -955,38 +1008,30 @@ def calculate_reveal_stats(player_state, cards_db):
             
         reveal_effect = card_data.get("reveal_effect", {})
         
-        # --- Logika bazowa + warunkowa ---
+        # --- Logika bazowa ---
         persuasion = reveal_effect.get("persuasion", 0)
         swords = reveal_effect.get("swords", 0)
+        
+        possible_actions = reveal_effect.get("possible actions", {}).get("actions", [])
         description = reveal_effect.get("possible actions", {}).get("description", "No effect.")
         
-        # === POCZĄTEK NOWEJ LOGIKI WARUNKOWEJ ===
+        # === POCZĄTEK NOWEJ LOGIKI WARUNKOWEJ (POPRAWKA 11) ===
         
-        # "Sietch Reverend Mother" (sietch_reverend_mother)
+        # --- A. Efekty warunkowe (automatyczne) ---
         if card_id == "sietch_reverend_mother":
             if len(played_fremen_card_ids) > 0:
                 persuasion += 3
-                # Bonus +1 Spice jest obsługiwany manualnie, tu liczymy tylko P/S
                 description = f"BONUS AKTYWOWANY: +3 Perswazji (za zagraną kartę Fremenów)."
-
-        # "Fedaykin Death Commando" (fedaykin_death_commando)
         elif card_id == "fedaykin_death_commando":
             if len(played_fremen_card_ids) > 0:
                 swords += 3
                 description = f"BONUS AKTYWOWANY: +3 Miecza (za zagraną kartę Fremenów)."
-
-        # "Firm Grip" (firm_grip)
         elif card_id == "firm_grip":
             if has_emperor_alliance:
                 persuasion += 4
                 description = f"BONUS AKTYWOWANY: +4 Perswazji (za sojusz z Cesarzem)."
-
-        # "Liet Kynes" (liet_kynes)
         elif card_id == "liet_kynes":
-            # Ten efekt liczy karty Fremenów "w grze" (w ręce i zagrane)
-            # 1. Liczymy zagrane (z Kroku 0)
             fremen_count = len(played_fremen_card_ids)
-            # 2. Liczymy te w ręce (ale nie liczymy samej Liet Kynes)
             for hand_card_id in cards_in_hand_ids:
                 if hand_card_id == "liet_kynes": continue
                 hand_card_data = cards_db.get(hand_card_id, {})
@@ -998,21 +1043,24 @@ def calculate_reveal_stats(player_state, cards_db):
                 persuasion += bonus_persuasion
                 description = f"BONUS AKTYWOWANY: +{bonus_persuasion} Perswazji (2 za każdą z {fremen_count} kart Fremenów)."
         
-        # "Control the Spice" (control_the_spice) - Fremen Bond
-        elif card_id == "control_the_spice":
-            if len(played_fremen_card_ids) > 0:
-                 # Bonus +1 Spice jest manualny
-                 description = f"BONUS (MANUALNY): Zyskaj 1 Przyprawę (za zagraną kartę Fremenów)."
-        
-        # "Spice Hunter" (spice_hunter) - Fremen Bond
-        elif card_id == "spice_hunter":
-            if len(played_fremen_card_ids) > 0:
-                 # Bonus +1 Spice jest manualny
-                 description = f"BONUS (MANUALNY): Zyskaj 1 Przyprawę (za zagraną kartę Fremenów)."
+        # --- B. Obsługa CHOICE (automatyczne założenie) ---
+        elif card_id == "bene_gesserit_sister":
+            # Karta ma wybór: 2 Perswazji lub 2 Miecza.
+            # Automatycznie zakładamy wybór Perswazji, bo jest Faza Odkrycia (kupowanie).
+            persuasion += 2
+            description = "BONUS (Założono): +2 Perswazji (zamiast 2 Mieczy)."
 
-        # Oznacz karty z manualną opcją (np. Gurney Halleck "You may pay...")
-        elif "You may pay" in description or " or " in description.lower():
-             description = f"[MANUAL ACTION NEEDED] {description}"
+        # --- C. Obsługa PAY/EXCHANGE (instrukcje manualne) ---
+        elif card_id == "gurney_halleck":
+            description = f"[MANUAL ACTION] {description} (Użyj 'Ręczna Korekta', aby zapłacić 3 Solari i dodać 2 Wojska)."
+        elif card_id == "guild_ambassador":
+            description = f"[MANUAL ACTION] {description} (Użyj 'Ręczna Korekta', aby zapłacić 3 Przyprawy za 1 VP, jeśli masz sojusz)."
+        elif card_id == "opulence":
+            description = f"[MANUAL ACTION] {description} (Użyj 'Ręczna Korekta', aby zapłacić 6 Solari za 1 VP)."
+        
+        # --- D. Inne efekty manualne ---
+        elif "deploy" in description or "retreat" in description:
+            description = f"[MANUAL ACTION] {description} (Pamiętaj, aby dostosować wojsko w konflikcie)."
         
         # === KONIEC NOWEJ LOGIKI WARUNKOWEJ ===
 
@@ -1026,6 +1074,8 @@ def calculate_reveal_stats(player_state, cards_db):
             "swords": swords,
             "description": description # Zaktualizowany opis
         })
+    
+    # Usunęliśmy stąd logikę liczenia wojsk (przeniesiona do app.py, Poprawka 5)
     
     return {
         "total_persuasion": total_persuasion,
@@ -1557,6 +1607,37 @@ def process_manual_override(game_state, player_name, form_data):
         log = _safe_add_resource(player_inf, state_key, form_data.get(form_key))
         if log:
             changes_log.append(log)
+
+    # 4. (NOWOŚĆ) Dodaj Intrygę
+    intrigue_to_add = form_data.get("add_intrigue_id")
+    if intrigue_to_add: # Jeśli wybrano cokolwiek z listy
+        if "intrigue_hand" not in player_state:
+            player_state["intrigue_hand"] = []
+        player_state["intrigue_hand"].append(intrigue_to_add)
+        changes_log.append(f"dodano intrygę '{intrigue_to_add}'")
+
+    # 5. (NOWOŚĆ) Zmień Bonus Przyprawy (Globalnie, nie per-gracz)
+    # Ta sekcja modyfikuje globalny game_state, a nie player_state
+    locations_state = game_state.get("locations_state", {})
+    spice_fields = {
+        "bonus_the_greate_flat": "the_greate_flat",
+        "bonus_hagga_basin": "hagga_basin",
+        "bonus_imperial_basin": "imperial_basin"
+    }
+
+    for form_key, loc_id in spice_fields.items():
+        new_bonus_str = form_data.get(form_key)
+        if new_bonus_str: # Sprawdź, czy pole nie jest puste
+            try:
+                new_bonus_val = int(new_bonus_str)
+                if new_bonus_val < 0: new_bonus_val = 0 # Zapobieganie ujemnym
+
+                if loc_id in locations_state and "bonus_spice" in locations_state[loc_id]:
+                    if locations_state[loc_id]["bonus_spice"] != new_bonus_val:
+                        locations_state[loc_id]["bonus_spice"] = new_bonus_val
+                        changes_log.append(f"ustawiono bonus {loc_id} na {new_bonus_val}")
+            except ValueError:
+                changes_log.append(f"błędna wartość dla {form_key} ('{new_bonus_str}')")
 
     if not changes_log:
         return True, "Nie wprowadzono żadnych zmian."

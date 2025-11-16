@@ -206,7 +206,7 @@ def set_conflict():
 
 @app.route('/play_intrigue', methods=['POST'])
 def play_intrigue():
-    game_state, _, _, intrigues_db, _, _ = load_game_data()
+    game_state, _, cards_db, intrigues_db, _, _ = load_game_data()
 
     current_phase = game_state.get("current_phase", "AGENT_TURN")
     redirect_target = 'reveal_phase' if current_phase == "REVEAL" else 'index'
@@ -229,7 +229,7 @@ def play_intrigue():
     
     if requirements["type"] == "simple" or requirements["type"] == "not_found":
         # Prosta karta -> wykonaj natychmiast bez dodatkowych decyzji
-        is_valid, message = process_intrigue(game_state, intrigues_db, player_name_input, intrigue_id_input)
+        is_valid, message = process_intrigue(game_state, intrigues_db, cards_db, player_name_input, intrigue_id_input)
         
         if is_valid:
             save_json_file(GAME_STATE_FILE, game_state)
@@ -283,7 +283,7 @@ def execute_intrigue():
     Odbiera decyzję gracza z formularza i wywołuje 
     "idealną" funkcję process_intrigue z odpowiednimi kwargs.
     """
-    game_state, _, _, intrigues_db, _, _ = load_game_data()
+    game_state, _, cards_db, intrigues_db, _, _ = load_game_data()
     
     # Odczytaj dane z formularza
     player_name = request.form.get('player_name')
@@ -302,13 +302,7 @@ def execute_intrigue():
             return redirect(url_for('index'))
 
     # Wywołaj "idealny" silnik z zebranymi decyzjami
-    is_valid, message = process_intrigue(
-        game_state, 
-        intrigues_db, 
-        player_name, 
-        intrigue_id, 
-        **kwargs # Rozpakuj decyzje tutaj
-    )
+    is_valid, message = process_intrigue(game_state, intrigues_db, cards_db, player_name, intrigue_id, **kwargs)
 
     if is_valid:
         save_json_file(GAME_STATE_FILE, game_state)
@@ -813,15 +807,29 @@ from game_manager import process_manual_override
 @app.route('/manual_override', methods=['GET'])
 def manual_override():
     """Wyświetla stronę do ręcznej korekty stanu gry."""
-    game_state, _, _, _, _, _ = load_game_data()
+    # Wczytujemy teraz więcej danych: intrigues_db
+    game_state, _, _, intrigues_db, _, _ = load_game_data()
     if not game_state:
         flash("CRITICAL ERROR: Cannot load game state.", "error")
         return redirect(url_for('index'))
-        
+
     player_names = get_player_names(game_state)
-    
+
+    # Przygotuj listę wszystkich intryg dla formularza
+    all_intrigues = intrigues_db if intrigues_db else {}
+
+    # Pobierz aktualne wartości bonus_spice dla formularza
+    locations_state = game_state.get("locations_state", {})
+    current_bonuses = {
+        "the_greate_flat": locations_state.get("the_greate_flat", {}).get("bonus_spice", 0),
+        "hagga_basin": locations_state.get("hagga_basin", {}).get("bonus_spice", 0),
+        "imperial_basin": locations_state.get("imperial_basin", {}).get("bonus_spice", 0)
+    }
+
     return render_template('manual_override.html',
-        player_names=player_names
+        player_names=player_names,
+        all_intrigues=all_intrigues,  # Nowo dodane
+        current_bonuses=current_bonuses  # Nowo dodane
     )
 
 @app.route('/apply_override', methods=['POST'])

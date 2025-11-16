@@ -98,6 +98,43 @@
             </div>
         </fieldset>
 
+
+        <fieldset>
+            <legend>6. Dodaj Kartę Intrygi Graczowi</legend>
+            <div class="grid">
+                <div>
+                    <label for="add_intrigue_id">Dodaj Intrygę:</label>
+                    <select id="add_intrigue_id" name="add_intrigue_id">
+                        <option value="">-- Wybierz, by dodać --</option>
+                        {% for intrigue_id, intrigue_data in all_intrigues.items() %}
+                            <option value="{{ intrigue_id }}">{{ intrigue_data.name }} ({{ intrigue_data.type }})</option>
+                        {% endfor %}
+                    </select>
+                    <p style="font-size: 0.8em; color: #555;">(Pamiętaj, aby wybrać gracza w sekcji 1. Usunięcie intrygi wymaga edycji JSON.)</p>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>7. Ustaw Bonus Przyprawy na Polach (Globalne)</legend>
+            <p>Uwaga: Ta wartość <b>zastąpi</b> obecną, a nie doda się. Wpływa na całą grę, nie na wybranego gracza.</p>
+            <div class="grid">
+                <div>
+                    <label for="bonus_the_greate_flat">The Great Flat (Bonus):</label>
+                    <input type="number" id="bonus_the_greate_flat" name="bonus_the_greate_flat" value="{{ current_bonuses.the_greate_flat }}" min="0">
+                </div>
+                <div>
+                    <label for="bonus_hagga_basin">Hagga Basin (Bonus):</label>
+                    <input type="number" id="bonus_hagga_basin" name="bonus_hagga_basin" value="{{ current_bonuses.hagga_basin }}" min="0">
+                </div>
+                <div>
+                    <label for="bonus_imperial_basin">Imperial Basin (Bonus):</label>
+                    <input type="number" id="bonus_imperial_basin" name="bonus_imperial_basin" value="{{ current_bonuses.imperial_basin }}" min="0">
+                </div>
+            </div>
+        </fieldset>
+
+
         <button type="submit" onclick="return confirm('Czy na pewno chcesz ręcznie zmodyfikować stan gry?')">Zastosuj Korektę</button>
     </form>
 </body>

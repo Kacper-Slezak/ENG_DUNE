@@ -10,7 +10,10 @@
     "ability_signet": {
       "name": "Discipline",
       "action": [
-        { "type": "action", "description": "Gain 1 card from unplayed pile." }
+        {
+          "type": "action",
+          "description": "Gain 1 card from unplayed pile."
+        }
       ],
       "description": "Gain 1 card from unplayed pile."
     }
@@ -26,7 +29,10 @@
     "ability_signet": {
       "name": "Manipulation",
       "action": [
-        { "type": "action", "description": "Trash a card from the Imperium row and replace it. During your reveal turn this round, you may acquire the trashed card for 1 Solari less." }
+        {
+          "type": "action",
+          "description": "Trash a card from the Imperium row and replace it. During your reveal turn this round, you may acquire the trashed card for 1 Solari less."
+        }
       ],
       "description": "Trash a card from the Imperium row and replace it. During your reveal turn this round, you may acquire the trashed card for 1 Solari less."
     }
@@ -42,8 +48,12 @@
     "ability_signet": {
       "name": "Spice Supply",
       "action": [
-        {"gain": 
-          { "type": "resource", "resource": "Spice", "amount": 1 }
+        {
+          "gain": {
+            "type": "resource",
+            "resource": "Spice",
+            "amount": 1
+          }
         }
       ],
       "description": "Gain 1 Spice."
@@ -60,14 +70,24 @@
     "ability_signet": {
       "name": "Scheming",
       "action": [
-        {"exchange": [
-          {"pay":
-            { "type": "resource", "resource": "solari", "amount": 1 }
-          },
-          {"gain":
-            { "type": "resource", "resource": "intrigue", "amount": 1 }
-          }
-        ]}
+        {
+          "exchange": [
+            {
+              "pay": {
+                "type": "resource",
+                "resource": "solari",
+                "amount": 1
+              }
+            },
+            {
+              "gain": {
+                "type": "resource",
+                "resource": "intrigue",
+                "amount": 1
+              }
+            }
+          ]
+        }
       ],
       "description": "pay 1 Solari to get 1 Intrigue card."
     }
@@ -83,8 +103,12 @@
     "ability_signet": {
       "name": "Production",
       "action": [
-        {"gain": 
-          { "type": "resource", "resource": "solari", "amount": 1 }
+        {
+          "gain": {
+            "type": "resource",
+            "resource": "solari",
+            "amount": 1
+          }
         }
       ],
       "description": "Gain 1 Solari."
@@ -101,13 +125,20 @@
     "ability_signet": {
       "name": "Careful Diplomacy",
       "action": [
-        {"exchange":
-          [
-            {"pay":
-              { "type": "resource", "resource": "Spice", "amount": 1 }
+        {
+          "exchange": [
+            {
+              "pay": {
+                "type": "resource",
+                "resource": "Spice",
+                "amount": 1
+              }
             },
-            {"gain":
-              { "type": "action", "description": "Gain 1 influence point with a faction where an opponent has more influence than you." }
+            {
+              "gain": {
+                "type": "action",
+                "description": "Gain 1 influence point with a faction where an opponent has more influence than you."
+              }
             }
           ]
         }
@@ -123,21 +154,38 @@
       "name": "Fief of Arrakis",
       "description": "You start the game with additional resources: 1 Solari and 1 water.",
       "gain": [
-        { "type": "resource", "resource": "solari", "amount": 1 },
-        { "type": "resource", "resource": "water", "amount": 1 }
+        {
+          "type": "resource",
+          "resource": "solari",
+          "amount": 1
+        },
+        {
+          "type": "resource",
+          "resource": "water",
+          "amount": 1
+        }
       ]
     },
     "ability_signet": {
       "name": "Brutality",
       "action": [
-        {"type": "choice","choice": [
-          {"gain": 
-            { "type": "resource", "resource": "troops", "amount": 1 }
-          },
-          {"action": 
-            { "type": "action", "description": "Gain 2 troops, if you have at least 1 faction token ( alliance.)" }
-          }
-        ],"choose": 1}
+        {
+          "choice": [
+            {
+              "gain": {
+                "type": "resource",
+                "resource": "troops",
+                "amount": 1
+              }
+            },
+            {
+              "action": {
+                "type": "action",
+                "description": "Gain 2 troops, if you have at least 1 faction token ( alliance.)"
+              }
+            }
+          ]
+        }
       ],
       "description": "Gain 1 troops —OR— Gain 2 troops, if you have at least 1 faction alliance."
     }
@@ -153,8 +201,12 @@
     "ability_signet": {
       "name": "Hidden Reservoir",
       "action": [
-        {"gain": 
-          { "type": "resource", "resource": "water", "amount": 1 }
+        {
+          "gain": {
+            "type": "resource",
+            "resource": "water",
+            "amount": 1
+          }
         }
       ],
       "description": "Gain 1 water."
