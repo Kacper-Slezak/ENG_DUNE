@@ -6,8 +6,7 @@ import os
 from game_manager import (
     load_game_data, perform_full_game_reset, save_json_file, is_move_valid, process_move, 
     check_and_advance_phase, process_intrigue,
-    calculate_reveal_stats, perform_cleanup_and_new_round, 
-    GAME_STATE_FILE,
+    calculate_reveal_stats, calculate_and_store_reveal_stats, perform_cleanup_and_new_round,    GAME_STATE_FILE,
     process_pass_turn,
     process_buy_card,
     get_card_persuasion_cost,
@@ -206,7 +205,7 @@ def set_conflict():
 
 @app.route('/play_intrigue', methods=['POST'])
 def play_intrigue():
-    game_state, _, cards_db, intrigues_db, _, _ = load_game_data()
+    game_state, _, cards_db, intrigues_db, _, leaders_db = load_game_data()
 
     current_phase = game_state.get("current_phase", "AGENT_TURN")
     redirect_target = 'reveal_phase' if current_phase == "REVEAL" else 'index'
@@ -229,7 +228,7 @@ def play_intrigue():
     
     if requirements["type"] == "simple" or requirements["type"] == "not_found":
         # Prosta karta -> wykonaj natychmiast bez dodatkowych decyzji
-        is_valid, message = process_intrigue(game_state, intrigues_db, cards_db, player_name_input, intrigue_id_input)
+        is_valid, message = process_intrigue(game_state, intrigues_db, cards_db, leaders_db, player_name_input, intrigue_id_input)
         
         if is_valid:
             save_json_file(GAME_STATE_FILE, game_state)
@@ -283,8 +282,8 @@ def execute_intrigue():
     Odbiera decyzję gracza z formularza i wywołuje 
     "idealną" funkcję process_intrigue z odpowiednimi kwargs.
     """
-    game_state, _, cards_db, intrigues_db, _, _ = load_game_data()
-    
+    game_state, _, cards_db, intrigues_db, _, leaders_db = load_game_data()    
+
     # Odczytaj dane z formularza
     player_name = request.form.get('player_name')
     intrigue_id = request.form.get('intrigue_id')
@@ -301,8 +300,7 @@ def execute_intrigue():
             flash("Invalid choice index received.", "error")
             return redirect(url_for('index'))
 
-    # Wywołaj "idealny" silnik z zebranymi decyzjami
-    is_valid, message = process_intrigue(game_state, intrigues_db, cards_db, player_name, intrigue_id, **kwargs)
+    is_valid, message = process_intrigue(game_state, intrigues_db, cards_db, leaders_db, player_name, intrigue_id, **kwargs)
 
     if is_valid:
         save_json_file(GAME_STATE_FILE, game_state)
@@ -597,7 +595,9 @@ def commit_troops():
 @app.route('/ai_prompt')
 def ai_prompt():
     game_state, _, cards_db, _, _, _ = load_game_data()
-    
+
+    calculate_and_store_reveal_stats(game_state, cards_db)
+
     if game_state is None or cards_db is None:
         flash("CRITICAL ERROR: Cannot load game data or cards data.", "error")
         return render_template('error.html'), 500
@@ -807,18 +807,37 @@ from game_manager import process_manual_override
 @app.route('/manual_override', methods=['GET'])
 def manual_override():
     """Wyświetla stronę do ręcznej korekty stanu gry."""
-    # Wczytujemy teraz więcej danych: intrigues_db
-    game_state, _, _, intrigues_db, _, _ = load_game_data()
+    # Wczytujemy teraz wszystkie bazy danych
+    game_state, _, cards_db, intrigues_db, _, _ = load_game_data()
     if not game_state:
         flash("CRITICAL ERROR: Cannot load game state.", "error")
         return redirect(url_for('index'))
 
     player_names = get_player_names(game_state)
 
-    # Przygotuj listę wszystkich intryg dla formularza
+    # --- NOWA LOGIKA ---
+    selected_player_name = request.args.get('player_name') # Sprawdź, czy gracz jest wybrany w URL
+    selected_player_data = {}
+    deck_pool_legend = {}
+
+    if selected_player_name and selected_player_name in game_state.get("players", {}):
+        player = game_state["players"][selected_player_name]
+
+        # Przygotuj dane kart (jako stringi ID)
+        selected_player_data = {
+            "hand": ", ".join(player.get("hand", [])),
+            "discard_pile": ", ".join(player.get("discard_pile", [])),
+            "draw_deck": ", ".join(player.get("draw_deck", [])),
+            "deck_pool": ", ".join(player.get("deck_pool", []))
+        }
+
+        # Stwórz legendę (ID -> Nazwa) dla wszystkich kart w talii gracza
+        for card_id in sorted(list(set(player.get("deck_pool", [])))):
+            deck_pool_legend[card_id] = cards_db.get(card_id, {}).get("name", "Nieznana Karta")
+    # --- KONIEC NOWEJ LOGIKI ---
+
     all_intrigues = intrigues_db if intrigues_db else {}
 
-    # Pobierz aktualne wartości bonus_spice dla formularza
     locations_state = game_state.get("locations_state", {})
     current_bonuses = {
         "the_greate_flat": locations_state.get("the_greate_flat", {}).get("bonus_spice", 0),
@@ -828,14 +847,18 @@ def manual_override():
 
     return render_template('manual_override.html',
         player_names=player_names,
-        all_intrigues=all_intrigues,  # Nowo dodane
-        current_bonuses=current_bonuses  # Nowo dodane
+        all_intrigues=all_intrigues,
+        current_bonuses=current_bonuses,
+        selected_player_name=selected_player_name, # Nowe
+        selected_player_data=selected_player_data, # Nowe
+        deck_pool_legend=deck_pool_legend # Nowe
     )
 
 @app.route('/apply_override', methods=['POST'])
 def apply_override():
     """Przetwarza formularz ręcznej korekty."""
-    game_state, _, _, _, _, _ = load_game_data()
+    # Musimy załadować cards_db do walidacji kart
+    game_state, _, cards_db, _, _, _ = load_game_data()
     if not game_state:
         flash("CRITICAL ERROR: Cannot load game state.", "error")
         return redirect(url_for('index'))
@@ -844,9 +867,9 @@ def apply_override():
     if not player_name:
         flash("Błąd: Nie wybrano gracza.", "error")
         return redirect(url_for('manual_override'))
-        
-    # Przekaż cały słownik formularza do game_managera
-    is_valid, message = process_manual_override(game_state, player_name, request.form)
+
+    # Przekaż cały słownik formularza ORAZ cards_db do game_managera
+    is_valid, message = process_manual_override(game_state, cards_db, player_name, request.form)
 
     if is_valid:
         if save_json_file(GAME_STATE_FILE, game_state):
@@ -857,7 +880,8 @@ def apply_override():
         flash(f"Błąd korekty: {message}", "error")
 
     # Przekieruj z powrotem do formularza korekty, aby można było wykonać więcej zmian
-    return redirect(url_for('manual_override'))
+    # Utrzymaj wybranego gracza w URL
+    return redirect(url_for('manual_override', player_name=player_name))
 
 
 if __name__ == '__main__':
