@@ -1054,20 +1054,6 @@ def calculate_reveal_stats(player_state, cards_db):
             "swords": swords,
             "description": description # Zaktualizowany opis
         })
-
-    # --- Krok 2: Przetwórz karty ZAGRANE (dają TYLKO Siłę) ---
-    for card_id in cards_played_ids:
-        card_data = cards_db.get(card_id)
-        if not card_data: continue
-
-        agent_effect = card_data.get("agent_effect", {})
-        base_swords += swords
-        
-        cards_played_details.append({
-            "name": card_data.get("name", card_id),
-            "persuasion": 0,
-            "swords": swords
-        })
     
     committed_troops = player_state.get("resources", {}).get("troops_in_conflict", 0)
     base_swords += (committed_troops * 2)
